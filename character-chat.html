@@ -4,178 +4,117 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" id="tc" content="#FFFFFF">
 <title>캐릭터 대화</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&display=swap">
 <style>
   :root{
-    --ink:#17151F;
-    --surface:#211E2B;
-    --raised:#2A2634;
-    --line:#37324A;
-    --text:#EBE6F2;
-    --muted:#948CA6;
-    --plum:#9A6FB0;
-    --plum-soft:#5C3F73;
-    /* 괄호 속 번역을 위한 부드러운 연한 회색 */
-    --trans-gray:#9A94A8;
+    color-scheme:light;
+    --bg:#FFFFFF; --panel:#FFFFFF; --field:#F4F3F7; --line:#E7E5EC;
+    --text:#191820; --muted:#8B8896; --bub:#EFEEF2; --mine:#E3DFF6;
+    --nar:#8A8796; --accent:#6F5FC4;
+    --paper:#FAF6EE; --paper-line:#E8DFCC; --paper-text:#3A342C;
+  }
+  body.dark{
+    color-scheme:dark;
+    --bg:#16141E; --panel:#1D1A26; --field:#252231; --line:#332E44;
+    --text:#EDE9F3; --muted:#948CA6; --bub:#262233; --mine:#463364;
+    --nar:#9A93AC; --accent:#A98BD6;
+    --paper:#231F2C; --paper-line:#3A3348; --paper-text:#DCD5E6;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{background:var(--bg)}
   html,body{margin:0;padding:0;height:100%}
   body{
-    background:var(--ink);
-    color:var(--text);
-    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",system-ui,sans-serif;
-    font-size:16px;
-    line-height:1.6;
-    overflow:hidden;
+    background:var(--bg);color:var(--text);
+    font-family:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",system-ui,sans-serif;
+    font-size:16px;line-height:1.6;overflow:hidden;
   }
   #app{display:flex;flex-direction:column;height:100dvh}
-
-  /* 상단 바 */
   #bar{
-    flex:0 0 auto;
-    display:flex;align-items:center;gap:10px;
-    padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;
-    border-bottom:1px solid var(--line);
-    background:var(--surface);
+    flex:0 0 auto;display:flex;align-items:center;gap:8px;
+    padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;
+    border-bottom:1px solid var(--line);background:var(--panel);
   }
-  #bar .ttl{flex:1;min-width:0}
-  #bar h1{margin:0;font-size:16px;font-weight:600;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #bar .ttl{flex:1;min-width:0;text-align:center}
+  #bar h1{margin:0;font-size:16px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #bar .sub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .iconbtn{
-    flex:0 0 auto;border:0;background:transparent;color:var(--text);
-    font-size:15px;padding:8px 10px;border-radius:10px;cursor:pointer;
-  }
-  .iconbtn:active{background:var(--raised)}
-
-  /* 본문 */
+  .iconbtn{flex:0 0 auto;min-width:50px;border:0;background:transparent;color:var(--accent);font-size:15px;font-family:inherit;padding:8px 4px;cursor:pointer}
+  .iconbtn:nth-of-type(2){text-align:right}
+  .iconbtn:active{opacity:.5}
   #view{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 14px calc(env(safe-area-inset-bottom) + 24px)}
-  #view.chat{padding-bottom:12px}
+  #view.chat{padding:18px 14px 8px}
 
-  /* 목록 */
-  .card{
-    display:flex;align-items:center;gap:12px;
-    background:var(--surface);border:1px solid var(--line);
-    border-radius:14px;padding:12px 14px;margin-bottom:10px;cursor:pointer;
-  }
-  .card:active{background:var(--raised)}
-  .ava{
-    flex:0 0 auto;width:44px;height:44px;border-radius:12px;
-    background:var(--raised);display:flex;align-items:center;justify-content:center;
-    font-size:22px;overflow:hidden;
-  }
+  .card{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:10px;cursor:pointer}
+  .card:active{background:var(--field)}
+  .ava{flex:0 0 auto;width:44px;height:44px;border-radius:50%;background:var(--field);display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden}
+  .ava.sm{width:32px;height:32px;font-size:16px}
+  .ava.lg{width:62px;height:62px;font-size:28px}
+  .ava.xs{width:26px;height:26px;font-size:13px}
   .ava img{width:100%;height:100%;object-fit:cover}
   .card .meta{flex:1;min-width:0}
   .card .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .card .ds{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .empty{color:var(--muted);text-align:center;padding:56px 20px;font-size:14px;line-height:1.9}
 
-  .empty{color:var(--muted);text-align:center;padding:60px 20px;font-size:14px;line-height:1.9}
-
-  /* 버튼 */
-  .btn{
-    width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);
-    background:var(--surface);color:var(--text);font-size:15px;font-family:inherit;
-    cursor:pointer;margin-top:10px;
-  }
-  .btn:active{background:var(--raised)}
-  .btn.primary{background:var(--plum);border-color:var(--plum);color:#fff;font-weight:600}
-  .btn.subtle{background:var(--raised);border-color:var(--line);font-size:14px;padding:10px}
-  .btn.danger{color:#E08585}
-  .row{display:flex;gap:8px}
-  .row .btn{margin-top:10px}
-
-  /* 칩 및 작은 링크 버튼 */
-  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
-  .chip{
-    background:var(--raised);border:1px solid var(--line);color:var(--muted);
-    font-size:12px;padding:5px 10px;border-radius:8px;cursor:pointer;
-  }
-  .chip:hover, .chip:active{border-color:var(--plum);color:var(--text)}
-
-  /* 폼 */
+  .btn{width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--text);font-size:15px;font-family:inherit;cursor:pointer;margin-top:10px}
+  .btn:active{background:var(--field)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  .btn.danger{color:#D06060}
+  .btn.sm{width:auto;padding:9px 14px;font-size:14px;margin:0}
   label{display:block;margin:18px 0 6px;font-size:13px;color:var(--muted)}
-  label:first-of-type{margin-top:4px}
   .hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.7}
-  input,textarea,select{
-    width:100%;padding:12px;border-radius:11px;
-    border:1px solid var(--line);background:var(--surface);color:var(--text);
-    font-size:15px;font-family:inherit;line-height:1.6;
-  }
-  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--plum)}
+  input,textarea,select{width:100%;padding:12px;border-radius:11px;border:1px solid var(--line);background:var(--field);color:var(--text);font-size:16px;font-family:inherit;line-height:1.6}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
   textarea{resize:vertical;min-height:90px}
-  .sec{margin:26px 0 0;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--plum);font-weight:600}
-  .sec:first-child{margin-top:0;padding-top:0;border-top:0}
-
-  .input-btn-wrap{position:relative}
-  .input-btn-wrap input{padding-right:54px}
-  .inner-btn{
-    position:absolute;right:8px;top:50%;transform:translateY(-50%);
-    background:transparent;border:0;color:var(--plum);font-size:12px;cursor:pointer;padding:6px;
-  }
-
-  /* 모달 */
-  .modal-wrap{
-    position:fixed;top:0;left:0;right:0;bottom:0;
-    background:rgba(0,0,0,0.65);z-index:999;display:flex;align-items:flex-end;
-  }
-  .modal-box{
-    width:100%;background:var(--surface);border-top:1px solid var(--line);
-    border-radius:20px 20px 0 0;padding:18px 16px 28px;max-height:80vh;display:flex;flex-direction:column;
-  }
-  .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
-  .modal-ttl{font-size:16px;font-weight:600}
-  .modal-body{overflow-y:auto;flex:1}
-  .prof-item{
-    background:var(--raised);border:1px solid var(--line);border-radius:12px;
-    padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;
-  }
-  .prof-item:hover{border-color:var(--plum)}
+  .sec{margin:26px 0 0;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--accent);font-weight:600}
+  .sec.first{margin-top:0;padding-top:0;border-top:0}
+  .pick{display:flex;align-items:center;gap:12px;margin-top:4px}
+  .pick .btns{display:flex;gap:8px;flex-wrap:wrap}
+  .castbox{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:12px}
 
   /* 대화 */
-  .msg{margin-bottom:18px;max-width:88%}
-  .msg.me{margin-left:auto}
-  .who{font-size:12px;color:var(--muted);margin-bottom:5px}
-  .msg.me .who{text-align:right}
-  .bub{
-    padding:11px 14px;border-radius:16px;
-    background:var(--surface);border:1px solid var(--line);
-    white-space:pre-wrap;word-break:break-word;
-  }
-  .msg.me .bub{background:var(--plum-soft);border-color:transparent}
-  .bub em{color:var(--muted);font-style:italic}
-  
-  /* [요청 반영] 일본어 뒤 괄호 속 연한 회색 번역 스타일 */
-  .bub .trans, .preview-box .trans{
-    color:var(--trans-gray);
-    font-weight:400;
-  }
+  .msg{margin-bottom:20px;display:flex;gap:9px;align-items:flex-start}
+  .msg.me{justify-content:flex-end}
+  .msg .col{min-width:0;max-width:84%}
+  .msg.me .col{max-width:78%}
+  .who{font-size:13.5px;font-weight:600;margin:2px 0 6px 2px}
+  .bub{padding:13px 16px;border-radius:18px;background:var(--bub);white-space:pre-wrap;word-break:break-word;font-size:16px;line-height:1.85;letter-spacing:-.004em;cursor:pointer}
+  .msg.me .bub{background:var(--mine)}
+  .bub em{font-family:"Noto Serif KR",serif;font-style:italic;font-weight:300;color:var(--nar);font-size:15.5px;line-height:1.9}
+  .bub .tr{color:var(--nar);font-size:14.5px}
+  .ooc{margin:0 0 18px;padding:9px 13px;border-radius:12px;border:1px dashed var(--line);color:var(--muted);font-size:14px;white-space:pre-wrap}
+  .acts{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .acts button{background:var(--field);border:1px solid var(--line);color:var(--text);font-family:inherit;font-size:13px;padding:7px 12px;border-radius:10px;cursor:pointer}
+  .acts button.del{color:#D06060}
+  .editbox{width:100%;min-height:120px;margin-top:4px}
+  .thinking{color:var(--muted);font-size:14px;padding:2px 2px 20px 50px}
+  .err{background:#FBE9EF;border:1px solid #EFC3D2;color:#8A3552;padding:11px 14px;border-radius:12px;font-size:13px;margin-bottom:18px;white-space:pre-wrap}
+  body.dark .err{background:#3A2230;border-color:#6B3348;color:#F0C4D0}
 
-  .thinking{color:var(--muted);font-size:14px;padding:4px 2px 18px}
-  .err{
-    background:#3A2230;border:1px solid #6B3348;color:#F0C4D0;
-    padding:11px 14px;border-radius:12px;font-size:13px;margin-bottom:18px;
-    white-space:pre-wrap;word-break:break-word;
-  }
-  .preview-box{
-    background:var(--raised);border:1px solid var(--line);
-    border-radius:12px;padding:12px 14px;margin-top:8px;font-size:14px;line-height:1.6;
-  }
+  /* 특수 카드 */
+  .phone{background:var(--field);border-radius:20px;padding:12px;margin:10px 0}
+  .phone .ph{display:flex;align-items:center;gap:8px;padding:2px 4px 10px;border-bottom:1px solid var(--line);margin-bottom:10px;font-weight:600;font-size:14px}
+  .phone .pm{background:var(--panel);border-radius:14px;padding:9px 13px;margin-bottom:7px;max-width:86%;font-size:15px;line-height:1.6}
+  .phone .pm.me{background:var(--mine);margin-left:auto}
+  .paper{background:var(--paper);border:1px solid var(--paper-line);border-radius:14px;padding:18px 18px 20px;margin:10px 0;font-family:"Noto Serif KR",serif;font-weight:300;color:var(--paper-text);line-height:2;font-size:15.5px;white-space:pre-wrap}
+  .paper .pt{font-size:12px;letter-spacing:.08em;color:var(--muted);margin-bottom:10px;font-family:inherit}
+  .mind{border-left:3px solid var(--accent);background:var(--field);border-radius:0 12px 12px 0;padding:12px 15px;margin:10px 0;font-family:"Noto Serif KR",serif;font-style:italic;font-weight:300;color:var(--nar);line-height:1.95;font-size:15px;white-space:pre-wrap}
+  .pl{background:var(--field);border-radius:16px;padding:6px 4px;margin:10px 0}
+  .pl a{display:block;padding:10px 14px;text-decoration:none;color:inherit;border-bottom:1px solid var(--line)}
+  .pl a:last-child{border-bottom:0}
+  .pl .t{font-size:15px;font-weight:600}
+  .pl .ar{font-size:13px;color:var(--muted)}
+  .pl .rs{font-size:12.5px;color:var(--nar);margin-top:3px;font-style:italic}
 
-  /* 입력창 하단 */
-  #dock{
-    flex:0 0 auto;border-top:1px solid var(--line);background:var(--surface);
-    padding:10px 12px calc(env(safe-area-inset-bottom) + 10px);
-  }
-  #dock .tools{display:flex;gap:14px;padding:0 2px 8px}
-  #dock .tools button{
-    background:transparent;border:0;color:var(--muted);font-size:13px;
-    font-family:inherit;padding:0;cursor:pointer;
-  }
+  #dock{flex:0 0 auto;border-top:1px solid var(--line);background:var(--panel);padding:9px 12px calc(env(safe-area-inset-bottom) + 9px)}
+  #dock .tools{display:flex;gap:13px;padding:0 2px 8px;overflow-x:auto}
+  #dock .tools button{background:transparent;border:0;color:var(--muted);font-size:13px;font-family:inherit;padding:0;white-space:nowrap;cursor:pointer}
   #dock .line{display:flex;gap:8px;align-items:flex-end}
-  #inp{flex:1;min-height:44px;max-height:140px;border-radius:22px;padding:11px 16px}
-  #send{
-    flex:0 0 auto;width:44px;height:44px;border-radius:22px;border:0;
-    background:var(--plum);color:#fff;font-size:17px;cursor:pointer;
-  }
+  #inp{flex:1;min-height:44px;max-height:140px;border-radius:22px;padding:11px 16px;min-width:0}
+  #send{flex:0 0 auto;width:44px;height:44px;border-radius:22px;border:0;background:var(--accent);color:#fff;font-size:17px;cursor:pointer}
   #send:disabled{opacity:.4}
 </style>
 </head>
@@ -191,7 +130,9 @@
     <div class="tools">
       <button id="regen">다시 생성</button>
       <button id="undo">마지막 지우기</button>
-      <button id="reset">대화 초기화</button>
+      <button id="cmds">명령어</button>
+      <button id="note">노트</button>
+      <button id="reset">초기화</button>
     </div>
     <div class="line">
       <textarea id="inp" rows="1" placeholder="메시지"></textarea>
@@ -200,13 +141,11 @@
   </div>
 </div>
 
-<div id="modalSlot"></div>
-
 <script>
 (function(){
 "use strict";
 
-/* ---------- 저장소 ---------- */
+/* ---------- 저장 ---------- */
 var mem = {};
 var canStore = (function(){
   try { localStorage.setItem("gz.t","1"); localStorage.removeItem("gz.t"); return true; }
@@ -214,636 +153,649 @@ var canStore = (function(){
 })();
 function put(k,v){
   var s = JSON.stringify(v);
-  if (canStore) { try { localStorage.setItem(k,s); return; } catch(e){} }
-  mem[k]=s;
+  if (canStore) { try { localStorage.setItem(k,s); return true; } catch(e){ return false; } }
+  mem[k]=s; return true;
 }
 function get(k,d){
   var s = null;
   if (canStore) { try { s = localStorage.getItem(k); } catch(e){} }
-  if (s===null) s = mem[k];
+  if (s===null || s===undefined) s = mem[k];
   if (s===null || s===undefined) return d;
   try { return JSON.parse(s); } catch(e){ return d; }
 }
-
-/* ---------- 환경설정 (API 및 언어) ---------- */
-var cfg = get("gz.cfg", {
-  type: "openai", // "openai" (OpenAI 호환/브릿지) 또는 "gemini"
-  key: "",
-  base: "https://bridge-production-b13b.up.railway.app/v1",
-  model: "gemini-3.7-flash",
-  maxTokens: 2000,
-  lang: "jp_ko", // "jp_ko" (일본어 + 괄호 연한 회색 한국어 번역), "ko" (한국어 기본)
-  profiles: [
-    {
-      name: "기본 Railway 브릿지",
-      type: "openai",
-      base: "https://bridge-production-b13b.up.railway.app/v1",
-      key: "",
-      model: "gemini-3.7-flash",
-      maxTokens: 2000
-    }
-  ]
-});
-
-// 하위 호환성 보장
-if (!cfg.type) cfg.type = "openai";
-if (!cfg.profiles) cfg.profiles = [];
-if (!cfg.lang) cfg.lang = "jp_ko";
-
+var cfg = get("gz.cfg", { mode:"openai", key:"", base:"", model:"gemini-3.7-flash", maxTokens:2600, theme:"light" });
+if (!cfg.mode) cfg.mode = "openai";
+if (!cfg.theme) cfg.theme = "light";
 var chars = get("gz.chars", []);
-function saveCfg(){ put("gz.cfg", cfg); }
+function saveCfg(){ put("gz.cfg", cfg); applyTheme(); }
 function saveChars(){ put("gz.chars", chars); }
 function logKey(id){ return "gz.log."+id; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
+function applyTheme(){
+  var d = cfg.theme==="dark";
+  document.body.className = d ? "dark" : "";
+  var tc = document.getElementById("tc");
+  if (tc) tc.setAttribute("content", d ? "#16141E" : "#FFFFFF");
+}
 
-/* ---------- 도구 및 텍스트 파서 ---------- */
+/* ---------- 도구 ---------- */
 var $ = function(s){ return document.querySelector(s); };
-var view=$("#view"), bar=$("#bar"), dock=$("#dock"), modalSlot=$("#modalSlot");
+var view=$("#view"), dock=$("#dock");
 var elTitle=$("#title"), elSub=$("#subtitle"), elLeft=$("#left"), elRight=$("#right");
 var elInp=$("#inp"), elSend=$("#send");
 
 function esc(s){
-  return String(s==null?"":s)
-    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
-
-/* [핵심] 지문 *지문* 처리 및 일본어 뒤 (번역)을 연한 회색 span으로 포맷 */
 function fmt(s){
-  var text = esc(s);
-  // 1. *지문* 처리
-  text = text.replace(/\*([^*\n]+)\*/g, "<em>*$1*</em>");
-  // 2. 괄호 안 번역 (한국어 번역) 또는 （번역）을 연한 회색으로 감쌈
-  text = text.replace(/(\([^\)\n]+\)|（[^）\n]+）)/g, '<span class="trans">$1</span>');
-  return text;
+  var t = esc(s).replace(/\n{3,}/g,"\n\n").trim();
+  t = t.replace(/([(（][^)）\n]*[)）])/g,'<span class="tr">$1</span>');
+  t = t.replace(/\*{1,3}([^*]+?)\*{1,3}/g,'<em>$1</em>');
+  return t.replace(/\*/g,"");
 }
-
-function avaHTML(v, fallback){
-  var s = (v||"").trim();
-  if (/^https?:\/\//i.test(s)) return '<div class="ava"><img src="'+esc(s)+'" alt=""></div>';
-  return '<div class="ava">'+esc(s||fallback)+"</div>";
+function avaHTML(v, fb, cls){
+  var s=(v||"").trim(), k="ava"+(cls?" "+cls:"");
+  if (/^(https?:|data:image)/i.test(s)) return '<div class="'+k+'"><img src="'+esc(s)+'" alt=""></div>';
+  return '<div class="'+k+'">'+esc(s||fb)+"</div>";
 }
 function uid(){ return "c"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
-
-/* ---------- 화면 전환 ---------- */
-var screen = "list", curId = null, busy = false;
-
-function go(s, id){
-  screen = s; if (id !== undefined) curId = id;
-  render();
-}
-function cur(){
-  for (var i=0;i<chars.length;i++) if (chars[i].id===curId) return chars[i];
+function castOf(c){ return (c.cast||[]).filter(function(x){ return x && x.name; }); }
+function findPerson(c, name){
+  if (!name) return null;
+  var n = name.trim();
+  if (n === (c.name||"").trim()) return { name:c.name, avatar:c.avatar };
+  var cs = castOf(c);
+  for (var i=0;i<cs.length;i++) if (cs[i].name.trim()===n) return cs[i];
   return null;
 }
 
-function render(){
-  view.className = "";
-  dock.style.display = "none";
-  modalSlot.innerHTML = "";
-  elLeft.textContent = ""; elRight.textContent = "";
-  elLeft.onclick = null; elRight.onclick = null;
+function pickPhoto(done){
+  var inp = document.createElement("input");
+  inp.type="file"; inp.accept="image/*";
+  inp.style.cssText="position:fixed;left:-9999px";
+  document.body.appendChild(inp);
+  inp.onchange = function(){
+    var f = inp.files && inp.files[0];
+    if (!f){ inp.remove(); return; }
+    var fr = new FileReader();
+    fr.onload = function(){
+      var img = new Image();
+      img.onload = function(){
+        var S=200, cv=document.createElement("canvas");
+        cv.width=S; cv.height=S;
+        var g=cv.getContext("2d"), side=Math.min(img.width,img.height);
+        g.drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,S,S);
+        inp.remove(); done(cv.toDataURL("image/jpeg",0.82));
+      };
+      img.onerror=function(){ inp.remove(); alert("이 사진은 못 읽었어."); };
+      img.src = fr.result;
+    };
+    fr.onerror=function(){ inp.remove(); alert("사진을 불러오지 못했어."); };
+    fr.readAsDataURL(f);
+  };
+  inp.click();
+}
 
+/* ---------- 화면 ---------- */
+var screen="list", curId=null, busy=false, selIdx=-1, editIdx=-1;
+function go(s,id){ screen=s; if(id!==undefined) curId=id; selIdx=-1; editIdx=-1; render(); }
+function cur(){ for (var i=0;i<chars.length;i++) if (chars[i].id===curId) return chars[i]; return null; }
+function render(){
+  view.className=""; dock.style.display="none";
+  elLeft.textContent=""; elRight.textContent="";
+  elLeft.onclick=null; elRight.onclick=null;
   if (screen==="list") return viewList();
   if (screen==="chat") return viewChat();
   if (screen==="edit") return viewEdit();
   if (screen==="cfg")  return viewCfg();
+  if (screen==="note") return viewNote();
 }
 
-/* ---------- 1. 캐릭터 목록 ---------- */
+/* ---------- 목록 ---------- */
 function viewList(){
-  elTitle.textContent = "캐릭터";
+  elTitle.textContent="캐릭터";
   elSub.textContent = chars.length ? chars.length+"명" : "";
-  elRight.textContent = "설정";
-  elRight.onclick = function(){ go("cfg"); };
-
-  var h = "";
-  if (!chars.length){
-    h += '<div class="empty">아직 캐릭터가 없어.<br>새 캐릭터를 추가해 대화를 시작해봐.</div>';
-  } else {
-    for (var i=0;i<chars.length;i++){
-      var c = chars[i], n = getLog(c.id).length;
-      h += '<div class="card" data-open="'+c.id+'">'
-         + avaHTML(c.avatar,"🙂")
-         + '<div class="meta"><div class="nm">'+esc(c.name||"이름 없음")+'</div>'
-         + '<div class="ds">'+esc(c.tagline || (n? n+"개의 메시지" : "아직 대화 없음"))+'</div></div>'
-         + '</div>';
-    }
+  elRight.textContent="설정";
+  elRight.onclick=function(){ go("cfg"); };
+  var h="";
+  if (!chars.length) h += '<div class="empty">아직 캐릭터가 없어.<br>아래에서 하나 만들어봐.</div>';
+  else for (var i=0;i<chars.length;i++){
+    var c=chars[i], n=getLog(c.id).length;
+    h += '<div class="card" data-open="'+c.id+'">'+avaHTML(c.avatar,"🙂")
+       + '<div class="meta"><div class="nm">'+esc(c.name||"이름 없음")+'</div>'
+       + '<div class="ds">'+esc(c.tagline || (n? n+"개의 메시지" : "아직 대화 없음"))+'</div></div></div>';
   }
   h += '<button class="btn primary" id="new">새 캐릭터</button>';
-  if (!cfg.key) h += '<div class="hint" style="text-align:center;margin-top:12px">대화하려면 우측 상단 설정에서 API 키를 먼저 넣어줘.</div>';
-  view.innerHTML = h;
-
-  $("#new").onclick = function(){
-    var c = {
-      id:uid(), name:"", avatar:"", tagline:"", prompt:"", world:"",
-      greeting:"", userName:"", userAvatar:"", userPrompt:"", length:"보통"
-    };
+  view.innerHTML=h;
+  $("#new").onclick=function(){
+    var c={ id:uid(), name:"", avatar:"", tagline:"", prompt:"", world:"", greeting:"", sample:"", note:"",
+            cast:[], userName:"", userAvatar:"", userPrompt:"", length:"길게", lang:"한국어", romaji:false };
     chars.push(c); saveChars(); go("edit", c.id);
   };
   Array.prototype.forEach.call(view.querySelectorAll("[data-open]"), function(el){
-    el.onclick = function(){ go("chat", el.getAttribute("data-open")); };
+    el.onclick=function(){ go("chat", el.getAttribute("data-open")); };
   });
 }
 
-/* ---------- 2. 캐릭터 편집 ---------- */
-function field(label, key, val, ph, big, hint){
-  var tag = big
-    ? '<textarea data-k="'+key+'" placeholder="'+esc(ph)+'" style="min-height:'+big+'px">'+esc(val)+'</textarea>'
-    : '<input data-k="'+key+'" value="'+esc(val)+'" placeholder="'+esc(ph)+'">';
+/* ---------- 캐릭터 설정 ---------- */
+function field(label,key,val,big,hint){
+  var tag = big ? '<textarea data-k="'+key+'" style="min-height:'+big+'px">'+esc(val||"")+'</textarea>'
+                : '<input data-k="'+key+'" value="'+esc(val||"")+'">';
   return '<label>'+esc(label)+'</label>'+tag+(hint?'<div class="hint">'+hint+'</div>':"");
+}
+function photoBlock(label,key,val){
+  return '<label>'+esc(label)+'</label><div class="pick">'+avaHTML(val,"🙂","lg")
+    + '<div class="btns"><button class="btn sm" data-pick="'+key+'">사진 고르기</button>'
+    + '<button class="btn sm" data-clear="'+key+'">지우기</button></div></div>'
+    + '<div class="hint">앨범에서 고르면 작게 줄여서 저장돼. 이모지를 쓰려면 아래 칸에.</div>'
+    + '<input data-k="'+key+'" value="'+esc(/^data:image/.test(val||"")?"":(val||""))+'">';
 }
 
 function viewEdit(){
-  var c = cur(); if (!c) return go("list");
-  elTitle.textContent = "캐릭터 설정";
-  elSub.textContent = c.name || "";
-  elLeft.textContent = "← 목록";
-  elLeft.onclick = function(){ saveChars(); go("list"); };
+  var c=cur(); if(!c) return go("list");
+  elTitle.textContent="캐릭터 설정"; elSub.textContent=c.name||"";
+  elLeft.textContent="목록"; elLeft.onclick=function(){ saveChars(); go("list"); };
 
-  var h = "";
-  h += '<div class="sec">캐릭터</div>';
-  h += field("이름","name",c.name,"이치조 미나토");
-  h += field("프로필 사진","avatar",c.avatar,"이모지 또는 이미지 주소",0,"이모지나 웹 이미지 URL을 입력.");
-  h += field("한 줄 소개","tagline",c.tagline,"나고야 이치조 가문의 후계자");
-  h += field("캐릭터 프롬프트","prompt",c.prompt,"성격, 배경, 말투, 습관, 관계 등을 적어줘.",160);
-  h += field("세계관 / 상황","world",c.world,"지금 어떤 상황에서 시작하는지.",100);
-  h += field("첫 마디","greeting",c.greeting,"*눈이 마주치자 살짝 미소를 짓는다* 늦었네.",90);
+  var h="";
+  h += '<div class="sec first">캐릭터</div>';
+  h += field("이름","name",c.name);
+  h += photoBlock("프로필 사진","avatar",c.avatar);
+  h += field("한 줄 소개","tagline",c.tagline);
+  h += field("캐릭터 프롬프트","prompt",c.prompt,200);
+  h += field("세계관 / 상황","world",c.world,120);
+  h += field("첫 마디","greeting",c.greeting,100,"방에 들어가면 캐릭터가 이 말부터 해.");
+  h += field("문체 예시","sample",c.sample,180,"원하는 문체로 쓴 장면을 붙여넣으면 그 결을 따라가.");
+
+  h += '<div class="sec">같이 나올 인물</div>';
+  h += '<div class="hint">두 명까지 더할 수 있어. 이름을 비우면 안 나와.</div>';
+  var cast = c.cast || (c.cast=[]);
+  for (var i=0;i<2;i++){
+    var p = cast[i] || (cast[i]={name:"",avatar:"",prompt:""});
+    h += '<div class="castbox">'
+       + '<label>이름</label><input data-cast="'+i+'" data-ck="name" value="'+esc(p.name)+'">'
+       + '<div class="pick" style="margin-top:10px">'+avaHTML(p.avatar,"🙂","lg")
+       + '<div class="btns"><button class="btn sm" data-castpick="'+i+'">사진</button>'
+       + '<button class="btn sm" data-castclear="'+i+'">지우기</button></div></div>'
+       + '<label>설정</label><textarea data-cast="'+i+'" data-ck="prompt" style="min-height:80px">'+esc(p.prompt)+'</textarea>'
+       + '</div>';
+  }
 
   h += '<div class="sec">나</div>';
-  h += field("내 이름","userName",c.userName,"시라유키 히나");
-  h += field("내 프로필 사진","userAvatar",c.userAvatar,"이모지 또는 이미지 주소");
-  h += field("내 캐릭터 프롬프트","userPrompt",c.userPrompt,"내가 연기하는 인물의 설정.",100);
+  h += field("내 이름","userName",c.userName);
+  h += photoBlock("내 프로필 사진","userAvatar",c.userAvatar);
+  h += field("내 캐릭터 프롬프트","userPrompt",c.userPrompt,140);
 
   h += '<div class="sec">응답</div>';
   h += '<label>길이</label><select data-k="length">'
-     + ["짧게","보통","길게"].map(function(o){
-         return '<option'+(c.length===o?" selected":"")+'>'+o+"</option>"; }).join("")
-     + "</select>";
+     + ["짧게","보통","길게"].map(function(o){ return '<option'+((c.length||"길게")===o?" selected":"")+'>'+o+"</option>"; }).join("")+"</select>";
+  h += '<div class="hint">짧게는 티키타카, 길게는 지문 여러 문단.</div>';
+  h += '<label>대사 언어</label><select data-k="lang">'
+     + ["한국어","일본어","영어","중국어"].map(function(o){ return '<option'+((c.lang||"한국어")===o?" selected":"")+'>'+o+"</option>"; }).join("")+"</select>";
+  h += '<label>발음 표기</label><select data-k="romaji">'
+     + '<option value="on"'+(c.romaji?" selected":"")+'>켜기</option>'
+     + '<option value="off"'+(c.romaji?"":" selected")+'>끄기</option></select>';
+  h += '<div class="hint">켜면 (쿄우모 아리가토, 오늘도 고마워) 처럼 발음과 번역이 같이 나와.</div>';
 
   h += '<button class="btn primary" id="done">저장하고 대화하기</button>';
   h += '<button class="btn danger" id="del">이 캐릭터 삭제</button>';
-  view.innerHTML = h;
+  view.innerHTML=h;
 
   Array.prototype.forEach.call(view.querySelectorAll("[data-k]"), function(el){
-    el.oninput = el.onchange = function(){ c[el.getAttribute("data-k")] = el.value; saveChars(); };
+    el.oninput = el.onchange = function(){
+      var k=el.getAttribute("data-k"), v=el.value;
+      if (k==="romaji"){ c.romaji = (v==="on"); saveChars(); return; }
+      if ((k==="avatar"||k==="userAvatar") && /^data:image/.test(c[k]||"") && !v) return;
+      c[k]=v; saveChars();
+    };
   });
-  $("#done").onclick = function(){ saveChars(); go("chat", c.id); };
-  $("#del").onclick = function(){
-    if (!confirm((c.name||"이 캐릭터")+" 삭제할까? 대화 내용도 같이 지워져.")) return;
+  Array.prototype.forEach.call(view.querySelectorAll("[data-cast]"), function(el){
+    el.oninput = function(){
+      var i=+el.getAttribute("data-cast"), k=el.getAttribute("data-ck");
+      c.cast[i][k]=el.value; saveChars();
+    };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-castpick]"), function(el){
+    el.onclick=function(){
+      var i=+el.getAttribute("data-castpick");
+      pickPhoto(function(d){ c.cast[i].avatar=d; saveChars(); render(); });
+    };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-castclear]"), function(el){
+    el.onclick=function(){ c.cast[+el.getAttribute("data-castclear")].avatar=""; saveChars(); render(); };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-pick]"), function(el){
+    el.onclick=function(){
+      var k=el.getAttribute("data-pick");
+      pickPhoto(function(d){
+        c[k]=d;
+        if (!put("gz.chars",chars)) alert("저장 공간이 부족해. 사진을 지우거나 캐릭터를 정리해줘.");
+        render();
+      });
+    };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-clear]"), function(el){
+    el.onclick=function(){ c[el.getAttribute("data-clear")]=""; saveChars(); render(); };
+  });
+  $("#done").onclick=function(){ saveChars(); go("chat", c.id); };
+  $("#del").onclick=function(){
+    if (!confirm((c.name||"이 캐릭터")+" 삭제할까? 대화도 같이 지워져.")) return;
     chars = chars.filter(function(x){ return x.id!==c.id; });
-    saveChars(); put(logKey(c.id), []); go("list");
+    saveChars(); setLog(c.id,[]); go("list");
   };
 }
 
-/* ---------- 3. [요청 반영] 설정 (API 추가/프로필 + 일본어 언어 추가) ---------- */
+/* ---------- 노트 ---------- */
+function viewNote(){
+  var c=cur(); if(!c) return go("list");
+  elTitle.textContent="노트"; elSub.textContent=c.name||"";
+  elLeft.textContent="대화"; elLeft.onclick=function(){ go("chat", c.id); };
+  view.innerHTML = '<div class="hint" style="margin-bottom:10px">여기 적은 건 매번 같이 보내져서 캐릭터가 절대 안 잊어. 한 줄에 하나씩 적어줘.</div>'
+    + '<textarea id="nb" style="min-height:300px">'+esc(c.note||"")+'</textarea>'
+    + '<button class="btn primary" id="nbd">저장</button>';
+  $("#nb").oninput = function(){ c.note=this.value; saveChars(); };
+  $("#nbd").onclick = function(){ saveChars(); go("chat", c.id); };
+}
+
+/* ---------- 설정 ---------- */
 function viewCfg(){
-  elTitle.textContent = "설정";
-  elSub.textContent = "";
-  elLeft.textContent = "← 목록";
-  elLeft.onclick = function(){ go("list"); };
+  elTitle.textContent="설정"; elSub.textContent="";
+  elLeft.textContent="목록"; elLeft.onclick=function(){ go("list"); };
+  var h="";
+  h += '<div class="sec first">연결</div>';
+  h += '<label>API 종류</label><select id="md">'
+     + '<option value="openai"'+(cfg.mode==="openai"?" selected":"")+'>직접 입력 · OpenAI 호환</option>'
+     + '<option value="gemini"'+(cfg.mode==="gemini"?" selected":"")+'>구글 직접 · Gemini</option></select>';
+  h += '<label>API 주소</label><input id="b" value="'+esc(cfg.base)+'" autocapitalize="off" spellcheck="false">';
+  h += '<div class="hint">OpenAI 호환이면 /v1 까지만. 구글 직접이면 비워둬.</div>';
+  h += '<label>API 키</label><input id="k" value="'+esc(cfg.key)+'" autocapitalize="off" autocorrect="off" spellcheck="false">';
+  h += '<label>모델</label><input id="m" value="'+esc(cfg.model)+'" autocapitalize="off" spellcheck="false">';
+  h += '<label>최대 응답 길이</label><input id="t" value="'+esc(cfg.maxTokens)+'" inputmode="numeric">';
+  h += '<div class="sec">화면</div>';
+  h += '<label>테마</label><select id="th">'
+     + '<option value="light"'+(cfg.theme==="light"?" selected":"")+'>밝게</option>'
+     + '<option value="dark"'+(cfg.theme==="dark"?" selected":"")+'>어둡게</option></select>';
+  h += '<div class="sec">백업</div>';
+  h += '<div class="hint">사파리가 저장 공간을 정리하면 캐릭터가 사라질 수 있어. 가끔 내보내둬.</div>';
+  h += '<button class="btn" id="exp">전체 내보내기</button>';
+  h += '<label>불러오기</label><textarea id="impbox"></textarea>';
+  h += '<button class="btn" id="imp">불러오기</button>';
+  if (!canStore) h += '<div class="hint">지금 저장이 막혀 있어. 창을 닫으면 사라지니 꼭 내보내둬.</div>';
+  view.innerHTML=h;
 
-  var h = "";
-
-  // [언어 추가 기능]
-  h += '<div class="sec">언어 및 출력 방식</div>';
-  h += '<label>응답 언어 모드</label>';
-  h += '<select id="langMode">'
-     + '<option value="jp_ko"'+(cfg.lang==="jp_ko"?" selected":"")+'>일본어 (번역) 병기 모드</option>'
-     + '<option value="ko"'+(cfg.lang==="ko"?" selected":"")+'>한국어 기본 모드</option>'
-     + '</select>';
-  h += '<div class="hint">일본어 병기 모드 선택 시, 캐릭터가 일본어로 말하고 뒤에 괄호로 한국어 번역이 연한 회색으로 함께 출력됩니다.</div>';
-  
-  // 실시간 미리보기 상자
-  h += '<div class="preview-box" id="previewLang">'
-     + (cfg.lang==="jp_ko" 
-        ? 'こんにちは！ <span class="trans">(안녕하세요!)</span><br>*軽く会釈する* 今日もよろしくね。 <span class="trans">(*가볍게 목례한다* 오늘도 잘 부탁해.)</span>' 
-        : '안녕하세요! 오늘도 잘 부탁해.')
-     + '</div>';
-
-  // [스크린샷 완벽 재현] API 종류 / URL / Key / Model / MaxTokens
-  h += '<div class="sec">API 연결</div>';
-  
-  h += '<label>API 종류</label>';
-  h += '<select id="apiType">'
-     + '<option value="openai"'+(cfg.type==="openai"?" selected":"")+'>직접 입력 · OpenAI 호환 (Railway/중계/v1)</option>'
-     + '<option value="gemini"'+(cfg.type==="gemini"?" selected":"")+'>Google Gemini 직접 연결 (v1beta)</option>'
-     + '</select>';
-
-  h += '<label>API URL</label>';
-  h += '<input id="b" value="'+esc(cfg.base)+'" placeholder="https://bridge-production-b13b.up.railway.app/v1" autocapitalize="off" autocorrect="off" spellcheck="false">';
-
-  h += '<label>API Key</label>';
-  h += '<div class="input-btn-wrap">'
-     + '<input id="k" type="password" value="'+esc(cfg.key)+'" placeholder="API 키 입력" autocapitalize="off" autocorrect="off" spellcheck="false">'
-     + '<button type="button" class="inner-btn" id="toggleKey">보기</button>'
-     + '</div>';
-
-  h += '<label>모델</label>';
-  h += '<input id="m" value="'+esc(cfg.model)+'" placeholder="gemini-3.7-flash" autocapitalize="off" spellcheck="false">';
-  h += '<div class="chips">'
-     + '<span style="font-size:12px;color:var(--muted);align-self:center">추천 모델:</span>'
-     + '<button type="button" class="chip" data-chip="gemini-3.7-flash">gemini-3.7-flash</button>'
-     + '<button type="button" class="chip" data-chip="gemini-2.5-flash">gemini-2.5-flash</button>'
-     + '<button type="button" class="chip" data-chip="gpt-4o-mini">gpt-4o-mini</button>'
-     + '</div>';
-
-  h += '<label>맥스 토큰</label>';
-  h += '<input id="t" value="'+esc(cfg.maxTokens)+'" inputmode="numeric" placeholder="2000">';
-
-  // [API 프로필 추가 및 연결 테스트 액션 버튼]
-  h += '<div class="row" style="margin-top:16px">';
-  h += '<button class="btn subtle" id="saveProfBtn" style="flex:1">+ 새 API 프로필로 저장</button>';
-  h += '<button class="btn subtle" id="openProfBtn" style="flex:1">저장된 프로필 ('+cfg.profiles.length+')</button>';
-  h += '</div>';
-
-  h += '<button class="btn subtle" id="testBtn" style="margin-top:8px">연결 테스트</button>';
-  h += '<div id="testStatus" class="hint" style="text-align:center"></div>';
-
-  // 백업
-  h += '<div class="sec">데이터 백업</div>';
-  h += '<div class="hint">브라우저 저장 공간이 정리될 때를 대비해 가끔 내보내서 메모장에 저장해두세요.</div>';
-  h += '<button class="btn subtle" id="exp">전체 내보내기</button>';
-  h += '<label>불러오기</label><textarea id="impbox" placeholder="내보낸 JSON 데이터를 여기에 붙여넣기"></textarea>';
-  h += '<button class="btn subtle" id="imp">불러오기</button>';
-
-  view.innerHTML = h;
-
-  // 이벤트 바인딩
-  $("#langMode").onchange = function(){
-    cfg.lang = this.value;
-    saveCfg();
-    $("#previewLang").innerHTML = (cfg.lang==="jp_ko" 
-      ? 'こんにちは！ <span class="trans">(안녕하세요!)</span><br>*軽く会釈する* 今日もよろしくね。 <span class="trans">(*가볍게 목례한다* 오늘도 잘 부탁해.)</span>' 
-      : '안녕하세요! 오늘도 잘 부탁해.');
+  $("#md").onchange=function(){ cfg.mode=this.value; saveCfg(); };
+  $("#th").onchange=function(){ cfg.theme=this.value; saveCfg(); };
+  $("#b").oninput=function(){ cfg.base=this.value.trim().replace(/\/+$/,""); saveCfg(); };
+  $("#k").oninput=function(){ cfg.key=this.value.trim(); saveCfg(); };
+  $("#m").oninput=function(){ cfg.model=this.value.trim(); saveCfg(); };
+  $("#t").oninput=function(){ cfg.maxTokens=parseInt(this.value,10)||2600; saveCfg(); };
+  $("#exp").onclick=function(){
+    var out={cfg:cfg,chars:chars,logs:{}};
+    chars.forEach(function(c){ out.logs[c.id]=getLog(c.id); });
+    var box=document.createElement("textarea");
+    box.value=JSON.stringify(out);
+    box.style.cssText="width:100%;min-height:120px;margin-top:10px";
+    this.parentNode.insertBefore(box,this.nextSibling);
+    box.select();
+    try { document.execCommand("copy"); alert("복사했어. 메모장에 붙여넣어 둬."); }
+    catch(e){ alert("아래 칸을 길게 눌러서 복사해줘."); }
   };
-
-  $("#apiType").onchange = function(){ cfg.type = this.value; saveCfg(); };
-  $("#b").oninput = function(){ cfg.base = this.value.trim().replace(/\/+$/,""); saveCfg(); };
-  $("#k").oninput = function(){ cfg.key = this.value.trim(); saveCfg(); };
-  $("#m").oninput = function(){ cfg.model = this.value.trim(); saveCfg(); };
-  $("#t").oninput = function(){ cfg.maxTokens = parseInt(this.value,10)||2000; saveCfg(); };
-
-  // 비밀번호 보기 토글
-  $("#toggleKey").onclick = function(){
-    var input = $("#k");
-    if (input.type === "password"){
-      input.type = "text";
-      this.textContent = "숨기기";
-    } else {
-      input.type = "password";
-      this.textContent = "보기";
-    }
+  $("#imp").onclick=function(){
+    var raw=$("#impbox").value.trim(); if(!raw) return;
+    try{
+      var d=JSON.parse(raw);
+      if(d.cfg){ cfg=d.cfg; saveCfg(); }
+      if(d.chars){ chars=d.chars; saveChars(); }
+      if(d.logs) for(var id in d.logs) setLog(id,d.logs[id]);
+      alert("불러왔어."); go("list");
+    }catch(e){ alert("형식이 안 맞아."); }
   };
+}
 
-  // 추천 모델 칩
-  Array.prototype.forEach.call(view.querySelectorAll("[data-chip]"), function(btn){
-    btn.onclick = function(){
-      var modelName = btn.getAttribute("data-chip");
-      $("#m").value = modelName;
-      cfg.model = modelName;
-      saveCfg();
-    };
-  });
+/* ---------- 특수 블록 렌더 ---------- */
+var CARD_RE = /\[(문자|일기|편지|속마음|플리)\]\s*([\s\S]*?)\s*\[\/\1\]/g;
 
-  // 새 API 프로필로 저장
-  $("#saveProfBtn").onclick = function(){
-    var name = prompt("새 프로필 이름을 입력해주세요:", "프로필 " + (cfg.profiles.length + 1));
-    if (!name || !name.trim()) return;
-    cfg.profiles.push({
-      name: name.trim(),
-      type: cfg.type,
-      base: cfg.base,
-      key: cfg.key,
-      model: cfg.model,
-      maxTokens: cfg.maxTokens
+function cardHTML(kind, body, c){
+  if (kind==="문자"){
+    var rows = body.split("\n").filter(function(l){ return l.trim(); });
+    var who = "", inner = "";
+    rows.forEach(function(l){
+      var m = l.match(/^\s*([^:：]{1,20})[:：]\s*([\s\S]*)$/);
+      var nm = m ? m[1].trim() : "", tx = m ? m[2] : l;
+      var mine = nm && c.userName && nm===c.userName.trim();
+      if (!who && !mine && nm) who = nm;
+      inner += '<div class="pm'+(mine?" me":"")+'">'+esc(tx)+'</div>';
     });
-    saveCfg();
-    alert("'" + name + "' 프로필이 저장되었습니다.");
-    viewCfg();
-  };
+    var p = findPerson(c, who) || { name:who||c.name, avatar:c.avatar };
+    return '<div class="phone"><div class="ph">'+avaHTML(p.avatar,"🙂","xs")+esc(p.name||"")+'</div>'+inner+'</div>';
+  }
+  if (kind==="일기")  return '<div class="paper"><div class="pt">일기</div>'+esc(body)+'</div>';
+  if (kind==="편지")  return '<div class="paper"><div class="pt">편지</div>'+esc(body)+'</div>';
+  if (kind==="속마음") return '<div class="mind">'+esc(body)+'</div>';
+  if (kind==="플리"){
+    var out = '<div class="pl">';
+    body.split("\n").forEach(function(l){
+      if (!l.trim()) return;
+      var parts = l.replace(/^[-•*\d.\s]+/,"").split(/\s*::\s*/);
+      var song = parts[0]||"", why = parts[1]||"";
+      var sp = song.split(/\s+[-–—]\s+/);
+      var title = sp[0]||song, artist = sp[1]||"";
+      out += '<a href="https://www.youtube.com/results?search_query='+encodeURIComponent(title+" "+artist)
+           + '" target="_blank" rel="noreferrer"><div class="t">♪ '+esc(title)+'</div>'
+           + (artist?'<div class="ar">'+esc(artist)+'</div>':"")
+           + (why?'<div class="rs">'+esc(why)+'</div>':"")+'</a>';
+    });
+    return out+'</div>';
+  }
+  return "";
+}
 
-  // 저장된 API 프로필 열기 모달
-  $("#openProfBtn").onclick = function(){
-    showProfilesModal();
-  };
+/* 캐릭터별 말풍선 + 특수 카드로 조각내기 */
+function pieces(c, text){
+  var out = [], last = 0, m;
+  CARD_RE.lastIndex = 0;
+  while ((m = CARD_RE.exec(text)) !== null){
+    if (m.index > last) out.push({ card:null, text:text.slice(last, m.index) });
+    out.push({ card:m[1], text:m[2] });
+    last = CARD_RE.lastIndex;
+  }
+  if (last < text.length) out.push({ card:null, text:text.slice(last) });
 
-  // 연결 테스트 실행
-  $("#testBtn").onclick = function(){
-    var statusEl = $("#testStatus");
-    statusEl.textContent = "연결 확인 중...";
-    statusEl.style.color = "var(--plum)";
-
-    if (!cfg.key && cfg.type !== "openai"){
-      statusEl.textContent = "API 키가 입력되지 않았습니다.";
-      statusEl.style.color = "#E08585";
+  var res = [];
+  out.forEach(function(seg){
+    if (seg.card){ res.push({ card:seg.card, text:seg.text }); return; }
+    var parts = seg.text.split(/^\[([^\]\n]{1,20})\]/gm);
+    if (parts.length===1){
+      if (seg.text.trim()) res.push({ who:null, text:seg.text });
       return;
     }
-
-    var dummyLog = [{ r:"u", t:"ping" }];
-    callAPI({ name:"테스터" }, dummyLog).then(function(){
-      statusEl.textContent = "✓ 연결 성공! 정상적으로 응답을 수신했습니다.";
-      statusEl.style.color = "#85E0A3";
-    }).catch(function(err){
-      statusEl.textContent = "연결 실패: " + (err.message || "오류 발생");
-      statusEl.style.color = "#E08585";
-    });
-  };
-
-  // 백업
-  $("#exp").onclick = function(){
-    var out = { cfg:cfg, chars:chars, logs:{} };
-    chars.forEach(function(c){ out.logs[c.id] = getLog(c.id); });
-    var box = document.createElement("textarea");
-    box.value = JSON.stringify(out);
-    box.style.cssText = "width:100%;min-height:120px;margin-top:10px";
-    this.parentNode.insertBefore(box, this.nextSibling);
-    box.select();
-    try { document.execCommand("copy"); alert("클립보드에 복사되었습니다. 메모장에 저장하세요."); }
-    catch(e){ alert("아래 텍스트 박스를 복사하세요."); }
-  };
-  $("#imp").onclick = function(){
-    var raw = $("#impbox").value.trim();
-    if (!raw) return;
-    try {
-      var d = JSON.parse(raw);
-      if (d.cfg) { cfg = d.cfg; saveCfg(); }
-      if (d.chars) { chars = d.chars; saveChars(); }
-      if (d.logs) for (var id in d.logs) setLog(id, d.logs[id]);
-      alert("데이터를 성공적으로 불러왔습니다."); go("list");
-    } catch(e){ alert("데이터 형식이 올바르지 않습니다."); }
-  };
-}
-
-// 프로필 관리 팝업 모달
-function showProfilesModal(){
-  var h = '<div class="modal-wrap" id="mWrap">'
-        + '<div class="modal-box">'
-        + '<div class="modal-head">'
-        + '<div class="modal-ttl">저장된 API 프로필</div>'
-        + '<button class="iconbtn" id="mClose">닫기</button>'
-        + '</div>'
-        + '<div class="modal-body">';
-  
-  if (!cfg.profiles.length){
-    h += '<div class="empty" style="padding:30px">저장된 프로필이 없습니다.</div>';
-  } else {
-    for (var i=0; i<cfg.profiles.length; i++){
-      var p = cfg.profiles[i];
-      h += '<div class="prof-item" data-load="'+i+'">'
-         + '<div><b style="font-size:14px">'+esc(p.name)+'</b>'
-         + '<div style="font-size:11px;color:var(--muted)">'+esc(p.model)+' · '+esc(p.base)+'</div></div>'
-         + '<button class="iconbtn" data-del="'+i+'" style="color:#E08585;font-size:13px">삭제</button>'
-         + '</div>';
+    if (parts[0] && parts[0].trim()) res.push({ who:null, text:parts[0] });
+    for (var i=1;i<parts.length;i+=2){
+      var body = parts[i+1]||"";
+      if (body.trim()) res.push({ who:parts[i], text:body });
     }
-  }
-  h += '</div></div></div>';
-  modalSlot.innerHTML = h;
-
-  $("#mClose").onclick = function(){ modalSlot.innerHTML = ""; };
-  $("#mWrap").onclick = function(e){ if(e.target===this) modalSlot.innerHTML = ""; };
-
-  Array.prototype.forEach.call(modalSlot.querySelectorAll("[data-load]"), function(el){
-    el.onclick = function(e){
-      if (e.target.tagName==="BUTTON") return;
-      var idx = parseInt(el.getAttribute("data-load"), 10);
-      var p = cfg.profiles[idx];
-      cfg.type = p.type || "openai";
-      cfg.base = p.base;
-      cfg.key = p.key;
-      cfg.model = p.model;
-      cfg.maxTokens = p.maxTokens;
-      saveCfg();
-      modalSlot.innerHTML = "";
-      alert("'" + p.name + "' 설정을 불러왔습니다.");
-      viewCfg();
-    };
   });
-
-  Array.prototype.forEach.call(modalSlot.querySelectorAll("[data-del]"), function(btn){
-    btn.onclick = function(e){
-      e.stopPropagation();
-      var idx = parseInt(btn.getAttribute("data-del"), 10);
-      if (confirm("'" + cfg.profiles[idx].name + "' 프로필을 삭제하시겠습니까?")){
-        cfg.profiles.splice(idx, 1);
-        saveCfg();
-        showProfilesModal();
-      }
-    };
-  });
+  return res;
 }
 
-/* ---------- 4. 대화 화면 ---------- */
+/* ---------- 대화 ---------- */
 function viewChat(){
-  var c = cur(); if (!c) return go("list");
-  elTitle.textContent = c.name || "이름 없음";
-  elSub.textContent = (cfg.lang === "jp_ko" ? "[일본어 (번역)] " : "") + (c.tagline || "");
-  elLeft.textContent = "← 목록";
-  elLeft.onclick = function(){ go("list"); };
-  elRight.textContent = "설정";
-  elRight.onclick = function(){ go("edit", c.id); };
-
-  view.className = "chat";
-  dock.style.display = "block";
-
-  var log = getLog(c.id);
-  if (!log.length && c.greeting){
-    log = [{ r:"a", t:c.greeting }];
-    setLog(c.id, log);
-  }
+  var c=cur(); if(!c) return go("list");
+  elTitle.textContent=c.name||"이름 없음";
+  elSub.textContent=c.tagline||"";
+  elLeft.textContent="목록"; elLeft.onclick=function(){ go("list"); };
+  elRight.textContent="설정"; elRight.onclick=function(){ go("edit", c.id); };
+  view.className="chat"; dock.style.display="block";
+  if (!getLog(c.id).length && c.greeting) setLog(c.id, [{ r:"a", t:c.greeting }]);
   paint();
 }
 
+function actsHTML(i){
+  return '<div class="acts"><button data-ed="'+i+'">수정</button>'
+       + '<button class="del" data-del="'+i+'">삭제</button>'
+       + '<button class="del" data-cut="'+i+'">여기부터 지우기</button></div>';
+}
+
 function paint(err, thinking){
-  var c = cur(); if (!c) return;
-  var log = getLog(c.id), h = "";
+  var c=cur(); if(!c) return;
+  var log=getLog(c.id), h="";
   for (var i=0;i<log.length;i++){
-    var m = log[i], me = m.r==="u";
-    h += '<div class="msg'+(me?" me":"")+'">'
-       + '<div class="who">'+esc(me ? (c.userName||"나") : (c.name||"상대"))+"</div>"
-       + '<div class="bub">'+fmt(m.t)+"</div></div>";
+    var m=log[i];
+    if (editIdx===i){
+      h += '<div class="msg'+(m.r==="u"?" me":"")+'"><div class="col" style="max-width:100%;width:100%">'
+         + '<textarea class="editbox" id="eb">'+esc(m.t)+'</textarea>'
+         + '<div class="acts"><button data-save="'+i+'">저장</button><button data-cancel="1">취소</button></div></div></div>';
+      continue;
+    }
+    if (m.ooc){
+      h += '<div class="ooc" data-i="'+i+'">'+esc(m.t)+'</div>' + (selIdx===i?actsHTML(i):"");
+      continue;
+    }
+    if (m.r==="u"){
+      h += '<div class="msg me"><div class="col"><div class="bub" data-i="'+i+'">'+fmt(m.t)+'</div>'
+         + (selIdx===i?actsHTML(i):"")+'</div></div>';
+      continue;
+    }
+    var ps = pieces(c, m.t), body = "";
+    ps.forEach(function(p){
+      if (p.card){ body += cardHTML(p.card, p.text, c); return; }
+      var who = p.who ? (findPerson(c,p.who) || {name:p.who, avatar:""}) : {name:c.name, avatar:c.avatar};
+      body += '<div class="msg">'+avaHTML(who.avatar,"🙂","sm")
+            + '<div class="col"><div class="who">'+esc(who.name||"")+'</div>'
+            + '<div class="bub" data-i="'+i+'">'+fmt(p.text)+'</div></div></div>';
+    });
+    h += body + (selIdx===i?actsHTML(i):"");
   }
   if (thinking) h += '<div class="thinking">'+esc(c.name||"상대")+" 입력 중…</div>";
   if (err) h += '<div class="err">'+esc(err)+"</div>";
-  if (!log.length && !thinking && !err)
-    h += '<div class="empty">메시지를 보내 대화를 시작해보세요.</div>';
-  view.innerHTML = h;
-  view.scrollTop = view.scrollHeight;
+  if (!log.length && !thinking && !err) h += '<div class="empty">먼저 말을 걸어봐.</div>';
+  view.innerHTML=h;
+
+  Array.prototype.forEach.call(view.querySelectorAll("[data-i]"), function(el){
+    el.onclick=function(){
+      var i=+el.getAttribute("data-i");
+      selIdx = (selIdx===i) ? -1 : i;
+      paint();
+    };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-ed]"), function(el){
+    el.onclick=function(){ editIdx=+el.getAttribute("data-ed"); selIdx=-1; paint(); };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-del]"), function(el){
+    el.onclick=function(){
+      var i=+el.getAttribute("data-del"), l=getLog(c.id);
+      l.splice(i,1); setLog(c.id,l); selIdx=-1; paint();
+    };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-cut]"), function(el){
+    el.onclick=function(){
+      var i=+el.getAttribute("data-cut"), l=getLog(c.id);
+      if (!confirm("여기부터 뒤로 전부 지울까?")) return;
+      l.splice(i); setLog(c.id,l); selIdx=-1; paint();
+    };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-save]"), function(el){
+    el.onclick=function(){
+      var i=+el.getAttribute("data-save"), l=getLog(c.id);
+      l[i].t = $("#eb").value; setLog(c.id,l); editIdx=-1; paint();
+    };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-cancel]"), function(el){
+    el.onclick=function(){ editIdx=-1; paint(); };
+  });
+  if (editIdx<0) view.scrollTop = view.scrollHeight;
 }
 
-/* [프롬프트 생성기: 일본어 + 괄호 연한 회색 번역 규칙 포함] */
+/* ---------- 명령어 ---------- */
+var CMDS = {
+  "/문자":"지금 장면에 이어서, 등장인물이 휴대폰으로 보내는 문자 메시지를 보여준다. 문자 부분은 반드시 [문자] 와 [/문자] 사이에 넣고, 한 줄에 하나씩 '이름: 내용' 형식으로 쓴다. 블록 앞뒤로는 평소처럼 지문을 쓴다.",
+  "/일기":"등장인물이 쓴 일기를 보여준다. 일기 본문은 반드시 [일기] 와 [/일기] 사이에 넣고 1인칭으로 쓴다. 날짜로 시작해도 좋다.",
+  "/편지":"등장인물이 쓴 편지를 보여준다. 편지 본문은 반드시 [편지] 와 [/편지] 사이에 넣는다.",
+  "/속마음":"지금 이 순간 등장인물의 속마음을 보여준다. 반드시 [속마음] 과 [/속마음] 사이에 넣고 1인칭으로 쓴다. 겉으로 못 하는 말까지 솔직하게.",
+  "/플리":"지금 등장인물이 듣고 있을 법한 노래 다섯 곡을 고른다. 반드시 [플리] 와 [/플리] 사이에 넣고, 한 줄에 하나씩 '제목 - 가수 :: 고른 이유' 형식으로 쓴다. 실제로 존재하는 곡만 쓴다."
+};
+function cmdOf(t){
+  var k = t.trim().split(/\s+/)[0];
+  return CMDS[k] ? k : null;
+}
+
+/* ---------- 프롬프트 ---------- */
+function langSample(lang, romaji){
+  if (lang==="일본어") return romaji ? "今日もありがとう。(쿄우모 아리가토, 오늘도 고마워.)" : "今日もありがとう。(오늘도 고마워.)";
+  if (lang==="영어")   return romaji ? "You're late. (유어 레이트, 늦었네.)" : "You're late. (늦었네.)";
+  if (lang==="중국어") return romaji ? "你来晚了。(니 라이 완 러, 늦었네.)" : "你来晚了。(늦었네.)";
+  return "";
+}
 function buildSystem(c){
   var lenMap = {
-    "짧게":"2~3문장으로 짧게",
-    "보통":"4~6문장 정도로",
-    "길게":"8~12문장으로 묘사를 충분히 넣어"
+    "짧게":"지문은 한두 줄, 대사는 한두 마디. 티키타카하듯 짧게 주고받는다.",
+    "보통":"지문과 대사를 섞어 적당한 길이로 쓴다.",
+    "길게":"지문 여러 문단과 대사 여러 마디로 충분히 길게 쓴다."
   };
-  var p = [];
-  p.push("너는 상황극 파트너다. 아래 설정의 '"+(c.name||"캐릭터")+"'를 완벽히 연기한다.");
-  p.push("");
-  p.push("[캐릭터]");
-  p.push("이름: "+(c.name||""));
+  var name=c.name||"캐릭터", cs=castOf(c), p=[];
+  p.push("너는 상황극 파트너다. 아래 설정의 '"+name+"'를 연기한다.");
+  p.push(""); p.push("[캐릭터]"); p.push("이름: "+name);
   if (c.tagline) p.push(c.tagline);
   if (c.prompt) p.push(c.prompt);
-  if (c.world){ p.push(""); p.push("[상황과 세계관]"); p.push(c.world); }
-  p.push("");
-  p.push("[상대역]");
-  p.push("이름: "+(c.userName||"상대"));
-  if (c.userPrompt) p.push(c.userPrompt);
-  p.push("");
-  p.push("[작성 규칙]");
-  p.push("- "+(c.name||"캐릭터")+"의 시점에서만 쓴다. 상대역의 대사, 행동, 속마음을 대신 서술하지 않는다.");
-  p.push("- 행동과 상황 묘사는 *별표* 안에 쓴다. 대사는 별표 없이 그대로 쓴다.");
-  p.push("- 분량은 "+(lenMap[c.length]||lenMap["보통"])+" 쓴다.");
-  p.push("- 이야기를 마무리 짓지 말고 상대가 이어갈 여지를 남긴다.");
-
-  // [일본어 (번역) 언어 모드 규칙 주입]
-  if (cfg.lang === "jp_ko") {
-    p.push("");
-    p.push("[언어 및 번역 표기 규칙 - 필수]");
-    p.push("1. 모든 대사와 행동 지문은 자연스러운 일본어로 먼저 작성한다.");
-    p.push("2. 각 일본어 문장(또는 지문) 바로 뒤에 반드시 한국어 번역을 괄호 '( ... )' 안에 병기한다.");
-    p.push("3. 반드시 '일본어 문장 (한국어 번역)' 형식을 지켜라.");
-    p.push("예시:");
-    p.push("こんにちは、調子はどう？ (안녕, 컨디션은 어때?)");
-    p.push("*優しく微笑みながら首をかしげる* (*상냥하게 미소 지으며 고개를 갸웃거린다*) 何を考えているの？ (무슨 생각해?)");
-  } else {
-    p.push("- 한국어로 작성한다.");
+  if (cs.length){
+    p.push(""); p.push("[같이 나오는 인물]");
+    cs.forEach(function(x){ p.push("- "+x.name+": "+(x.prompt||"")); });
+    p.push("- 인물이 바뀔 때마다 줄 맨 앞에 [이름] 을 붙인다. 예: [ "+cs[0].name+" ] 가 아니라 ["+cs[0].name+"] 형태로 정확히 쓴다.");
+    p.push("- "+name+"의 대사에는 ["+name+"] 을 붙인다.");
   }
+  if (c.world){ p.push(""); p.push("[상황과 세계관]"); p.push(c.world); }
+  p.push(""); p.push("[상대역]"); p.push("이름: "+(c.userName||"상대"));
+  if (c.userPrompt) p.push(c.userPrompt);
+  if (c.note){ p.push(""); p.push("[반드시 기억할 것]"); p.push(c.note); }
 
+  p.push(""); p.push("[형식]");
+  p.push("- 행동, 상황 묘사, 속마음은 모두 별표 하나로 감싼다. 별표를 두 번 겹쳐 쓰지 않는다.");
+  p.push("- 대사는 별표 없이 그대로 쓰고 따옴표를 붙이지 않는다.");
+  p.push("- 지문과 대사를 빈 줄로 나누지 않는다. 한 덩어리 안에서 자연스럽게 이어 붙여 쓴다.");
+
+  p.push(""); p.push("[문체]");
+  p.push("- 지문은 3인칭 과거형 소설체로 쓴다. '~합니다', '~했습니다' 같은 존댓말 서술은 쓰지 않는다.");
+  p.push("- 지문에 소리, 냄새, 빛, 온도, 감촉 같은 감각을 넣는다.");
+  p.push("- 서술자가 인물의 속마음이나 감춘 의도를 짚어도 된다.");
+  p.push("- 대사는 실제 사람이 말하듯 자연스럽게 쓴다. 감정을 말로 설명하지 않는다.");
+  p.push("- 번역체와 과장된 미사여구를 쓰지 않는다. 상대의 이름이나 호칭을 반복해서 부르지 않는다.");
+  p.push("- 문장을 일부러 짧게 끊거나 조사를 생략하지 않는다. 정상적인 문장으로 쓴다.");
+  p.push("- 지문과 대사의 비율은 장면에 따라 달라진다. 기계적으로 번갈아 쓰지 않는다.");
+  p.push("- 분량은 "+(lenMap[c.length]||lenMap["길게"]));
+
+  p.push(""); p.push("[지켜야 할 것]");
+  p.push("- 상대역의 대사, 행동, 속마음을 대신 서술하지 않는다.");
+  p.push("- AI, 설정, 프롬프트 같은 메타 발언을 하지 않는다.");
+  p.push("- 이야기를 마무리 짓지 말고 상대가 이어갈 여지를 남긴다.");
+  p.push("- 설정에 없는 부분은 캐릭터 성격에 맞게 자연스럽게 채운다.");
+
+  var lang=c.lang||"한국어";
+  if (lang!=="한국어"){
+    p.push(""); p.push("[언어]");
+    p.push("- 대사는 "+lang+"로 쓴다.");
+    if (c.romaji) p.push("- 대사 바로 뒤 소괄호 안에 한국어 발음, 쉼표, 한국어 번역 순으로 넣는다. 예: "+langSample(lang,true));
+    else p.push("- 대사 바로 뒤 소괄호 안에 한국어 번역을 넣는다. 예: "+langSample(lang,false));
+    p.push("- 별표 안의 지문은 번역 없이 한국어로만 쓴다.");
+    p.push("- 괄호는 번역에만 쓴다.");
+  } else p.push("- 한국어로 쓴다.");
+
+  p.push(""); p.push("[OOC]");
+  p.push("- 상대의 메시지가 OOC 로 시작하면 연기를 멈추고, 그 지시에 짧게 OOC 로만 답한다. 상황극 본문은 쓰지 않는다.");
+  p.push("- 그 지시는 다음 턴부터 계속 반영한다.");
+
+  if (c.sample){
+    p.push(""); p.push("[문체 예시]");
+    p.push("아래는 원하는 문체를 보여주는 예시다. 내용이 아니라 문장의 결과 호흡만 따라간다.");
+    p.push(c.sample);
+  }
   return p.join("\n");
 }
 
-/* [API 통신 엔진: OpenAI 호환(브릿지) 및 Gemini 양방향 지원] */
+function apiText(m){
+  if (m.ooc) return "OOC: " + m.t.replace(/^\/ooc\s*/i,"");
+  var k = m.r==="u" ? cmdOf(m.t) : null;
+  if (k) return "(지시: " + CMDS[k] + " 추가 요청: " + m.t.slice(k.length).trim() + ")";
+  return m.t;
+}
+
 function callAPI(c, log){
-  var sysPrompt = buildSystem(c);
-
-  // 1. OpenAI 호환 브릿지 엔드포인트 호출 (/v1/chat/completions)
-  if (cfg.type === "openai" || cfg.base.indexOf("/v1") !== -1) {
-    var url = cfg.base.replace(/\/+$/, "") + "/chat/completions";
-    var messages = [{ role: "system", content: sysPrompt }];
-
-    for (var i=0; i<log.length; i++){
-      messages.push({
-        role: log[i].r === "u" ? "user" : "assistant",
-        content: log[i].t
-      });
-    }
-
-    var headers = { "Content-Type": "application/json" };
-    if (cfg.key) headers["Authorization"] = "Bearer " + cfg.key;
-
-    return fetch(url, {
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify({
-        model: cfg.model,
-        messages: messages,
-        max_tokens: cfg.maxTokens
-      })
-    }).then(function(res){
-      return res.text().then(function(txt){
-        var data = null;
-        try { data = JSON.parse(txt); } catch(e){}
-        if (!res.ok){
-          var msg = (data && data.error && (data.error.message || data.error)) || txt.slice(0, 300);
-          throw new Error("서버 오류 (" + res.status + "):\n" + msg);
-        }
-        var reply = data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
-        if (!reply) throw new Error("응답이 비어 있습니다. 모델명이나 토큰 설정을 확인하세요.");
-        return reply.trim();
-      });
+  var sys=buildSystem(c), url, headers, body;
+  if (cfg.mode==="openai"){
+    var b=(cfg.base||"").replace(/\/+$/,"");
+    url = /chat\/completions$/.test(b) ? b : b+"/chat/completions";
+    headers={ "Content-Type":"application/json", "Authorization":"Bearer "+cfg.key };
+    body={ model:cfg.model, max_tokens:cfg.maxTokens,
+      messages:[{role:"system",content:sys}].concat(log.map(function(m){
+        return { role: m.r==="u"?"user":"assistant", content: apiText(m) };
+      })) };
+  } else {
+    var contents=log.map(function(m){
+      return { role: m.r==="u"?"user":"model", parts:[{ text: apiText(m) }] };
     });
+    if (contents.length && contents[0].role==="model")
+      contents.unshift({ role:"user", parts:[{ text:"(상황 시작)" }] });
+    var gb=(cfg.base||"https://generativelanguage.googleapis.com").replace(/\/+$/,"");
+    url = gb+"/v1beta/models/"+encodeURIComponent(cfg.model)+":generateContent?key="+encodeURIComponent(cfg.key);
+    headers={ "Content-Type":"application/json" };
+    body={ systemInstruction:{parts:[{text:sys}]}, contents:contents, generationConfig:{ maxOutputTokens:cfg.maxTokens } };
   }
-
-  // 2. Google Gemini 직접 연결 (v1beta)
-  var contents = log.map(function(m){
-    return { role: m.r==="u" ? "user" : "model", parts:[{ text:m.t }] };
-  });
-  if (contents.length && contents[0].role==="model")
-    contents.unshift({ role:"user", parts:[{ text:"(상황 시작)" }] });
-
-  var gUrl = cfg.base.replace(/\/+$/, "") + "/v1beta/models/" + encodeURIComponent(cfg.model)
-           + ":generateContent?key=" + encodeURIComponent(cfg.key);
-
-  return fetch(gUrl, {
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body: JSON.stringify({
-      systemInstruction:{ parts:[{ text: sysPrompt }] },
-      contents: contents,
-      generationConfig:{ maxOutputTokens: cfg.maxTokens }
-    })
-  }).then(function(res){
+  return fetch(url,{ method:"POST", headers:headers, body:JSON.stringify(body) })
+  .then(function(res){
     return res.text().then(function(txt){
-      var data = null;
-      try { data = JSON.parse(txt); } catch(e){}
+      var data=null; try{ data=JSON.parse(txt); }catch(e){}
       if (!res.ok){
-        var msg = (data && data.error && data.error.message) || txt.slice(0,300);
-        throw new Error("서버 오류 (" + res.status + "):\n" + msg);
+        var em=(data&&data.error&&(data.error.message||data.error))||txt.slice(0,300);
+        throw new Error("서버가 "+res.status+" 로 응답했어.\n"+em);
       }
-      var cand = data && data.candidates && data.candidates[0];
-      if (!cand) throw new Error("응답이 비어 있습니다. 키 또는 모델 이름을 확인하세요.");
-      var parts = (cand.content && cand.content.parts) || [];
-      var out = parts.map(function(p){ return p.text || ""; }).join("").trim();
-      if (!out) throw new Error("본문이 비어 있습니다.");
+      var out="";
+      if (cfg.mode==="openai"){
+        var ch=data&&data.choices&&data.choices[0];
+        if(!ch) throw new Error("응답이 비어서 돌아왔어. 주소나 모델 이름을 확인해봐.");
+        out=((ch.message&&ch.message.content)||ch.text||"").trim();
+      } else {
+        var cand=data&&data.candidates&&data.candidates[0];
+        if(!cand) throw new Error("응답이 비어서 돌아왔어. 모델 이름이나 키를 확인해봐.");
+        out=((cand.content&&cand.content.parts)||[]).map(function(x){return x.text||"";}).join("").trim();
+      }
+      if(!out) throw new Error("본문이 비어 있어. 응답 길이를 늘리거나 프롬프트를 바꿔봐.");
       return out;
     });
   });
 }
 
 function turn(){
-  var c = cur(); if (!c || busy) return;
-  if (!cfg.key && cfg.type !== "openai"){ paint("API 키가 없습니다. 오른쪽 위 설정에서 입력해주세요."); return; }
-  busy = true; elSend.disabled = true;
-  paint(null, true);
-
-  callAPI(c, getLog(c.id)).then(function(text){
-    var log = getLog(c.id);
-    log.push({ r:"a", t:text });
-    setLog(c.id, log);
-    busy = false; elSend.disabled = false;
-    paint();
+  var c=cur(); if(!c||busy) return;
+  if(!cfg.key){ paint("API 키가 없어. 오른쪽 위 설정에서 넣어줘."); return; }
+  if(cfg.mode==="openai" && !cfg.base){ paint("API 주소가 비어 있어. 설정에서 넣어줘."); return; }
+  busy=true; elSend.disabled=true; paint(null,true);
+  callAPI(c,getLog(c.id)).then(function(text){
+    var l=getLog(c.id); l.push({r:"a",t:text}); setLog(c.id,l);
+    busy=false; elSend.disabled=false; paint();
   }).catch(function(e){
-    busy = false; elSend.disabled = false;
-    paint(e.message || "연결에 실패했습니다. 설정과 네트워크를 확인해주세요.");
+    busy=false; elSend.disabled=false;
+    paint(e.message||"연결에 실패했어.");
   });
 }
 
-elSend.onclick = function(){
-  var c = cur(); if (!c || busy) return;
-  var t = elInp.value.trim(); if (!t) return;
-  var log = getLog(c.id);
-  log.push({ r:"u", t:t });
-  setLog(c.id, log);
-  elInp.value = ""; elInp.style.height = "auto";
-  paint();
-  turn();
+elSend.onclick=function(){
+  var c=cur(); if(!c||busy) return;
+  var t=elInp.value.trim(); if(!t) return;
+  var l=getLog(c.id);
+  var isOoc = /^\/ooc\b/i.test(t) || /^\(?\s*ooc\s*[:：]/i.test(t);
+  l.push(isOoc ? {r:"u",t:t,ooc:true} : {r:"u",t:t});
+  setLog(c.id,l);
+  elInp.value=""; elInp.style.height="auto";
+  selIdx=-1; paint(); turn();
 };
-elInp.addEventListener("input", function(){
-  this.style.height = "auto";
-  this.style.height = Math.min(this.scrollHeight, 140) + "px";
+elInp.addEventListener("input",function(){
+  this.style.height="auto";
+  this.style.height=Math.min(this.scrollHeight,140)+"px";
 });
+$("#regen").onclick=function(){
+  var c=cur(); if(!c||busy) return;
+  var l=getLog(c.id);
+  while(l.length && l[l.length-1].r==="a") l.pop();
+  setLog(c.id,l); paint(); turn();
+};
+$("#undo").onclick=function(){
+  var c=cur(); if(!c||busy) return;
+  var l=getLog(c.id); l.pop(); setLog(c.id,l); paint();
+};
+$("#note").onclick=function(){ if(cur()) go("note"); };
+$("#cmds").onclick=function(){
+  var k = prompt("명령어를 골라 입력창에 넣을게.\n\n/문자  /일기  /속마음  /편지  /플리  /ooc", "/문자");
+  if (!k) return;
+  elInp.value = k.trim()+" ";
+  elInp.focus();
+};
+$("#reset").onclick=function(){
+  var c=cur(); if(!c||busy) return;
+  if(!confirm("이 캐릭터와의 대화를 처음부터 다시 시작할까?")) return;
+  setLog(c.id, c.greeting?[{r:"a",t:c.greeting}]:[]);
+  selIdx=-1; paint();
+};
 
-$("#regen").onclick = function(){
-  var c = cur(); if (!c || busy) return;
-  var log = getLog(c.id);
-  while (log.length && log[log.length-1].r==="a") log.pop();
-  setLog(c.id, log);
-  paint(); turn();
-};
-$("#undo").onclick = function(){
-  var c = cur(); if (!c || busy) return;
-  var log = getLog(c.id);
-  log.pop(); setLog(c.id, log); paint();
-};
-$("#reset").onclick = function(){
-  var c = cur(); if (!c || busy) return;
-  if (!confirm("대화를 처음부터 다시 시작할까요?")) return;
-  setLog(c.id, c.greeting ? [{ r:"a", t:c.greeting }] : []);
-  paint();
-};
-
+applyTheme();
 render();
 })();
 </script>
