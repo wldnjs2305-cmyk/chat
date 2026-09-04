@@ -1,4 +1,355 @@
-esc(ph)+'" style="min-height:'+big+'px">'+esc(val)+'</textarea>'
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>캐릭터 대화</title>
+<style>
+  :root{
+    --ink:#17151F;
+    --surface:#211E2B;
+    --raised:#2A2634;
+    --line:#37324A;
+    --text:#EBE6F2;
+    --muted:#948CA6;
+    --plum:#9A6FB0;
+    --plum-soft:#5C3F73;
+    /* 괄호 속 번역을 위한 부드러운 연한 회색 */
+    --trans-gray:#9A94A8;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;height:100%}
+  body{
+    background:var(--ink);
+    color:var(--text);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",system-ui,sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    overflow:hidden;
+  }
+  #app{display:flex;flex-direction:column;height:100dvh}
+
+  /* 상단 바 */
+  #bar{
+    flex:0 0 auto;
+    display:flex;align-items:center;gap:10px;
+    padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;
+    border-bottom:1px solid var(--line);
+    background:var(--surface);
+  }
+  #bar .ttl{flex:1;min-width:0}
+  #bar h1{margin:0;font-size:16px;font-weight:600;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #bar .sub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .iconbtn{
+    flex:0 0 auto;border:0;background:transparent;color:var(--text);
+    font-size:15px;padding:8px 10px;border-radius:10px;cursor:pointer;
+  }
+  .iconbtn:active{background:var(--raised)}
+
+  /* 본문 */
+  #view{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 14px calc(env(safe-area-inset-bottom) + 24px)}
+  #view.chat{padding-bottom:12px}
+
+  /* 목록 */
+  .card{
+    display:flex;align-items:center;gap:12px;
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:14px;padding:12px 14px;margin-bottom:10px;cursor:pointer;
+  }
+  .card:active{background:var(--raised)}
+  .ava{
+    flex:0 0 auto;width:44px;height:44px;border-radius:12px;
+    background:var(--raised);display:flex;align-items:center;justify-content:center;
+    font-size:22px;overflow:hidden;
+  }
+  .ava img{width:100%;height:100%;object-fit:cover}
+  .card .meta{flex:1;min-width:0}
+  .card .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card .ds{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+  .empty{color:var(--muted);text-align:center;padding:60px 20px;font-size:14px;line-height:1.9}
+
+  /* 버튼 */
+  .btn{
+    width:100%;padding:13px;border-radius:12px;border:1px solid var(--line);
+    background:var(--surface);color:var(--text);font-size:15px;font-family:inherit;
+    cursor:pointer;margin-top:10px;
+  }
+  .btn:active{background:var(--raised)}
+  .btn.primary{background:var(--plum);border-color:var(--plum);color:#fff;font-weight:600}
+  .btn.subtle{background:var(--raised);border-color:var(--line);font-size:14px;padding:10px}
+  .btn.danger{color:#E08585}
+  .row{display:flex;gap:8px}
+  .row .btn{margin-top:10px}
+
+  /* 칩 및 작은 링크 버튼 */
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+  .chip{
+    background:var(--raised);border:1px solid var(--line);color:var(--muted);
+    font-size:12px;padding:5px 10px;border-radius:8px;cursor:pointer;
+  }
+  .chip:hover, .chip:active{border-color:var(--plum);color:var(--text)}
+
+  /* 폼 */
+  label{display:block;margin:18px 0 6px;font-size:13px;color:var(--muted)}
+  label:first-of-type{margin-top:4px}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.7}
+  input,textarea,select{
+    width:100%;padding:12px;border-radius:11px;
+    border:1px solid var(--line);background:var(--surface);color:var(--text);
+    font-size:15px;font-family:inherit;line-height:1.6;
+  }
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--plum)}
+  textarea{resize:vertical;min-height:90px}
+  .sec{margin:26px 0 0;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--plum);font-weight:600}
+  .sec:first-child{margin-top:0;padding-top:0;border-top:0}
+
+  .input-btn-wrap{position:relative}
+  .input-btn-wrap input{padding-right:54px}
+  .inner-btn{
+    position:absolute;right:8px;top:50%;transform:translateY(-50%);
+    background:transparent;border:0;color:var(--plum);font-size:12px;cursor:pointer;padding:6px;
+  }
+
+  /* 모달 */
+  .modal-wrap{
+    position:fixed;top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,0.65);z-index:999;display:flex;align-items:flex-end;
+  }
+  .modal-box{
+    width:100%;background:var(--surface);border-top:1px solid var(--line);
+    border-radius:20px 20px 0 0;padding:18px 16px 28px;max-height:80vh;display:flex;flex-direction:column;
+  }
+  .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .modal-ttl{font-size:16px;font-weight:600}
+  .modal-body{overflow-y:auto;flex:1}
+  .prof-item{
+    background:var(--raised);border:1px solid var(--line);border-radius:12px;
+    padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;
+  }
+  .prof-item:hover{border-color:var(--plum)}
+
+  /* 대화 */
+  .msg{margin-bottom:18px;max-width:88%}
+  .msg.me{margin-left:auto}
+  .who{font-size:12px;color:var(--muted);margin-bottom:5px}
+  .msg.me .who{text-align:right}
+  .bub{
+    padding:11px 14px;border-radius:16px;
+    background:var(--surface);border:1px solid var(--line);
+    white-space:pre-wrap;word-break:break-word;
+  }
+  .msg.me .bub{background:var(--plum-soft);border-color:transparent}
+  .bub em{color:var(--muted);font-style:italic}
+  
+  /* [요청 반영] 일본어 뒤 괄호 속 연한 회색 번역 스타일 */
+  .bub .trans, .preview-box .trans{
+    color:var(--trans-gray);
+    font-weight:400;
+  }
+
+  .thinking{color:var(--muted);font-size:14px;padding:4px 2px 18px}
+  .err{
+    background:#3A2230;border:1px solid #6B3348;color:#F0C4D0;
+    padding:11px 14px;border-radius:12px;font-size:13px;margin-bottom:18px;
+    white-space:pre-wrap;word-break:break-word;
+  }
+  .preview-box{
+    background:var(--raised);border:1px solid var(--line);
+    border-radius:12px;padding:12px 14px;margin-top:8px;font-size:14px;line-height:1.6;
+  }
+
+  /* 입력창 하단 */
+  #dock{
+    flex:0 0 auto;border-top:1px solid var(--line);background:var(--surface);
+    padding:10px 12px calc(env(safe-area-inset-bottom) + 10px);
+  }
+  #dock .tools{display:flex;gap:14px;padding:0 2px 8px}
+  #dock .tools button{
+    background:transparent;border:0;color:var(--muted);font-size:13px;
+    font-family:inherit;padding:0;cursor:pointer;
+  }
+  #dock .line{display:flex;gap:8px;align-items:flex-end}
+  #inp{flex:1;min-height:44px;max-height:140px;border-radius:22px;padding:11px 16px}
+  #send{
+    flex:0 0 auto;width:44px;height:44px;border-radius:22px;border:0;
+    background:var(--plum);color:#fff;font-size:17px;cursor:pointer;
+  }
+  #send:disabled{opacity:.4}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="bar">
+    <button class="iconbtn" id="left"></button>
+    <div class="ttl"><h1 id="title">캐릭터</h1><div class="sub" id="subtitle"></div></div>
+    <button class="iconbtn" id="right"></button>
+  </header>
+  <main id="view"></main>
+  <div id="dock" style="display:none">
+    <div class="tools">
+      <button id="regen">다시 생성</button>
+      <button id="undo">마지막 지우기</button>
+      <button id="reset">대화 초기화</button>
+    </div>
+    <div class="line">
+      <textarea id="inp" rows="1" placeholder="메시지"></textarea>
+      <button id="send">↑</button>
+    </div>
+  </div>
+</div>
+
+<div id="modalSlot"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- 저장소 ---------- */
+var mem = {};
+var canStore = (function(){
+  try { localStorage.setItem("gz.t","1"); localStorage.removeItem("gz.t"); return true; }
+  catch(e){ return false; }
+})();
+function put(k,v){
+  var s = JSON.stringify(v);
+  if (canStore) { try { localStorage.setItem(k,s); return; } catch(e){} }
+  mem[k]=s;
+}
+function get(k,d){
+  var s = null;
+  if (canStore) { try { s = localStorage.getItem(k); } catch(e){} }
+  if (s===null) s = mem[k];
+  if (s===null || s===undefined) return d;
+  try { return JSON.parse(s); } catch(e){ return d; }
+}
+
+/* ---------- 환경설정 (API 및 언어) ---------- */
+var cfg = get("gz.cfg", {
+  type: "openai", // "openai" (OpenAI 호환/브릿지) 또는 "gemini"
+  key: "",
+  base: "https://bridge-production-b13b.up.railway.app/v1",
+  model: "gemini-3.7-flash",
+  maxTokens: 2000,
+  lang: "jp_ko", // "jp_ko" (일본어 + 괄호 연한 회색 한국어 번역), "ko" (한국어 기본)
+  profiles: [
+    {
+      name: "기본 Railway 브릿지",
+      type: "openai",
+      base: "https://bridge-production-b13b.up.railway.app/v1",
+      key: "",
+      model: "gemini-3.7-flash",
+      maxTokens: 2000
+    }
+  ]
+});
+
+// 하위 호환성 보장
+if (!cfg.type) cfg.type = "openai";
+if (!cfg.profiles) cfg.profiles = [];
+if (!cfg.lang) cfg.lang = "jp_ko";
+
+var chars = get("gz.chars", []);
+function saveCfg(){ put("gz.cfg", cfg); }
+function saveChars(){ put("gz.chars", chars); }
+function logKey(id){ return "gz.log."+id; }
+function getLog(id){ return get(logKey(id), []); }
+function setLog(id,l){ put(logKey(id), l); }
+
+/* ---------- 도구 및 텍스트 파서 ---------- */
+var $ = function(s){ return document.querySelector(s); };
+var view=$("#view"), bar=$("#bar"), dock=$("#dock"), modalSlot=$("#modalSlot");
+var elTitle=$("#title"), elSub=$("#subtitle"), elLeft=$("#left"), elRight=$("#right");
+var elInp=$("#inp"), elSend=$("#send");
+
+function esc(s){
+  return String(s==null?"":s)
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+/* [핵심] 지문 *지문* 처리 및 일본어 뒤 (번역)을 연한 회색 span으로 포맷 */
+function fmt(s){
+  var text = esc(s);
+  // 1. *지문* 처리
+  text = text.replace(/\*([^*\n]+)\*/g, "<em>*$1*</em>");
+  // 2. 괄호 안 번역 (한국어 번역) 또는 （번역）을 연한 회색으로 감쌈
+  text = text.replace(/(\([^\)\n]+\)|（[^）\n]+）)/g, '<span class="trans">$1</span>');
+  return text;
+}
+
+function avaHTML(v, fallback){
+  var s = (v||"").trim();
+  if (/^https?:\/\//i.test(s)) return '<div class="ava"><img src="'+esc(s)+'" alt=""></div>';
+  return '<div class="ava">'+esc(s||fallback)+"</div>";
+}
+function uid(){ return "c"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+
+/* ---------- 화면 전환 ---------- */
+var screen = "list", curId = null, busy = false;
+
+function go(s, id){
+  screen = s; if (id !== undefined) curId = id;
+  render();
+}
+function cur(){
+  for (var i=0;i<chars.length;i++) if (chars[i].id===curId) return chars[i];
+  return null;
+}
+
+function render(){
+  view.className = "";
+  dock.style.display = "none";
+  modalSlot.innerHTML = "";
+  elLeft.textContent = ""; elRight.textContent = "";
+  elLeft.onclick = null; elRight.onclick = null;
+
+  if (screen==="list") return viewList();
+  if (screen==="chat") return viewChat();
+  if (screen==="edit") return viewEdit();
+  if (screen==="cfg")  return viewCfg();
+}
+
+/* ---------- 1. 캐릭터 목록 ---------- */
+function viewList(){
+  elTitle.textContent = "캐릭터";
+  elSub.textContent = chars.length ? chars.length+"명" : "";
+  elRight.textContent = "설정";
+  elRight.onclick = function(){ go("cfg"); };
+
+  var h = "";
+  if (!chars.length){
+    h += '<div class="empty">아직 캐릭터가 없어.<br>새 캐릭터를 추가해 대화를 시작해봐.</div>';
+  } else {
+    for (var i=0;i<chars.length;i++){
+      var c = chars[i], n = getLog(c.id).length;
+      h += '<div class="card" data-open="'+c.id+'">'
+         + avaHTML(c.avatar,"🙂")
+         + '<div class="meta"><div class="nm">'+esc(c.name||"이름 없음")+'</div>'
+         + '<div class="ds">'+esc(c.tagline || (n? n+"개의 메시지" : "아직 대화 없음"))+'</div></div>'
+         + '</div>';
+    }
+  }
+  h += '<button class="btn primary" id="new">새 캐릭터</button>';
+  if (!cfg.key) h += '<div class="hint" style="text-align:center;margin-top:12px">대화하려면 우측 상단 설정에서 API 키를 먼저 넣어줘.</div>';
+  view.innerHTML = h;
+
+  $("#new").onclick = function(){
+    var c = {
+      id:uid(), name:"", avatar:"", tagline:"", prompt:"", world:"",
+      greeting:"", userName:"", userAvatar:"", userPrompt:"", length:"보통"
+    };
+    chars.push(c); saveChars(); go("edit", c.id);
+  };
+  Array.prototype.forEach.call(view.querySelectorAll("[data-open]"), function(el){
+    el.onclick = function(){ go("chat", el.getAttribute("data-open")); };
+  });
+}
+
+/* ---------- 2. 캐릭터 편집 ---------- */
+function field(label, key, val, ph, big, hint){
+  var tag = big
+    ? '<textarea data-k="'+key+'" placeholder="'+esc(ph)+'" style="min-height:'+big+'px">'+esc(val)+'</textarea>'
     : '<input data-k="'+key+'" value="'+esc(val)+'" placeholder="'+esc(ph)+'">';
   return '<label>'+esc(label)+'</label>'+tag+(hint?'<div class="hint">'+hint+'</div>':"");
 }
