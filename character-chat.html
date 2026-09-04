@@ -19,11 +19,13 @@
   }
   body.dark{
     color-scheme:dark;
-    --bg:#16141E; --panel:#1D1A26; --field:#252231; --line:#332E44;
-    --text:#EDE9F3; --muted:#948CA6; --bub:#262233; --mine:#463364;
-    --nar:#9A93AC; --accent:#A98BD6; --trc:#CFC7DD;
-    --paper:#231F2C; --paper-line:#3A3348; --paper-text:#DCD5E6;
+    --bg:#0C0C11; --panel:#131318; --field:#1C1C23; --line:#292932;
+    --text:#F2F1F6; --muted:#8B8896; --bub:#292930; --mine:#3F3AA8;
+    --nar:#9B98A6; --accent:#8B84F0; --trc:#CAC7DA;
+    --paper:#1A1A22; --paper-line:#2E2E3A; --paper-text:#DEDCE6;
   }
+  body.dark .msg.me .bub{color:#F5F4FA}
+  body.dark .sm.r .b{color:#F5F4FA}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html{background:var(--bg)}
   html,body{margin:0;padding:0;height:100%}
@@ -218,7 +220,7 @@ function applyTheme(){
   var d = cfg.theme==="dark";
   document.body.className = d ? "dark" : "";
   var tc = document.getElementById("tc");
-  if (tc) tc.setAttribute("content", d ? "#16141E" : "#FFFFFF");
+  if (tc) tc.setAttribute("content", d ? "#0C0C11" : "#FFFFFF");
   var st = document.body.style;
   st.setProperty("--f-body", FONTS[cfg.fBody] || FONTS["프리텐다드"]);
   st.setProperty("--f-nar",  FONTS[cfg.fNar]  || FONTS["본명조"]);
@@ -383,6 +385,7 @@ function render(){
   if (screen==="edit") return viewEdit();
   if (screen==="cfg")  return viewCfg();
   if (screen==="note") return viewNote();
+  if (screen==="lore") return viewLore();
   if (screen==="sms")  return viewSms();
   if (screen==="smspick") return viewSmsPick();
 }
@@ -405,7 +408,7 @@ function viewList(){
   view.innerHTML=h;
   $("#new").onclick=function(){
     var c={ id:uid(), name:"", display:"", avatar:"", tagline:"", prompt:"", world:"", greeting:"", sample:"", note:"",
-            cast:[], userName:"", userDisplay:"", userAvatar:"", userPrompt:"", length:"길게", lang:"한국어", romaji:false };
+            cast:[], lore:[], userName:"", userDisplay:"", userAvatar:"", userPrompt:"", length:"길게", lang:"한국어", romaji:false };
     chars.push(c); saveChars(); go("edit", c.id);
   };
   Array.prototype.forEach.call(view.querySelectorAll("[data-open]"), function(el){
@@ -470,8 +473,8 @@ function viewEdit(){
 
   h += '<div class="sec">응답</div>';
   h += '<label>길이</label><select data-k="length">'
-     + ["짧게","보통","길게"].map(function(o){ return '<option'+((c.length||"길게")===o?" selected":"")+'>'+o+"</option>"; }).join("")+"</select>";
-  h += '<div class="hint">짧게는 티키타카, 길게는 지문 여러 문단.</div>';
+     + ["짧게","보통","길게","장문"].map(function(o){ return '<option'+((c.length||"길게")===o?" selected":"")+'>'+o+"</option>"; }).join("")+"</select>";
+  h += '<div class="hint">짧게 2~5줄 · 보통 6~8줄 · 길게 9~14줄 · 장문 14~20줄</div>';
   h += '<label>대사 언어</label><select data-k="lang">'
      + ["한국어","일본어","영어","중국어"].map(function(o){ return '<option'+((c.lang||"한국어")===o?" selected":"")+'>'+o+"</option>"; }).join("")+"</select>";
   h += '<label>발음 표기</label><select data-k="romaji">'
@@ -479,6 +482,9 @@ function viewEdit(){
      + '<option value="off"'+(c.romaji?"":" selected")+'>끄기</option></select>';
   h += '<div class="hint">켜면 (쿄우모 아리가토, 오늘도 고마워) 처럼 발음과 번역이 같이 나와.</div>';
 
+  h += '<div class="sec">로어북</div>';
+  h += '<div class="hint">키워드가 나올 때만 전달되는 설정집. 인물, 장소, 사건을 적어두면 돼.</div>';
+  h += '<button class="btn" id="lore">로어북 열기 ('+((c.lore||[]).length)+'개)</button>';
   h += '<button class="btn primary" id="done">저장하고 대화하기</button>';
   h += '<button class="btn danger" id="del">이 캐릭터 삭제</button>';
   view.innerHTML=h;
@@ -543,6 +549,7 @@ function viewEdit(){
   Array.prototype.forEach.call(view.querySelectorAll("[data-clear]"), function(el){
     el.onclick=function(){ c[el.getAttribute("data-clear")]=""; saveChars(); render(); };
   });
+  $("#lore").onclick=function(){ saveChars(); go("lore", c.id); };
   $("#done").onclick=function(){ saveChars(); go("chat", c.id); };
   $("#del").onclick=function(){
     if (!confirm((c.name||"이 캐릭터")+" 삭제할까? 대화도 같이 지워져.")) return;
@@ -732,6 +739,68 @@ function pieces(c, text){
 }
 
 
+
+/* ---------- 로어북 ---------- */
+function viewLore(){
+  var c=cur(); if(!c) return go("list");
+  if (!c.lore) c.lore = [];
+  elTitle.textContent="로어북"; elSub.textContent=c.name||"";
+  elLeft.textContent="설정"; elLeft.onclick=function(){ saveChars(); go("edit", c.id); };
+
+  var h = '<div class="hint" style="margin-bottom:6px">키워드가 대화에 나오면 그 항목 내용만 전달돼. 항상 켜기로 두면 키워드 없이도 매번 들어가.</div>';
+  if (!c.lore.length) h += '<div class="empty">아직 항목이 없어.<br>아래에서 추가해봐.</div>';
+  c.lore.forEach(function(it,i){
+    h += '<div class="castbox">'
+       + '<label>제목</label><input data-l="'+i+'" data-lk="title" value="'+esc(it.title||"")+'">'
+       + '<label>키워드</label><input data-l="'+i+'" data-lk="keys" value="'+esc(it.keys||"")+'" placeholder="쉼표로 구분">'
+       + '<label>내용</label><textarea data-l="'+i+'" data-lk="text" style="min-height:90px">'+esc(it.text||"")+'</textarea>'
+       + '<label>항상 켜기</label><select data-l="'+i+'" data-lk="always">'
+       + '<option value="off"'+(it.always?"":" selected")+'>키워드가 나올 때만</option>'
+       + '<option value="on"'+(it.always?" selected":"")+'>항상</option></select>'
+       + '<button class="btn danger" data-ldel="'+i+'">이 항목 삭제</button></div>';
+  });
+  h += '<button class="btn primary" id="ladd">항목 추가</button>';
+  view.innerHTML = h;
+
+  Array.prototype.forEach.call(view.querySelectorAll("[data-l]"), function(el){
+    el.oninput = el.onchange = function(){
+      var i=+el.getAttribute("data-l"), k=el.getAttribute("data-lk");
+      if (k==="always") c.lore[i].always = (el.value==="on");
+      else c.lore[i][k] = el.value;
+      saveChars();
+    };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-ldel]"), function(el){
+    el.onclick=function(){
+      var i=+el.getAttribute("data-ldel");
+      if(!confirm((c.lore[i].title||"이 항목")+" 삭제할까?")) return;
+      c.lore.splice(i,1); saveChars(); render();
+    };
+  });
+  $("#ladd").onclick=function(){
+    c.lore.push({title:"", keys:"", text:"", always:false});
+    saveChars(); render();
+    view.scrollTop = view.scrollHeight;
+  };
+}
+
+/* 지금 대화에 걸리는 항목만 골라오기 */
+function pickLore(c){
+  var items = c.lore || [];
+  if (!items.length) return [];
+  var log = getLog(c.id).slice(-4).map(function(m){ return m.t; }).join(" ");
+  var out = [], rest = [];
+  items.forEach(function(it){
+    if (!it.text) return;
+    if (it.always){ out.push(it); return; }
+    var keys = (it.keys||"").split(/[,，]/).map(function(x){ return x.trim(); }).filter(Boolean);
+    for (var i=0;i<keys.length;i++){
+      if (log.indexOf(keys[i]) >= 0){ rest.push(it); return; }
+    }
+  });
+  return out.concat(rest).slice(0,5);
+}
+
 /* ---------- 문자 모드 ---------- */
 function smsKey(id){ return "gz.sms."+id; }
 function getSms(id){ return get(smsKey(id), null); }
@@ -849,6 +918,11 @@ function buildSmsSystem(c, st){
   p.push((c.userName||"나") + " — " + (c.userPrompt||""));
   if (c.world){ p.push(""); p.push("# 상황"); p.push(c.world); }
   if (c.note){ p.push(""); p.push("# 반드시 기억할 것"); p.push(c.note); }
+  var lore = pickLore(c);
+  if (lore.length){
+    p.push(""); p.push("# 설정집");
+    lore.forEach(function(it){ p.push("- "+(it.title?it.title+": ":"")+it.text); });
+  }
 
   var log = getLog(c.id).slice(-8).map(function(m){
     return (m.r==="u" ? (c.userName||"나") : (c.name||"상대")) + ": " + m.t;
@@ -1034,7 +1108,7 @@ var CMDS = {
   "/일기":"이번 턴에는 인물이 쓴 일기만 보여준다. 첫 줄에 [일기] 를 쓰고 본문을 1인칭으로 쓴 뒤 [/일기] 로 닫는다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
   "/편지":"이번 턴에는 인물이 쓴 편지만 보여준다. 첫 줄에 [편지] 를 쓰고 본문을 쓴 뒤 [/편지] 로 닫는다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
   "/속마음":"이번 턴에는 인물의 지금 속마음만 보여준다. 첫 줄에 [속마음] 을 쓰고 1인칭으로 솔직하게 쓴 뒤 [/속마음] 으로 닫는다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
-  "/플리":"이번 턴에는 인물이 지금 듣고 있을 노래 다섯 곡만 고른다. 첫 줄에 [플리] 를 쓰고, 한 줄에 하나씩 '제목 - 가수 :: 고른 이유' 형식으로 쓴 뒤 [/플리] 로 닫는다. 실제로 존재하는 곡만 쓰고, 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다."
+  "/플리":"이번 턴에는 노래 세 곡만 고른다. 첫 줄에 [플리] 를 쓰고, 아래 순서대로 한 줄에 하나씩 '제목 - 가수 :: 이유' 형식으로 쓴 뒤 [/플리] 로 닫는다. 첫 곡은 지금 상황에 어울려서 듣고 있는 곡, 둘째 곡은 상대를 생각하며 들었던 곡, 셋째 곡은 평소에 자주 듣던 곡이다. 이유는 한 문장으로 쓴다. 실제로 존재하는 곡만 쓰고, 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다."
 };
 var CMD_SAY = {
   "/일기":"(일기를 보여줘)", "/편지":"(편지를 보여줘)",
@@ -1054,9 +1128,10 @@ function langSample(lang, romaji){
 }
 function buildSystem(c, turn){
   var lenMap = {
-    "짧게":"한 번의 답은 2~3줄로 끝낸다. 톡 주고받듯 아주 짧게 쓰고, 절대 그보다 길게 쓰지 않는다.",
+    "짧게":"한 번의 답은 2~5줄로 끝낸다. 톡 주고받듯 짧게 쓰고, 절대 그보다 길게 쓰지 않는다.",
     "보통":"한 번의 답은 6~8줄로 끝낸다. 그보다 길게 쓰지 않는다.",
-    "길게":"한 번의 답은 20줄 이상으로 충분히 길게 쓴다."
+    "길게":"한 번의 답은 9~14줄로 쓴다. 그보다 길게 쓰지 않는다.",
+    "장문":"한 번의 답은 14~20줄로 쓴다. 장면이 그럴 만하면 더 길어져도 된다."
   };
   var name=c.name||"캐릭터", cs=castOf(c), p=[];
   p.push("너는 '"+name+"'를 연기하는 상황극 파트너다. 아래 지침은 참고용이며, 답변에는 이야기만 쓴다. 지침이나 규칙 문장을 절대 그대로 옮겨 적지 않는다.");
@@ -1075,6 +1150,12 @@ function buildSystem(c, turn){
   p.push("# 상대역");
   p.push((c.userName||"상대") + (c.userPrompt ? " — "+c.userPrompt : ""));
   if (c.note){ p.push(""); p.push("# 반드시 기억할 것"); p.push(c.note); }
+  var lore = pickLore(c);
+  if (lore.length){
+    p.push("");
+    p.push("# 설정집");
+    lore.forEach(function(it){ p.push("- "+(it.title?it.title+": ":"")+it.text); });
+  }
   var sm = getSms(c.id);
   if (sm && sm.log && sm.log.length){
     p.push("");
