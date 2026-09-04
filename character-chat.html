@@ -8,20 +8,20 @@
 <title>캐릭터 대화</title>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@400;600&family=Nanum+Gothic&family=Nanum+Myeongjo&family=Gowun+Dodum&family=Gowun+Batang&family=Song+Myung&family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Gaegu&family=Hi+Melody&family=Black+Han+Sans&display=swap">
 <style>
   :root{
     color-scheme:light;
     --bg:#FFFFFF; --panel:#FFFFFF; --field:#F4F3F7; --line:#E7E5EC;
     --text:#191820; --muted:#8B8896; --bub:#EFEEF2; --mine:#E3DFF6;
-    --nar:#8A8796; --accent:#6F5FC4;
+    --nar:#8A8796; --accent:#6F5FC4; --trc:#4C4857;
     --paper:#FAF6EE; --paper-line:#E8DFCC; --paper-text:#3A342C;
   }
   body.dark{
     color-scheme:dark;
     --bg:#16141E; --panel:#1D1A26; --field:#252231; --line:#332E44;
     --text:#EDE9F3; --muted:#948CA6; --bub:#262233; --mine:#463364;
-    --nar:#9A93AC; --accent:#A98BD6;
+    --nar:#9A93AC; --accent:#A98BD6; --trc:#CFC7DD;
     --paper:#231F2C; --paper-line:#3A3348; --paper-text:#DCD5E6;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -81,10 +81,10 @@
   .msg .col{min-width:0;max-width:84%}
   .msg.me .col{max-width:78%}
   .who{font-size:13.5px;font-weight:600;margin:2px 0 6px 2px}
-  .bub{padding:13px 16px;border-radius:18px;background:var(--bub);white-space:pre-wrap;word-break:break-word;font-size:16px;line-height:1.85;letter-spacing:-.004em;cursor:pointer}
+  .bub{padding:13px 16px;border-radius:18px;background:var(--bub);white-space:pre-wrap;word-break:break-word;font-family:var(--f-body);font-size:var(--fs);line-height:1.85;letter-spacing:-.004em;cursor:pointer}
   .msg.me .bub{background:var(--mine)}
-  .bub em{font-family:"Noto Serif KR",serif;font-style:italic;font-weight:300;color:var(--nar);font-size:15.5px;line-height:1.9}
-  .bub .tr{color:var(--nar);font-size:14.5px}
+  .bub em{font-family:var(--f-nar);font-style:italic;font-weight:300;color:var(--nar);font-size:calc(var(--fs) - 0.5px);line-height:1.9}
+  .bub .tr{color:var(--trc);font-size:calc(var(--fs) - 1.5px)}
   .ooc{margin:0 0 18px;padding:9px 13px;border-radius:12px;border:1px dashed var(--line);color:var(--muted);font-size:14px;white-space:pre-wrap}
   .acts{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
   .acts button{background:var(--field);border:1px solid var(--line);color:var(--text);font-family:inherit;font-size:13px;padding:7px 12px;border-radius:10px;cursor:pointer}
@@ -108,6 +108,31 @@
   .pl .t{font-size:15px;font-weight:600}
   .pl .ar{font-size:13px;color:var(--muted)}
   .pl .rs{font-size:12.5px;color:var(--nar);margin-top:3px;font-style:italic}
+
+  /* 사진 편집기 */
+  #cropwrap{position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.72);display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:16px;padding:20px;-webkit-backdrop-filter:blur(6px)}
+  #cropbox{width:280px;height:280px;border-radius:50%;overflow:hidden;position:relative;background:#000;
+    box-shadow:0 0 0 2000px rgba(0,0,0,.28)}
+  #cropbox img{position:absolute;transform-origin:0 0;user-select:none;-webkit-user-drag:none;pointer-events:none}
+  #cropwrap .ctl{width:280px;display:flex;flex-direction:column;gap:10px}
+  #cropwrap input[type=range]{width:100%;padding:0}
+  #cropwrap .row{display:flex;gap:8px}
+  #cropwrap .row button{flex:1;padding:13px;border-radius:12px;border:0;font-family:inherit;font-size:15px;cursor:pointer}
+  #cropwrap .ok{background:var(--accent);color:#fff;font-weight:600}
+  #cropwrap .no{background:rgba(255,255,255,.16);color:#fff}
+  #cropwrap .tip{color:#fff;opacity:.75;font-size:13px;text-align:center}
+
+  /* 문자 화면 */
+  .smsbar{display:flex;align-items:center;gap:9px;padding:0 2px 12px;border-bottom:1px solid var(--line);margin-bottom:14px}
+  .smsbar .nm{flex:1;min-width:0;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .smsbar .sub{font-size:12px;color:var(--muted);font-weight:400}
+  .smsbar .x{border:0;background:transparent;color:var(--muted);font-size:20px;padding:2px 8px;cursor:pointer}
+  .sm{margin-bottom:9px;display:flex}
+  .sm .b{max-width:78%;padding:10px 14px;border-radius:16px;background:var(--bub);font-family:var(--f-body);font-size:calc(var(--fs) - 1px);line-height:1.65;white-space:pre-wrap;word-break:break-word}
+  .sm.r{justify-content:flex-end}
+  .sm.r .b{background:var(--mine)}
+  .sm .who2{font-size:11.5px;color:var(--muted);margin:0 0 4px 4px}
 
   #dock{flex:0 0 auto;border-top:1px solid var(--line);background:var(--panel);padding:9px 12px calc(env(safe-area-inset-bottom) + 9px)}
   #dock .tools{display:flex;gap:13px;padding:0 2px 8px;overflow-x:auto}
@@ -163,13 +188,30 @@ function get(k,d){
   if (s===null || s===undefined) return d;
   try { return JSON.parse(s); } catch(e){ return d; }
 }
-var cfg = get("gz.cfg", { mode:"openai", key:"", base:"", model:"gemini-3.7-flash", maxTokens:2600, theme:"light" });
+var FONTS = {
+  "프리텐다드":'"Pretendard Variable",Pretendard,-apple-system,sans-serif',
+  "본고딕":'"Noto Sans KR",sans-serif',
+  "나눔고딕":'"Nanum Gothic",sans-serif',
+  "고운돋움":'"Gowun Dodum",sans-serif',
+  "검은고딕":'"Black Han Sans",sans-serif',
+  "본명조":'"Noto Serif KR",serif',
+  "나눔명조":'"Nanum Myeongjo",serif',
+  "고운바탕":'"Gowun Batang",serif',
+  "송명":'"Song Myung",serif',
+  "나눔손글씨 펜":'"Nanum Pen Script",cursive',
+  "나눔손글씨 붓":'"Nanum Brush Script",cursive',
+  "개구쟁이":'"Gaegu",cursive',
+  "하이멜로디":'"Hi Melody",cursive'
+};
+var cfg = get("gz.cfg", { mode:"openai", key:"", base:"", model:"gemini-3.7-flash", maxTokens:2600,
+                          theme:"light", fBody:"프리텐다드", fNar:"본명조", fSize:16 });
 if (!cfg.mode) cfg.mode = "openai";
 if (!cfg.theme) cfg.theme = "light";
 var chars = get("gz.chars", []);
 function saveCfg(){ put("gz.cfg", cfg); applyTheme(); }
 function saveChars(){ put("gz.chars", chars); }
 function logKey(id){ return "gz.log."+id; }
+function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
 function applyTheme(){
@@ -177,6 +219,10 @@ function applyTheme(){
   document.body.className = d ? "dark" : "";
   var tc = document.getElementById("tc");
   if (tc) tc.setAttribute("content", d ? "#16141E" : "#FFFFFF");
+  var st = document.body.style;
+  st.setProperty("--f-body", FONTS[cfg.fBody] || FONTS["프리텐다드"]);
+  st.setProperty("--f-nar",  FONTS[cfg.fNar]  || FONTS["본명조"]);
+  st.setProperty("--fs", (cfg.fSize||16)+"px");
 }
 
 /* ---------- 도구 ---------- */
@@ -201,6 +247,8 @@ function avaHTML(v, fb, cls){
 }
 function uid(){ return "c"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
 function castOf(c){ return (c.cast||[]).filter(function(x){ return x && x.name; }); }
+function dispOf(c){ return (c.display||"").trim() || c.name || "상대"; }
+function udispOf(c){ return (c.userDisplay||"").trim() || c.userName || "나"; }
 function findPerson(c, name){
   if (!name) return null;
   var n = name.trim();
@@ -222,11 +270,11 @@ function pickPhoto(done){
     fr.onload = function(){
       var img = new Image();
       img.onload = function(){
-        var S=200, cv=document.createElement("canvas");
-        cv.width=S; cv.height=S;
-        var g=cv.getContext("2d"), side=Math.min(img.width,img.height);
-        g.drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,S,S);
-        inp.remove(); done(cv.toDataURL("image/jpeg",0.82));
+        var M=640, w=img.width, h=img.height, r=Math.min(1, M/Math.max(w,h));
+        var cv=document.createElement("canvas");
+        cv.width=Math.round(w*r); cv.height=Math.round(h*r);
+        cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+        inp.remove(); done(cv.toDataURL("image/jpeg",0.86));
       };
       img.onerror=function(){ inp.remove(); alert("이 사진은 못 읽었어."); };
       img.src = fr.result;
@@ -235,6 +283,91 @@ function pickPhoto(done){
     fr.readAsDataURL(f);
   };
   inp.click();
+}
+
+/* 확대, 위치 잡아서 동그랗게 자르기 */
+function editPhoto(src, done){
+  var S = 280;
+  var wrap = document.createElement("div");
+  wrap.id = "cropwrap";
+  wrap.innerHTML = '<div class="tip">손가락으로 움직이고, 두 손가락으로 확대할 수 있어</div>'
+    + '<div id="cropbox"><img id="cropimg" alt=""></div>'
+    + '<div class="ctl"><input id="cropz" type="range" min="100" max="400" value="100">'
+    + '<div class="row"><button class="no" id="cropno">취소</button>'
+    + '<button class="ok" id="cropok">저장</button></div></div>';
+  document.body.appendChild(wrap);
+
+  var im = wrap.querySelector("#cropimg");
+  var base=1, z=1, ox=0, oy=0, iw=0, ih=0;
+
+  function clamp(){
+    var dw=iw*base*z, dh=ih*base*z;
+    if (ox > 0) ox = 0;
+    if (oy > 0) oy = 0;
+    if (ox < S-dw) ox = S-dw;
+    if (oy < S-dh) oy = S-dh;
+  }
+  function draw(){
+    clamp();
+    im.style.width = (iw*base*z)+"px";
+    im.style.height = (ih*base*z)+"px";
+    im.style.left = ox+"px";
+    im.style.top = oy+"px";
+  }
+  im.onload = function(){
+    iw=im.naturalWidth; ih=im.naturalHeight;
+    base = S/Math.min(iw,ih);
+    z=1; ox=(S-iw*base)/2; oy=(S-ih*base)/2;
+    im.style.position="absolute";
+    draw();
+  };
+  im.src = src;
+
+  var box = wrap.querySelector("#cropbox");
+  var px=0, py=0, pd=0, pz=1, dragging=false;
+  function dist(t){
+    var dx=t[0].clientX-t[1].clientX, dy=t[0].clientY-t[1].clientY;
+    return Math.sqrt(dx*dx+dy*dy);
+  }
+  box.addEventListener("touchstart", function(e){
+    if (e.touches.length===1){ dragging=true; px=e.touches[0].clientX; py=e.touches[0].clientY; }
+    else if (e.touches.length===2){ dragging=false; pd=dist(e.touches); pz=z; }
+  }, {passive:true});
+  box.addEventListener("touchmove", function(e){
+    e.preventDefault();
+    if (e.touches.length===1 && dragging){
+      var x=e.touches[0].clientX, y=e.touches[0].clientY;
+      ox += x-px; oy += y-py; px=x; py=y; draw();
+    } else if (e.touches.length===2 && pd){
+      var nz = Math.max(1, Math.min(4, pz * dist(e.touches)/pd));
+      var cx=S/2, cy=S/2, k=nz/z;
+      ox = cx - (cx-ox)*k; oy = cy - (cy-oy)*k;
+      z = nz; wrap.querySelector("#cropz").value = Math.round(z*100); draw();
+    }
+  }, {passive:false});
+  box.addEventListener("touchend", function(){ dragging=false; pd=0; }, {passive:true});
+  box.addEventListener("mousedown", function(e){ dragging=true; px=e.clientX; py=e.clientY; });
+  window.addEventListener("mousemove", function(e){
+    if(!dragging) return;
+    ox += e.clientX-px; oy += e.clientY-py; px=e.clientX; py=e.clientY; draw();
+  });
+  window.addEventListener("mouseup", function(){ dragging=false; });
+
+  wrap.querySelector("#cropz").oninput = function(){
+    var nz = Math.max(1, Math.min(4, this.value/100));
+    var cx=S/2, cy=S/2, k=nz/z;
+    ox = cx - (cx-ox)*k; oy = cy - (cy-oy)*k;
+    z = nz; draw();
+  };
+  wrap.querySelector("#cropno").onclick = function(){ wrap.remove(); };
+  wrap.querySelector("#cropok").onclick = function(){
+    var out=200, cv=document.createElement("canvas");
+    cv.width=out; cv.height=out;
+    var sc = base*z, sx = -ox/sc, sy = -oy/sc, ss = S/sc;
+    cv.getContext("2d").drawImage(im, sx, sy, ss, ss, 0, 0, out, out);
+    wrap.remove();
+    done(cv.toDataURL("image/jpeg",0.85));
+  };
 }
 
 /* ---------- 화면 ---------- */
@@ -250,6 +383,8 @@ function render(){
   if (screen==="edit") return viewEdit();
   if (screen==="cfg")  return viewCfg();
   if (screen==="note") return viewNote();
+  if (screen==="sms")  return viewSms();
+  if (screen==="smspick") return viewSmsPick();
 }
 
 /* ---------- 목록 ---------- */
@@ -269,8 +404,8 @@ function viewList(){
   h += '<button class="btn primary" id="new">새 캐릭터</button>';
   view.innerHTML=h;
   $("#new").onclick=function(){
-    var c={ id:uid(), name:"", avatar:"", tagline:"", prompt:"", world:"", greeting:"", sample:"", note:"",
-            cast:[], userName:"", userAvatar:"", userPrompt:"", length:"길게", lang:"한국어", romaji:false };
+    var c={ id:uid(), name:"", display:"", avatar:"", tagline:"", prompt:"", world:"", greeting:"", sample:"", note:"",
+            cast:[], userName:"", userDisplay:"", userAvatar:"", userPrompt:"", length:"길게", lang:"한국어", romaji:false };
     chars.push(c); saveChars(); go("edit", c.id);
   };
   Array.prototype.forEach.call(view.querySelectorAll("[data-open]"), function(el){
@@ -287,6 +422,7 @@ function field(label,key,val,big,hint){
 function photoBlock(label,key,val){
   return '<label>'+esc(label)+'</label><div class="pick">'+avaHTML(val,"🙂","lg")
     + '<div class="btns"><button class="btn sm" data-pick="'+key+'">사진 고르기</button>'
+    + (/^data:image/.test(val||"") ? '<button class="btn sm" data-adj="'+key+'">위치 조정</button>' : "")
     + '<button class="btn sm" data-clear="'+key+'">지우기</button></div></div>'
     + '<div class="hint">앨범에서 고르면 작게 줄여서 저장돼. 이모지를 쓰려면 아래 칸에.</div>'
     + '<input data-k="'+key+'" value="'+esc(/^data:image/.test(val||"")?"":(val||""))+'">';
@@ -294,12 +430,16 @@ function photoBlock(label,key,val){
 
 function viewEdit(){
   var c=cur(); if(!c) return go("list");
+  if (typeof c.romaji !== "boolean") c.romaji = false;
+  if (!c.length) c.length = "길게";
+  if (!c.lang) c.lang = "한국어";
   elTitle.textContent="캐릭터 설정"; elSub.textContent=c.name||"";
   elLeft.textContent="목록"; elLeft.onclick=function(){ saveChars(); go("list"); };
 
   var h="";
   h += '<div class="sec first">캐릭터</div>';
   h += field("이름","name",c.name);
+  h += field("표시 이름","display",c.display,0,"말풍선 위에 뜨는 이름. 비우면 위 이름 그대로.");
   h += photoBlock("프로필 사진","avatar",c.avatar);
   h += field("한 줄 소개","tagline",c.tagline);
   h += field("캐릭터 프롬프트","prompt",c.prompt,200);
@@ -316,6 +456,7 @@ function viewEdit(){
        + '<label>이름</label><input data-cast="'+i+'" data-ck="name" value="'+esc(p.name)+'">'
        + '<div class="pick" style="margin-top:10px">'+avaHTML(p.avatar,"🙂","lg")
        + '<div class="btns"><button class="btn sm" data-castpick="'+i+'">사진</button>'
+       + (/^data:image/.test(p.avatar||"") ? '<button class="btn sm" data-castadj="'+i+'">위치</button>' : "")
        + '<button class="btn sm" data-castclear="'+i+'">지우기</button></div></div>'
        + '<label>설정</label><textarea data-cast="'+i+'" data-ck="prompt" style="min-height:80px">'+esc(p.prompt)+'</textarea>'
        + '</div>';
@@ -323,6 +464,7 @@ function viewEdit(){
 
   h += '<div class="sec">나</div>';
   h += field("내 이름","userName",c.userName);
+  h += field("내 표시 이름","userDisplay",c.userDisplay,0,"비우면 위 이름 그대로.");
   h += photoBlock("내 프로필 사진","userAvatar",c.userAvatar);
   h += field("내 캐릭터 프롬프트","userPrompt",c.userPrompt,140);
 
@@ -345,6 +487,7 @@ function viewEdit(){
     el.oninput = el.onchange = function(){
       var k=el.getAttribute("data-k"), v=el.value;
       if (k==="romaji"){ c.romaji = (v==="on"); saveChars(); return; }
+      if (k==="length" || k==="lang"){ c[k]=v; saveChars(); return; }
       if ((k==="avatar"||k==="userAvatar") && /^data:image/.test(c[k]||"") && !v) return;
       c[k]=v; saveChars();
     };
@@ -358,20 +501,43 @@ function viewEdit(){
   Array.prototype.forEach.call(view.querySelectorAll("[data-castpick]"), function(el){
     el.onclick=function(){
       var i=+el.getAttribute("data-castpick");
-      pickPhoto(function(d){ c.cast[i].avatar=d; saveChars(); render(); });
+      pickPhoto(function(orig){
+        put(origKey(c.id,"cast"+i), orig);
+        editPhoto(orig, function(cr){ c.cast[i].avatar=cr; saveChars(); render(); });
+      });
+    };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-castadj]"), function(el){
+    el.onclick=function(){
+      var i=+el.getAttribute("data-castadj");
+      var orig = get(origKey(c.id,"cast"+i), null) || c.cast[i].avatar;
+      if (!orig) return;
+      editPhoto(orig, function(cr){ c.cast[i].avatar=cr; saveChars(); render(); });
     };
   });
   Array.prototype.forEach.call(view.querySelectorAll("[data-castclear]"), function(el){
     el.onclick=function(){ c.cast[+el.getAttribute("data-castclear")].avatar=""; saveChars(); render(); };
   });
+  function savePhoto(k, cropped){
+    c[k]=cropped;
+    if (!put("gz.chars",chars)) alert("저장 공간이 부족해. 사진을 지우거나 캐릭터를 정리해줘.");
+    render();
+  }
   Array.prototype.forEach.call(view.querySelectorAll("[data-pick]"), function(el){
     el.onclick=function(){
       var k=el.getAttribute("data-pick");
-      pickPhoto(function(d){
-        c[k]=d;
-        if (!put("gz.chars",chars)) alert("저장 공간이 부족해. 사진을 지우거나 캐릭터를 정리해줘.");
-        render();
+      pickPhoto(function(orig){
+        put(origKey(c.id,k), orig);
+        editPhoto(orig, function(cr){ savePhoto(k, cr); });
       });
+    };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-adj]"), function(el){
+    el.onclick=function(){
+      var k=el.getAttribute("data-adj");
+      var orig = get(origKey(c.id,k), null) || c[k];
+      if (!orig) return;
+      editPhoto(orig, function(cr){ savePhoto(k, cr); });
     };
   });
   Array.prototype.forEach.call(view.querySelectorAll("[data-clear]"), function(el){
@@ -408,13 +574,23 @@ function viewCfg(){
      + '<option value="gemini"'+(cfg.mode==="gemini"?" selected":"")+'>구글 직접 · Gemini</option></select>';
   h += '<label>API 주소</label><input id="b" value="'+esc(cfg.base)+'" autocapitalize="off" spellcheck="false">';
   h += '<div class="hint">OpenAI 호환이면 /v1 까지만. 구글 직접이면 비워둬.</div>';
-  h += '<label>API 키</label><input id="k" value="'+esc(cfg.key)+'" autocapitalize="off" autocorrect="off" spellcheck="false">';
+  h += '<label>API 키</label>'
+     + '<div style="display:flex;gap:8px"><input id="k" type="password" value="'+esc(cfg.key)+'" autocapitalize="off" autocorrect="off" spellcheck="false">'
+     + '<button class="btn sm" id="kv">보기</button></div>';
   h += '<label>모델</label><input id="m" value="'+esc(cfg.model)+'" autocapitalize="off" spellcheck="false">';
   h += '<label>최대 응답 길이</label><input id="t" value="'+esc(cfg.maxTokens)+'" inputmode="numeric">';
   h += '<div class="sec">화면</div>';
   h += '<label>테마</label><select id="th">'
      + '<option value="light"'+(cfg.theme==="light"?" selected":"")+'>밝게</option>'
      + '<option value="dark"'+(cfg.theme==="dark"?" selected":"")+'>어둡게</option></select>';
+  var fopts = function(sel){
+    return Object.keys(FONTS).map(function(n){
+      return '<option'+(sel===n?" selected":"")+'>'+n+"</option>"; }).join("");
+  };
+  h += '<label>대사 글꼴</label><select id="fb">'+fopts(cfg.fBody)+'</select>';
+  h += '<label>지문 글꼴</label><select id="fn">'+fopts(cfg.fNar)+'</select>';
+  h += '<label>글자 크기 · '+(cfg.fSize||16)+'px</label>'
+     + '<input id="fs" type="range" min="13" max="22" step="1" value="'+(cfg.fSize||16)+'" style="padding:0">';
   h += '<div class="sec">백업</div>';
   h += '<div class="hint">사파리가 저장 공간을 정리하면 캐릭터가 사라질 수 있어. 가끔 내보내둬.</div>';
   h += '<button class="btn" id="exp">전체 내보내기</button>';
@@ -425,8 +601,19 @@ function viewCfg(){
 
   $("#md").onchange=function(){ cfg.mode=this.value; saveCfg(); };
   $("#th").onchange=function(){ cfg.theme=this.value; saveCfg(); };
+  $("#fb").onchange=function(){ cfg.fBody=this.value; saveCfg(); };
+  $("#fn").onchange=function(){ cfg.fNar=this.value; saveCfg(); };
+  $("#fs").oninput=function(){
+    cfg.fSize=parseInt(this.value,10)||16; saveCfg();
+    this.previousElementSibling.textContent="글자 크기 · "+cfg.fSize+"px";
+  };
   $("#b").oninput=function(){ cfg.base=this.value.trim().replace(/\/+$/,""); saveCfg(); };
   $("#k").oninput=function(){ cfg.key=this.value.trim(); saveCfg(); };
+  $("#kv").onclick=function(){
+    var el=$("#k");
+    if (el.type==="password"){ el.type="text"; this.textContent="가리기"; }
+    else { el.type="password"; this.textContent="보기"; }
+  };
   $("#m").oninput=function(){ cfg.model=this.value.trim(); saveCfg(); };
   $("#t").oninput=function(){ cfg.maxTokens=parseInt(this.value,10)||2600; saveCfg(); };
   $("#exp").onclick=function(){
@@ -453,8 +640,6 @@ function viewCfg(){
 }
 
 /* ---------- 특수 블록 렌더 ---------- */
-var CARD_RE = /\[(문자|일기|편지|속마음|플리)\]\s*([\s\S]*?)\s*\[\/\1\]/g;
-
 function cardHTML(kind, body, c){
   if (kind==="문자"){
     var rows = body.split("\n").filter(function(l){ return l.trim(); });
@@ -490,32 +675,270 @@ function cardHTML(kind, body, c){
   return "";
 }
 
-/* 캐릭터별 말풍선 + 특수 카드로 조각내기 */
-function pieces(c, text){
-  var out = [], last = 0, m;
-  CARD_RE.lastIndex = 0;
-  while ((m = CARD_RE.exec(text)) !== null){
-    if (m.index > last) out.push({ card:null, text:text.slice(last, m.index) });
-    out.push({ card:m[1], text:m[2] });
-    last = CARD_RE.lastIndex;
-  }
-  if (last < text.length) out.push({ card:null, text:text.slice(last) });
+var KINDS = ["문자","일기","편지","속마음","플리"];
 
-  var res = [];
-  out.forEach(function(seg){
-    if (seg.card){ res.push({ card:seg.card, text:seg.text }); return; }
-    var parts = seg.text.split(/^\[([^\]\n]{1,20})\]/gm);
-    if (parts.length===1){
-      if (seg.text.trim()) res.push({ who:null, text:seg.text });
-      return;
+function pieces(c, text){
+  var names = [ (c.name||"").trim() ].concat(castOf(c).map(function(x){ return x.name.trim(); }))
+                .filter(function(x){ return x; });
+  var t = String(text||"");
+  // '플리:' 처럼 머리말만 쓴 경우도 태그로 취급
+  t = t.replace(new RegExp("^\\s*(" + KINDS.join("|") + ")\\s*[:：]\\s*$", "gm"), "[$1]");
+  t = t.replace(new RegExp("^\\s*\\[\\s*(" + KINDS.join("|") + ")\\s*\\]\\s*$", "gm"), "[$1]");
+
+  var lines = t.split("\n"), res = [], curKind = null, curWho = null, buf = [];
+  function flush(){
+    var body = buf.join("\n").trim();
+    buf = [];
+    if (!body) return;
+    if (curKind) res.push({ card:curKind, text:body });
+    else res.push({ who:curWho, text:body });
+  }
+  var openRe  = new RegExp("^\\s*\\[(" + KINDS.join("|") + ")\\]\\s*$");
+  var closeRe = new RegExp("^\\s*\\[/\\s*(" + KINDS.join("|") + ")\\s*\\]\\s*$");
+
+  for (var i=0;i<lines.length;i++){
+    var L = lines[i], m;
+    if ((m = L.match(openRe))){ flush(); curKind = m[1]; continue; }
+    if (closeRe.test(L)){ flush(); curKind = null; continue; }
+    m = L.match(/^\s*\[([^\]\n]{1,20})\]\s*(.*)$/);
+    if (m && names.indexOf(m[1].trim()) >= 0){
+      flush(); curKind = null; curWho = m[1].trim();
+      if (m[2].trim()) buf.push(m[2]);
+      continue;
     }
-    if (parts[0] && parts[0].trim()) res.push({ who:null, text:parts[0] });
-    for (var i=1;i<parts.length;i+=2){
-      var body = parts[i+1]||"";
-      if (body.trim()) res.push({ who:parts[i], text:body });
+    buf.push(L);
+  }
+  flush();
+
+  // 태그를 빼먹었어도 곡 목록처럼 생겼으면 플리로 본다
+  var out = [];
+  res.forEach(function(seg){
+    if (seg.card){ out.push(seg); return; }
+    var ls = seg.text.split("\n"), run = [], rest = [];
+    function dumpRun(){
+      if (run.length >= 2) out.push({ card:"플리", text:run.join("\n") });
+      else Array.prototype.push.apply(rest, run);
+      run = [];
     }
+    ls.forEach(function(L){
+      if (/::/.test(L) && /\S\s*[-–—]\s*\S/.test(L)) run.push(L);
+      else { dumpRun(); rest.push(L); }
+    });
+    dumpRun();
+    var r = rest.join("\n").trim();
+    if (r) out.push({ who:seg.who, text:r });
   });
-  return res;
+  return out;
+}
+
+
+/* ---------- 문자 모드 ---------- */
+function smsKey(id){ return "gz.sms."+id; }
+function getSms(id){ return get(smsKey(id), null); }
+function setSms(id,v){ put(smsKey(id), v); }
+
+function peopleOf(c){
+  var arr = [{ key:"user", name:c.userName||"나", disp:udispOf(c), avatar:c.userAvatar }];
+  arr.push({ key:"main", name:c.name||"상대", disp:dispOf(c), avatar:c.avatar });
+  castOf(c).forEach(function(x,i){ arr.push({ key:"cast"+i, name:x.name, disp:x.name, avatar:x.avatar }); });
+  return arr;
+}
+function personByName(c, nm){
+  var ps = peopleOf(c), n=(nm||"").trim();
+  for (var i=0;i<ps.length;i++) if (ps[i].name.trim()===n || ps[i].disp.trim()===n) return ps[i];
+  return { key:"etc", name:n, disp:n, avatar:"" };
+}
+
+/* /문자 @A @B 파싱 */
+function parseSms(c, text){
+  var t = text.trim();
+  if (!/^\/문자/.test(t)) return null;
+  var rest = t.slice(3).trim();
+  var ats = rest.match(/@[^\s@]+/g);
+  if (!ats || ats.length < 2) return { pick:true };
+  var a = ats[0].slice(1), b = ats[1].slice(1);
+  var from = (a==="user"||a==="나") ? personByName(c, c.userName||"나") : personByName(c, a);
+  var toRandom = (b==="랜덤");
+  var to = toRandom ? { key:"random", name:"", disp:"", avatar:"" }
+                    : ((b==="user"||b==="나") ? personByName(c, c.userName||"나") : personByName(c, b));
+  return { from:from, to:to, random:toRandom };
+}
+
+function startSms(c, from, to, random){
+  var iAmIn = (from.key==="user" || to.key==="user");
+  setSms(c.id, { from:from, to:to, random:!!random, peek:!iAmIn, log:[] });
+  go("sms", c.id);
+}
+
+/* 문자 상대 고르는 화면 */
+function viewSmsPick(){
+  var c=cur(); if(!c) return go("list");
+  elTitle.textContent="문자"; elSub.textContent="누구와 누구의 문자?";
+  elLeft.textContent="취소"; elLeft.onclick=function(){ go("chat", c.id); };
+  var ps = peopleOf(c);
+  var opt = function(list){
+    return list.map(function(x){ return '<option value="'+esc(x.name)+'">'+esc(x.disp)+"</option>"; }).join("");
+  };
+  var h = '<div class="hint" style="margin-bottom:12px">오른쪽 말풍선에 뜨는 쪽이 보내는 사람이야.</div>';
+  h += '<label>보내는 사람</label><select id="sf">'+opt(ps)+'</select>';
+  h += '<label>받는 사람</label><select id="st">'+opt(ps)
+     + '<option value="__random">랜덤 (상황에 맞게)</option>'
+     + '<option value="__etc">직접 입력</option></select>';
+  h += '<input id="se" placeholder="이름 직접 입력" style="margin-top:8px;display:none">';
+  h += '<button class="btn primary" id="sgo">시작</button>';
+  view.innerHTML = h;
+  $("#st").onchange=function(){ $("#se").style.display = (this.value==="__etc") ? "block" : "none"; };
+  $("#sgo").onclick=function(){
+    var f = personByName(c, $("#sf").value);
+    var tv = $("#st").value, to, rnd=false;
+    if (tv==="__random"){ to={key:"random",name:"",disp:"",avatar:""}; rnd=true; }
+    else if (tv==="__etc"){
+      var nm = ($("#se").value||"").trim();
+      if (!nm) return alert("이름을 넣어줘.");
+      to = { key:"etc", name:nm, disp:nm, avatar:"" };
+    } else to = personByName(c, tv);
+    if (!rnd && to.name===f.name) return alert("보내는 사람과 받는 사람이 같아.");
+    startSms(c, f, to, rnd);
+  };
+}
+
+/* 문자 화면 */
+function viewSms(){
+  var c=cur(); if(!c) return go("list");
+  var st=getSms(c.id); if(!st) return go("chat", c.id);
+  elTitle.textContent="문자"; elSub.textContent="";
+  elLeft.textContent=""; elLeft.onclick=null;
+  elRight.textContent=""; elRight.onclick=null;
+  view.className="chat"; dock.style.display = st.peek ? "none" : "block";
+  paintSms();
+}
+
+function paintSms(err, thinking){
+  var c=cur(); if(!c) return;
+  var st=getSms(c.id); if(!st) return;
+  var other = st.peek ? (st.to.disp || (st.random?"?":"")) : (st.from.key==="user" ? st.to.disp : st.from.disp);
+  var h = '<div class="smsbar">'+avaHTML(st.peek?st.from.avatar:(st.from.key==="user"?st.to.avatar:st.from.avatar),"💬","sm")
+        + '<div class="nm">'+esc(st.peek ? (st.from.disp+" → "+(st.to.disp||"?")) : (other||"문자"))
+        + '<div class="sub">'+(st.peek?"엿보는 중":"문자")+'</div></div>'
+        + '<button class="x" id="smsx">✕</button></div>';
+  st.log.forEach(function(m){
+    var right = (m.who === st.from.name) || (!st.peek && m.mine);
+    var p = personByName(c, m.who);
+    h += '<div class="sm'+(right?" r":"")+'"><div>'
+       + (right?"":'<div class="who2">'+esc(p.disp||m.who)+'</div>')
+       + '<div class="b">'+esc(m.t)+'</div></div></div>';
+  });
+  if (thinking) h += '<div class="thinking" style="padding-left:4px">쓰는 중…</div>';
+  if (err) h += '<div class="err">'+esc(err)+'</div>';
+  if (!st.log.length && !thinking && !err)
+    h += '<div class="empty">'+(st.peek?"더 보기를 눌러봐.":"먼저 보내거나 기다려봐.")+'</div>';
+  if (st.peek) h += '<button class="btn" id="smsmore">더 보기</button>';
+  view.innerHTML = h;
+  $("#smsx").onclick=function(){ go("chat", c.id); };
+  if ($("#smsmore")) $("#smsmore").onclick=function(){ smsTurn(); };
+  view.scrollTop = view.scrollHeight;
+}
+
+function buildSmsSystem(c, st){
+  var p=[], cs=castOf(c);
+  p.push("문자 메시지만 쓴다. 지문, 묘사, 설명, 별표는 한 줄도 쓰지 않는다.");
+  p.push("");
+  p.push("# 인물");
+  p.push((c.name||"") + " — " + (c.tagline||"") + " " + (c.prompt||""));
+  cs.forEach(function(x){ p.push(x.name+" — "+(x.prompt||"")); });
+  p.push((c.userName||"나") + " — " + (c.userPrompt||""));
+  if (c.world){ p.push(""); p.push("# 상황"); p.push(c.world); }
+  if (c.note){ p.push(""); p.push("# 반드시 기억할 것"); p.push(c.note); }
+
+  var log = getLog(c.id).slice(-8).map(function(m){
+    return (m.r==="u" ? (c.userName||"나") : (c.name||"상대")) + ": " + m.t;
+  }).join("\n");
+  if (log){ p.push(""); p.push("# 조금 전까지의 상황"); p.push(log); }
+
+  p.push("");
+  p.push("# 형식");
+  p.push("한 줄에 하나씩 '이름: 내용' 형식으로만 쓴다. 다른 형식은 쓰지 않는다.");
+  p.push("한 번에 2~4줄만 쓴다. 문자답게 짧고 구어체로, 실제로 폰으로 칠 법하게 쓴다.");
+  p.push("이모티콘은 인물 성격에 맞을 때만 드물게 쓴다.");
+  if (st.random && !st.to.name){
+    p.push(st.from.name+"가 지금 상황에 맞는 상대에게 문자를 보낸다. 상대는 설정에 없는 인물이어도 된다. 상대 이름을 정하고 그 이름으로 계속 쓴다.");
+  }
+  if (st.peek){
+    p.push((c.userName||"나")+"는 이 문자에 등장하지 않는다. 두 사람만 주고받는다.");
+    p.push("양쪽 다 답장하며 자연스럽게 이어간다.");
+  } else {
+    var npc = st.from.key==="user" ? st.to.name : st.from.name;
+    p.push(npc+"의 문자만 쓴다. "+(c.userName||"나")+"의 문자는 절대 대신 쓰지 않는다.");
+  }
+  return p.join("\n");
+}
+
+function smsTurn(){
+  var c=cur(); if(!c||busy) return;
+  var st=getSms(c.id); if(!st) return;
+  if(!cfg.key){ paintSms("API 키가 없어. 설정에서 넣어줘."); return; }
+  busy=true; paintSms(null,true);
+
+  var transcript = st.log.map(function(m){ return m.who+": "+m.t; }).join("\n");
+  var ask = st.peek
+    ? "이어서 두 사람의 문자를 2~4줄 더 써줘."
+    : "이어서 문자를 2~4줄 써줘.";
+  var content = (transcript ? "지금까지 문자:\n"+transcript+"\n\n" : "") + ask;
+  var sys = buildSmsSystem(c, st);
+
+  var url, headers, body;
+  if (cfg.mode==="openai"){
+    var b=(cfg.base||"").replace(/\/+$/,"");
+    url = /chat\/completions$/.test(b) ? b : b+"/chat/completions";
+    headers={ "Content-Type":"application/json", "Authorization":"Bearer "+cfg.key };
+    body={ model:cfg.model, max_tokens:800, messages:[{role:"system",content:sys},{role:"user",content:content}] };
+  } else {
+    var gb=(cfg.base||"https://generativelanguage.googleapis.com").replace(/\/+$/,"");
+    url = gb+"/v1beta/models/"+encodeURIComponent(cfg.model)+":generateContent?key="+encodeURIComponent(cfg.key);
+    headers={ "Content-Type":"application/json" };
+    body={ systemInstruction:{parts:[{text:sys}]}, contents:[{role:"user",parts:[{text:content}]}],
+           generationConfig:{ maxOutputTokens:800 } };
+  }
+
+  fetch(url,{method:"POST",headers:headers,body:JSON.stringify(body)})
+  .then(function(res){ return res.text().then(function(txt){
+    var data=null; try{ data=JSON.parse(txt); }catch(e){}
+    if(!res.ok){
+      var em=(data&&data.error&&(data.error.message||data.error))||txt.slice(0,300);
+      throw new Error("서버가 "+res.status+" 로 응답했어.\n"+em);
+    }
+    var out="";
+    if (cfg.mode==="openai"){
+      var ch=data&&data.choices&&data.choices[0];
+      out=ch?((ch.message&&ch.message.content)||ch.text||""):"";
+    } else {
+      var cand=data&&data.candidates&&data.candidates[0];
+      out=cand?((cand.content&&cand.content.parts)||[]).map(function(x){return x.text||"";}).join(""):"";
+    }
+    return out.trim();
+  });})
+  .then(function(out){
+    var stt=getSms(c.id);
+    out.split("\n").forEach(function(L){
+      var t=L.trim(); if(!t) return;
+      t = t.replace(/\*/g,"");
+      var m=t.match(/^\s*([^:：]{1,20})[:：]\s*([\s\S]*)$/);
+      if (!m) return;
+      stt.log.push({ who:m[1].trim(), t:m[2].trim() });
+    });
+    setSms(c.id, stt);
+    busy=false; paintSms();
+  })
+  .catch(function(e){ busy=false; paintSms(e.message||"연결 실패"); });
+}
+
+function smsSend(text){
+  var c=cur(); if(!c) return;
+  var st=getSms(c.id); if(!st) return;
+  var me = (c.userName||"나");
+  st.log.push({ who:me, t:text, mine:true });
+  setSms(c.id, st);
+  paintSms(); smsTurn();
 }
 
 /* ---------- 대화 ---------- */
@@ -559,7 +982,7 @@ function paint(err, thinking){
     var ps = pieces(c, m.t), body = "";
     ps.forEach(function(p){
       if (p.card){ body += cardHTML(p.card, p.text, c); return; }
-      var who = p.who ? (findPerson(c,p.who) || {name:p.who, avatar:""}) : {name:c.name, avatar:c.avatar};
+      var who = p.who ? (findPerson(c,p.who) || {name:p.who, avatar:""}) : {name:dispOf(c), avatar:c.avatar};
       body += '<div class="msg">'+avaHTML(who.avatar,"🙂","sm")
             + '<div class="col"><div class="who">'+esc(who.name||"")+'</div>'
             + '<div class="bub" data-i="'+i+'">'+fmt(p.text)+'</div></div></div>';
@@ -608,14 +1031,17 @@ function paint(err, thinking){
 
 /* ---------- 명령어 ---------- */
 var CMDS = {
-  "/문자":"지금 장면에 이어서, 등장인물이 휴대폰으로 보내는 문자 메시지를 보여준다. 문자 부분은 반드시 [문자] 와 [/문자] 사이에 넣고, 한 줄에 하나씩 '이름: 내용' 형식으로 쓴다. 블록 앞뒤로는 평소처럼 지문을 쓴다.",
-  "/일기":"등장인물이 쓴 일기를 보여준다. 일기 본문은 반드시 [일기] 와 [/일기] 사이에 넣고 1인칭으로 쓴다. 날짜로 시작해도 좋다.",
-  "/편지":"등장인물이 쓴 편지를 보여준다. 편지 본문은 반드시 [편지] 와 [/편지] 사이에 넣는다.",
-  "/속마음":"지금 이 순간 등장인물의 속마음을 보여준다. 반드시 [속마음] 과 [/속마음] 사이에 넣고 1인칭으로 쓴다. 겉으로 못 하는 말까지 솔직하게.",
-  "/플리":"지금 등장인물이 듣고 있을 법한 노래 다섯 곡을 고른다. 반드시 [플리] 와 [/플리] 사이에 넣고, 한 줄에 하나씩 '제목 - 가수 :: 고른 이유' 형식으로 쓴다. 실제로 존재하는 곡만 쓴다."
+  "/일기":"이번 턴에는 인물이 쓴 일기만 보여준다. 첫 줄에 [일기] 를 쓰고 본문을 1인칭으로 쓴 뒤 [/일기] 로 닫는다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
+  "/편지":"이번 턴에는 인물이 쓴 편지만 보여준다. 첫 줄에 [편지] 를 쓰고 본문을 쓴 뒤 [/편지] 로 닫는다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
+  "/속마음":"이번 턴에는 인물의 지금 속마음만 보여준다. 첫 줄에 [속마음] 을 쓰고 1인칭으로 솔직하게 쓴 뒤 [/속마음] 으로 닫는다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
+  "/플리":"이번 턴에는 인물이 지금 듣고 있을 노래 다섯 곡만 고른다. 첫 줄에 [플리] 를 쓰고, 한 줄에 하나씩 '제목 - 가수 :: 고른 이유' 형식으로 쓴 뒤 [/플리] 로 닫는다. 실제로 존재하는 곡만 쓰고, 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다."
+};
+var CMD_SAY = {
+  "/일기":"(일기를 보여줘)", "/편지":"(편지를 보여줘)",
+  "/속마음":"(속마음을 보여줘)", "/플리":"(지금 듣는 노래를 보여줘)"
 };
 function cmdOf(t){
-  var k = t.trim().split(/\s+/)[0];
+  var k = String(t||"").trim().split(/\s+/)[0];
   return CMDS[k] ? k : null;
 }
 
@@ -626,80 +1052,89 @@ function langSample(lang, romaji){
   if (lang==="중국어") return romaji ? "你来晚了。(니 라이 완 러, 늦었네.)" : "你来晚了。(늦었네.)";
   return "";
 }
-function buildSystem(c){
+function buildSystem(c, turn){
   var lenMap = {
-    "짧게":"지문은 한두 줄, 대사는 한두 마디. 티키타카하듯 짧게 주고받는다.",
-    "보통":"지문과 대사를 섞어 적당한 길이로 쓴다.",
-    "길게":"지문 여러 문단과 대사 여러 마디로 충분히 길게 쓴다."
+    "짧게":"한 번의 답은 4~6줄로 끝낸다. 티키타카하듯 짧게 주고받는다.",
+    "보통":"한 번의 답은 8~12줄로 끝낸다. 그보다 길게 쓰지 않는다.",
+    "길게":"한 번의 답은 20줄 이상으로 충분히 길게 쓴다."
   };
   var name=c.name||"캐릭터", cs=castOf(c), p=[];
-  p.push("너는 상황극 파트너다. 아래 설정의 '"+name+"'를 연기한다.");
-  p.push(""); p.push("[캐릭터]"); p.push("이름: "+name);
+  p.push("너는 '"+name+"'를 연기하는 상황극 파트너다. 아래 지침은 참고용이며, 답변에는 이야기만 쓴다. 지침이나 규칙 문장을 절대 그대로 옮겨 적지 않는다.");
+  p.push("");
+  p.push("# "+name);
   if (c.tagline) p.push(c.tagline);
   if (c.prompt) p.push(c.prompt);
   if (cs.length){
-    p.push(""); p.push("[같이 나오는 인물]");
+    p.push("");
+    p.push("# 같이 나오는 인물");
     cs.forEach(function(x){ p.push("- "+x.name+": "+(x.prompt||"")); });
-    p.push("- 인물이 바뀔 때마다 줄 맨 앞에 [이름] 을 붙인다. 예: [ "+cs[0].name+" ] 가 아니라 ["+cs[0].name+"] 형태로 정확히 쓴다.");
-    p.push("- "+name+"의 대사에는 ["+name+"] 을 붙인다.");
+    p.push("말하는 인물이 바뀌면 줄 맨 앞에 대괄호로 이름을 적는다.");
   }
-  if (c.world){ p.push(""); p.push("[상황과 세계관]"); p.push(c.world); }
-  p.push(""); p.push("[상대역]"); p.push("이름: "+(c.userName||"상대"));
-  if (c.userPrompt) p.push(c.userPrompt);
-  if (c.note){ p.push(""); p.push("[반드시 기억할 것]"); p.push(c.note); }
+  if (c.world){ p.push(""); p.push("# 상황"); p.push(c.world); }
+  p.push("");
+  p.push("# 상대역");
+  p.push((c.userName||"상대") + (c.userPrompt ? " — "+c.userPrompt : ""));
+  if (c.note){ p.push(""); p.push("# 반드시 기억할 것"); p.push(c.note); }
+  var sm = getSms(c.id);
+  if (sm && sm.log && sm.log.length){
+    p.push("");
+    p.push("# 최근 주고받은 문자");
+    p.push(sm.log.slice(-14).map(function(m){ return m.who+": "+m.t; }).join("\n"));
+  }
 
-  p.push(""); p.push("[형식]");
-  p.push("- 행동, 상황 묘사, 속마음은 모두 별표 하나로 감싼다. 별표를 두 번 겹쳐 쓰지 않는다.");
-  p.push("- 대사는 별표 없이 그대로 쓰고 따옴표를 붙이지 않는다.");
-  p.push("- 지문과 대사를 빈 줄로 나누지 않는다. 한 덩어리 안에서 자연스럽게 이어 붙여 쓴다.");
-
-  p.push(""); p.push("[문체]");
-  p.push("- 지문은 3인칭 과거형 소설체로 쓴다. '~합니다', '~했습니다' 같은 존댓말 서술은 쓰지 않는다.");
-  p.push("- 지문에 소리, 냄새, 빛, 온도, 감촉 같은 감각을 넣는다.");
-  p.push("- 서술자가 인물의 속마음이나 감춘 의도를 짚어도 된다.");
-  p.push("- 대사는 실제 사람이 말하듯 자연스럽게 쓴다. 감정을 말로 설명하지 않는다.");
-  p.push("- 번역체와 과장된 미사여구를 쓰지 않는다. 상대의 이름이나 호칭을 반복해서 부르지 않는다.");
-  p.push("- 문장을 일부러 짧게 끊거나 조사를 생략하지 않는다. 정상적인 문장으로 쓴다.");
-  p.push("- 지문과 대사의 비율은 장면에 따라 달라진다. 기계적으로 번갈아 쓰지 않는다.");
-  p.push("- 분량은 "+(lenMap[c.length]||lenMap["길게"]));
-
-  p.push(""); p.push("[지켜야 할 것]");
-  p.push("- 상대역의 대사, 행동, 속마음을 대신 서술하지 않는다.");
-  p.push("- AI, 설정, 프롬프트 같은 메타 발언을 하지 않는다.");
-  p.push("- 이야기를 마무리 짓지 말고 상대가 이어갈 여지를 남긴다.");
-  p.push("- 설정에 없는 부분은 캐릭터 성격에 맞게 자연스럽게 채운다.");
+  p.push("");
+  p.push("# 쓰는 법");
+  p.push("행동과 상황 묘사, 속마음은 별표 하나로 감싼다. 대사는 별표 없이 그대로 쓰고 따옴표는 안 붙인다. 지문과 대사는 빈 줄로 나누지 말고 한 덩어리로 이어 쓴다.");
+  p.push("지문은 3인칭 과거형 소설체다. '~합니다' 같은 존댓말 서술은 쓰지 않는다. 소리, 냄새, 빛, 온도 같은 감각을 넣고, 인물의 속마음이나 감춘 의도를 짚어도 된다.");
+  p.push("대사는 실제 사람이 말하듯 자연스럽게 쓴다. 감정을 말로 설명하지 않고, 번역체와 과장된 미사여구를 피하며, 상대의 호칭을 반복해 부르지 않는다. 문장을 일부러 짧게 끊거나 조사를 생략하지 않는다.");
+  p.push("지문과 대사의 비율은 장면에 따라 달라진다. " + (lenMap[c.length]||lenMap["길게"]));
+  p.push("상대역의 대사와 행동, 속마음은 대신 쓰지 않는다. AI나 설정에 대한 메타 발언도 하지 않는다. 이야기를 끝맺지 말고 상대가 이어갈 여지를 남긴다.");
 
   var lang=c.lang||"한국어";
   if (lang!=="한국어"){
-    p.push(""); p.push("[언어]");
-    p.push("- 대사는 "+lang+"로 쓴다.");
-    if (c.romaji) p.push("- 대사 바로 뒤 소괄호 안에 한국어 발음, 쉼표, 한국어 번역 순으로 넣는다. 예: "+langSample(lang,true));
-    else p.push("- 대사 바로 뒤 소괄호 안에 한국어 번역을 넣는다. 예: "+langSample(lang,false));
-    p.push("- 별표 안의 지문은 번역 없이 한국어로만 쓴다.");
-    p.push("- 괄호는 번역에만 쓴다.");
-  } else p.push("- 한국어로 쓴다.");
+    p.push("");
+    p.push("# 언어");
+    if (c.romaji){
+      p.push("대사는 "+lang+"로 쓰고, 바로 뒤 소괄호 안에 한국어 발음, 쉼표, 한국어 번역 순으로 넣는다. 예: " + langSample(lang, true));
+    } else {
+      p.push("대사는 "+lang+"로 쓰고, 바로 뒤 소괄호 안에 한국어 번역만 넣는다. 예: " + langSample(lang, false));
+      p.push("발음이나 로마자 표기는 절대 쓰지 않는다. 괄호 안에는 번역 문장 하나만 들어간다.");
+    }
+    p.push("별표 안의 지문은 한국어로만 쓴다. 괄호는 번역에만 쓴다.");
+  }
 
-  p.push(""); p.push("[OOC]");
-  p.push("- 상대의 메시지가 OOC 로 시작하면 연기를 멈추고, 그 지시에 짧게 OOC 로만 답한다. 상황극 본문은 쓰지 않는다.");
-  p.push("- 그 지시는 다음 턴부터 계속 반영한다.");
+  p.push("");
+  p.push("# OOC");
+  p.push("상대 메시지가 OOC 로 시작하면 연기를 멈추고 그 지시에 짧게만 답한다. 이야기 본문은 쓰지 않고, 그 지시는 다음 턴부터 반영한다.");
 
   if (c.sample){
-    p.push(""); p.push("[문체 예시]");
-    p.push("아래는 원하는 문체를 보여주는 예시다. 내용이 아니라 문장의 결과 호흡만 따라간다.");
+    p.push("");
+    p.push("# 문체 예시");
+    p.push("아래 글의 내용이 아니라 문장의 결과 호흡만 따라간다.");
     p.push(c.sample);
+  }
+  if (turn){
+    p.push("");
+    p.push("# 이번 턴");
+    p.push(turn);
   }
   return p.join("\n");
 }
 
 function apiText(m){
   if (m.ooc) return "OOC: " + m.t.replace(/^\/ooc\s*/i,"");
-  var k = m.r==="u" ? cmdOf(m.t) : null;
-  if (k) return "(지시: " + CMDS[k] + " 추가 요청: " + m.t.slice(k.length).trim() + ")";
+  if (m.r==="u"){
+    var k = cmdOf(m.t);
+    if (k){
+      var extra = m.t.slice(k.length).trim();
+      return (CMD_SAY[k]||"") + (extra ? " " + extra : "");
+    }
+  }
   return m.t;
 }
 
-function callAPI(c, log){
-  var sys=buildSystem(c), url, headers, body;
+function callAPI(c, log, turnInstr){
+  var sys=buildSystem(c, turnInstr), url, headers, body;
   if (cfg.mode==="openai"){
     var b=(cfg.base||"").replace(/\/+$/,"");
     url = /chat\/completions$/.test(b) ? b : b+"/chat/completions";
@@ -748,7 +1183,11 @@ function turn(){
   if(!cfg.key){ paint("API 키가 없어. 오른쪽 위 설정에서 넣어줘."); return; }
   if(cfg.mode==="openai" && !cfg.base){ paint("API 주소가 비어 있어. 설정에서 넣어줘."); return; }
   busy=true; elSend.disabled=true; paint(null,true);
-  callAPI(c,getLog(c.id)).then(function(text){
+  var lg = getLog(c.id), ti = null;
+  for (var i=lg.length-1;i>=0;i--){
+    if (lg[i].r==="u"){ var k=cmdOf(lg[i].t); if(k && !lg[i].ooc) ti=CMDS[k]; break; }
+  }
+  callAPI(c,lg,ti).then(function(text){
     var l=getLog(c.id); l.push({r:"a",t:text}); setLog(c.id,l);
     busy=false; elSend.disabled=false; paint();
   }).catch(function(e){
@@ -760,11 +1199,20 @@ function turn(){
 elSend.onclick=function(){
   var c=cur(); if(!c||busy) return;
   var t=elInp.value.trim(); if(!t) return;
+  elInp.value=""; elInp.style.height="auto";
+
+  if (screen==="sms"){ smsSend(t); return; }
+
+  var sms = parseSms(c, t);
+  if (sms){
+    if (sms.pick) return go("smspick", c.id);
+    return startSms(c, sms.from, sms.to, sms.random);
+  }
+
   var l=getLog(c.id);
   var isOoc = /^\/ooc\b/i.test(t) || /^\(?\s*ooc\s*[:：]/i.test(t);
   l.push(isOoc ? {r:"u",t:t,ooc:true} : {r:"u",t:t});
   setLog(c.id,l);
-  elInp.value=""; elInp.style.height="auto";
   selIdx=-1; paint(); turn();
 };
 elInp.addEventListener("input",function(){
@@ -783,7 +1231,7 @@ $("#undo").onclick=function(){
 };
 $("#note").onclick=function(){ if(cur()) go("note"); };
 $("#cmds").onclick=function(){
-  var k = prompt("명령어를 골라 입력창에 넣을게.\n\n/문자  /일기  /속마음  /편지  /플리  /ooc", "/문자");
+  var k = prompt("명령어를 골라 입력창에 넣을게.\n\n/문자   문자 화면 열기\n/일기 /속마음 /편지 /플리\n/ooc   연기 멈추고 지시", "/문자");
   if (!k) return;
   elInp.value = k.trim()+" ";
   elInp.focus();
