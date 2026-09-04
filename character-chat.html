@@ -451,7 +451,7 @@ function viewEdit(){
   h += field("캐릭터 프롬프트","prompt",c.prompt,200);
   h += field("세계관 / 상황","world",c.world,120);
   h += field("첫 마디","greeting",c.greeting,140,
-      "방에 들어가면 이 내용부터 보여. 줄 앞에 <b>@:</b> 를 쓰면 나레이션, <b>말풍선:</b> 을 쓰면 말풍선으로 나와. 아무것도 안 붙이면 말풍선이야.");
+      "방에 들어가면 이 내용부터 보여.<br><b>@:</b> 나레이션 · <b>@" + esc((c.name||"이름").split(" ")[0]) + ":</b> 캐릭터 말풍선 · <b>@user:</b> 내 말풍선<br>서브 인물은 그 인물 이름을 쓰면 돼.");
   h += field("문체 예시","sample",c.sample,180,"원하는 문체로 쓴 장면을 붙여넣으면 그 결을 따라가.");
 
   h += '<div class="sec">같이 나올 인물</div>';
@@ -745,19 +745,40 @@ function pieces(c, text){
 
 
 
-/* 첫 마디를 @: 나레이션 / 말풍선: 으로 나눠 담기 */
-function seedGreeting(txt){
-  var out=[], mode=null, buf=[];
+/* 첫 마디를 @: 나레이션 / @이름: 말풍선 으로 나눠 담기 */
+function seedGreeting(c, txt){
+  var names = [ (c.name||"").trim() ].concat(castOf(c).map(function(x){ return x.name.trim(); })).filter(Boolean);
+  var uname = (c.userName||"").trim();
+  var out=[], mode="bub", who=null, buf=[];
+
   function flush(){
     var t=buf.join("\n").trim(); buf=[];
     if (!t) return;
-    out.push(mode==="narr" ? { r:"a", t:t, narr:true } : { r:"a", t:t });
+    if (mode==="narr"){ out.push({ r:"a", t:t, narr:true }); return; }
+    if (mode==="user"){ out.push({ r:"u", t:t }); return; }
+    if (who && names.length && who!==names[0]) out.push({ r:"a", t:"["+who+"]\n"+t });
+    else out.push({ r:"a", t:t });
   }
+
   String(txt).split("\n").forEach(function(L){
-    var m1 = L.match(/^\s*@\s*[:：]\s*([\s\S]*)$/);
+    var m = L.match(/^\s*@\s*([^:：\n]*)\s*[:：]\s*([\s\S]*)$/);
+    if (m){
+      flush();
+      var tag = m[1].trim();
+      if (!tag){ mode="narr"; who=null; }
+      else if (/^(user|나|유저)$/i.test(tag) || (uname && tag===uname)){ mode="user"; who=null; }
+      else {
+        mode="bub"; who=null;
+        for (var i=0;i<names.length;i++){
+          if (names[i]===tag || names[i].indexOf(tag)>=0 || tag.indexOf(names[i])>=0){ who=names[i]; break; }
+        }
+        if (!who) who = names[0] || null;
+      }
+      if (m[2].trim()) buf.push(m[2]);
+      return;
+    }
     var m2 = L.match(/^\s*말풍선\s*[:：]\s*([\s\S]*)$/);
-    if (m1){ flush(); mode="narr"; if(m1[1].trim()) buf.push(m1[1]); return; }
-    if (m2){ flush(); mode="bub";  if(m2[1].trim()) buf.push(m2[1]); return; }
+    if (m2){ flush(); mode="bub"; who=null; if(m2[1].trim()) buf.push(m2[1]); return; }
     buf.push(L);
   });
   flush();
@@ -1048,7 +1069,7 @@ function viewChat(){
   elLeft.textContent="목록"; elLeft.onclick=function(){ go("list"); };
   elRight.textContent="설정"; elRight.onclick=function(){ go("edit", c.id); };
   view.className="chat"; dock.style.display="block";
-  if (!getLog(c.id).length && c.greeting) setLog(c.id, seedGreeting(c.greeting));
+  if (!getLog(c.id).length && c.greeting) setLog(c.id, seedGreeting(c, c.greeting));
   paint();
 }
 
@@ -1361,7 +1382,7 @@ $("#cmds").onclick=function(){
 $("#reset").onclick=function(){
   var c=cur(); if(!c||busy) return;
   if(!confirm("이 캐릭터와의 대화를 처음부터 다시 시작할까?")) return;
-  setLog(c.id, c.greeting?seedGreeting(c.greeting):[]);
+  setLog(c.id, c.greeting?seedGreeting(c, c.greeting):[]);
   selIdx=-1; paint();
 };
 
