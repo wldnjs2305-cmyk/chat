@@ -370,6 +370,7 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
+var APP_VER = "2026-09-06 a";
 var THEMES = [
   ["light","밝게"], ["paper","종이"], ["mono","무채색"], ["pink","연핑크"],
   ["dark","어둡게"], ["night","밤"], ["cocoa","회갈색"], ["plum","보라"]
@@ -1050,6 +1051,10 @@ function viewCfg(){
        }).join("")
      + '</select>';
   h += '<button class="btn" id="gpm">프리셋 관리 ('+presets.length+'개)</button>';
+  h += '<div class="sec">앱</div>';
+  h += '<div class="hint">지금 버전 '+esc(APP_VER)+'</div>';
+  h += '<button class="btn" id="upd">업데이트 확인</button>';
+  h += '<div class="hint">파일을 새로 올렸는데 화면이 그대로면 이걸 눌러. 저장된 대화는 안 건드려.</div>';
   h += '<div class="sec">백업</div>';
   h += '<div class="hint">사파리가 저장 공간을 정리하면 캐릭터가 사라질 수 있어. 가끔 내보내둬.</div>';
   h += '<button class="btn" id="exp">전체 내보내기</button>';
@@ -1124,6 +1129,10 @@ function viewCfg(){
     });})
     .catch(function(e){ out.textContent = "실패 · "+(e.message||"연결 안 됨"); })
     .then(function(){ btn.disabled=false; });
+  };
+  $("#upd").onclick=function(){
+    var u = location.href.split("#")[0].split("?")[0];
+    location.replace(u + "?u=" + Date.now());
   };
   $("#gps").onchange=function(){ cfg.preset=this.value; saveCfg(); };
   $("#gpm").onclick=function(){ psBack="cfg"; go("presets"); };
