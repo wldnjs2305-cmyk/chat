@@ -175,7 +175,8 @@
   /* 특수 카드 */
   .phone{background:var(--field);border-radius:20px;padding:12px;margin:10px 0}
   .phone .ph{display:flex;align-items:center;gap:8px;padding:2px 4px 10px;border-bottom:1px solid var(--line);margin-bottom:10px;font-weight:600;font-size:14px}
-  .phone .pm{background:var(--panel);border-radius:14px;padding:9px 13px;margin-bottom:7px;max-width:86%;font-size:15px;line-height:1.6}
+  .phone .pm{background:var(--panel);border-radius:14px;padding:9px 13px;margin-bottom:7px;max-width:86%;
+    font-family:var(--f-sms, var(--f-body));font-size:var(--sfs,15px);line-height:1.6}
   .phone .pm.me{background:var(--mine);margin-left:auto}
   .paper{background:var(--paper);border:1px solid var(--paper-line);border-radius:14px;padding:18px 18px 20px;margin:10px 0;font-family:"Noto Serif KR",serif;font-weight:300;color:var(--paper-text);line-height:2;font-size:15.5px;white-space:pre-wrap}
   .paper .pt{font-size:12px;letter-spacing:.08em;color:var(--muted);margin-bottom:10px;font-family:inherit}
@@ -215,7 +216,7 @@
   body.dark .smswrap[data-th=retro]{--sbg:#2a2f36;--sother:#8fa07e;--sotherink:#141c0e;
     --smine:#9aa98a;--smineink:#141c0e;--sname:#aab6c4;--stime:#8b96a4}
   .smswrap[data-th=retro] .sm .b{
-    font-family:"DungGeunMo","돋움",Dotum,sans-serif;letter-spacing:.5px;line-height:1.65;
+    font-family:var(--f-sms,"DungGeunMo","돋움",Dotum,sans-serif);letter-spacing:.5px;line-height:1.65;
     border:2px solid #9ba5b5;box-shadow:inset 1px 1px 4px rgba(0,0,0,.18);
     background-image:repeating-linear-gradient(0deg,rgba(0,0,0,.045) 0px,rgba(0,0,0,.045) 1px,transparent 1px,transparent 2px)}
   .smswrap[data-th=retro] .smsbar{
@@ -260,8 +261,9 @@
     background:var(--sday,rgba(0,0,0,.12));color:var(--sdayink,var(--stime,var(--muted)))}
   .smswrap[data-th=imessage] .sday i{background:transparent;padding:0;font-size:12px;font-weight:600}
   .sm .b{display:inline-block;max-width:100%;padding:9px 13px;border-radius:var(--sro);
-    background:var(--sother);color:var(--sotherink);font-family:var(--f-body);
-    font-size:calc(var(--fs) - 1.5px);line-height:1.55;white-space:pre-wrap;
+    background:var(--sother);color:var(--sotherink);
+    font-family:var(--f-sms, var(--f-body));
+    font-size:var(--sfs, calc(var(--fs) - 1.5px));line-height:1.55;white-space:pre-wrap;
     overflow-wrap:break-word;word-break:normal;text-align:left}
   .sm.r .b{border-radius:var(--srm);background:var(--smine);color:var(--smineink)}
   .smsmore{display:block;width:calc(100% - 24px);margin:14px 12px;padding:13px;border-radius:12px;
@@ -349,15 +351,18 @@ var FONTS = {
   "나눔손글씨 펜":'"Nanum Pen Script",cursive',
   "나눔손글씨 붓":'"Nanum Brush Script",cursive',
   "개구쟁이":'"Gaegu",cursive',
-  "하이멜로디":'"Hi Melody",cursive'
+  "하이멜로디":'"Hi Melody",cursive',
+  "둥근모":'"DungGeunMo","돋움",Dotum,sans-serif'
 };
 var cfg = get("gz.cfg", { mode:"openai", key:"", base:"", model:"gemini-3.7-flash", maxTokens:2600,
-                          theme:"light", fBody:"프리텐다드", fNar:"본명조", fSize:16, smsTheme:"기본", preset:"", viewMode:"bubble", bubW:84 });
+                          theme:"light", fBody:"프리텐다드", fNar:"본명조", fSize:16, smsTheme:"기본", preset:"", viewMode:"bubble", bubW:84, fSms:"테마 따라가기", sSize:15 });
 if (!cfg.mode) cfg.mode = "openai";
 if (!cfg.theme) cfg.theme = "light";
 if (typeof cfg.preset !== "string") cfg.preset = "";
 if (cfg.viewMode !== "doc") cfg.viewMode = "bubble";
 if (!cfg.bubW) cfg.bubW = 84;
+if (!cfg.fSms) cfg.fSms = "테마 따라가기";
+if (!cfg.sSize) cfg.sSize = 15;
 var chars = get("gz.chars", []);
 var presets = get("gz.presets", []);
 function saveCfg(){ put("gz.cfg", cfg); applyTheme(); }
@@ -406,7 +411,7 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-06 c";
+var APP_VER = "2026-09-06 d";
 var THEMES = [
   ["light","밝게"], ["paper","종이"], ["mono","무채색"], ["pink","연핑크"],
   ["dark","어둡게"], ["night","밤"], ["cocoa","회갈색"], ["plum","보라"]
@@ -428,6 +433,9 @@ function applyTheme(){
   st.setProperty("--f-nar",  FONTS[cfg.fNar]  || FONTS["본명조"]);
   st.setProperty("--fs", (cfg.fSize||16)+"px");
   st.setProperty("--bw", (cfg.bubW||84)+"%");
+  var sf = FONTS[cfg.fSms];
+  if (sf) st.setProperty("--f-sms", sf); else st.removeProperty("--f-sms");
+  st.setProperty("--sfs", (cfg.sSize||15)+"px");
 }
 
 /* ---------- 도구 ---------- */
@@ -1143,6 +1151,12 @@ function viewCfg(){
   $("#fb").onchange=function(){ cfg.fBody=this.value; saveCfg(); };
   $("#fn").onchange=function(){ cfg.fNar=this.value; saveCfg(); };
   $("#sth").onchange=function(){ cfg.smsTheme=this.value; saveCfg(); };
+  $("#fsm").onchange=function(){ cfg.fSms=this.value; saveCfg(); };
+  $("#ss").oninput=function(){
+    cfg.sSize=+this.value; saveCfg();
+    var lb=this.previousElementSibling;
+    if (lb) lb.textContent="문자 글자 크기 · "+cfg.sSize+"px";
+  };
   $("#vm").onchange=function(){ cfg.viewMode=this.value; saveCfg(); };
   $("#bw").oninput=function(){
     cfg.bubW=+this.value; saveCfg();
