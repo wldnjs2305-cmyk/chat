@@ -417,7 +417,7 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-06 e";
+var APP_VER = "2026-09-06 f";
 var THEMES = [
   ["light","밝게"], ["paper","종이"], ["mono","무채색"], ["pink","연핑크"],
   ["dark","어둡게"], ["night","밤"], ["cocoa","회갈색"], ["plum","보라"]
@@ -1124,6 +1124,13 @@ function viewCfg(){
   };
   h += '<label>대사 글꼴</label><select id="fb">'+fopts(cfg.fBody)+'</select>';
   h += '<label>지문 글꼴</label><select id="fn">'+fopts(cfg.fNar)+'</select>';
+  h += '<label>문자 글꼴</label><select id="fsm">'
+     + '<option'+((cfg.fSms||"테마 따라가기")==="테마 따라가기"?" selected":"")+'>테마 따라가기</option>'
+     + Object.keys(FONTS).map(function(n){
+         return '<option'+(cfg.fSms===n?" selected":"")+'>'+n+'</option>'; }).join("")
+     + '</select>';
+  h += '<label>문자 글자 크기 · '+(cfg.sSize||15)+'px</label>'
+     + '<input id="ss" type="range" min="12" max="20" step="0.5" value="'+(cfg.sSize||15)+'" style="padding:0">';
   h += '<label>문자 테마</label><select id="sth">'
      + ["기본","kakao","imessage","line","retro"].map(function(o){
          var nm = {"기본":"기본","kakao":"카카오톡","imessage":"아이메시지","line":"라인","retro":"레트로 · 2003"}[o];
@@ -1908,36 +1915,54 @@ function viewSmsList(){
 }
 
 /* 상대 고르기 */
+var pickN = 3;
 function viewSmsPick(){
   var c=cur(); if(!c) return go("list");
-  elTitle.textContent="새 문자"; elSub.textContent="누구와 누구?";
-  elLeft.textContent="취소"; elLeft.onclick=function(){ go("smslist", c.id); };
+  elTitle.textContent="새 문자"; elSub.textContent="누가 누구랑?";
+  elLeft.textContent="취소"; elLeft.onclick=function(){ pickN=3; go("smslist", c.id); };
   var ps = peopleOf(c);
   var opt = function(extra){
     return ps.map(function(x){ return '<option value="'+esc(x.name)+'">'+esc(x.disp)+"</option>"; }).join("")
          + (extra||"");
   };
-  var h = '<div class="hint" style="margin-bottom:12px">맨 위가 보내는 사람이고, 오른쪽 말풍선으로 뜨는 쪽이야. 셋 이상 고르면 단톡이 돼.</div>';
-  h += '<label>보내는 사람</label><select id="s1">'+opt()+'</select>';
-  h += '<label>받는 사람</label><select id="s2">'+opt('<option value="__random">랜덤 (상황에 맞게)</option><option value="__etc">직접 입력</option>')+'</select>';
-  h += '<input id="s2e" placeholder="이름 직접 입력" style="margin-top:8px;display:none">';
-  h += '<label>한 명 더 (선택)</label><select id="s3"><option value="">없음</option>'+opt('<option value="__etc">직접 입력</option>')+'</select>';
-  h += '<input id="s3e" placeholder="이름 직접 입력" style="margin-top:8px;display:none">';
+  var h = '<div class="hint" style="margin-bottom:12px">맨 위가 폰 주인이야. 오른쪽 말풍선으로 뜨고 저장명도 이 사람 기준으로 붙어. 셋 이상이면 단톡방이 돼.</div>';
+  h += '<label>폰 주인 · 보내는 사람</label><select id="s1">'+opt()+'</select>';
+  for (var i=2;i<=pickN;i++){
+    h += '<label>'+(i===2?"받는 사람":"참여자 "+(i-1))+'</label>'
+       + '<select id="s'+i+'">'
+       + (i>2 ? '<option value="">없음</option>' : "")
+       + opt('<option value="__random">랜덤 (상황에 맞게)</option><option value="__etc">직접 입력</option>')
+       + '</select>'
+       + '<input id="s'+i+'e" placeholder="이름 직접 입력" style="margin-top:8px;display:none">';
+  }
+  h += '<button class="btn" id="more">사람 추가</button>';
   h += '<button class="btn primary" id="sgo">시작</button>';
   view.innerHTML = h;
-  $("#s2").onchange=function(){ $("#s2e").style.display = this.value==="__etc"?"block":"none"; };
-  $("#s3").onchange=function(){ $("#s3e").style.display = this.value==="__etc"?"block":"none"; };
+
+  for (var j=2;j<=pickN;j++){
+    (function(k){
+      var sel=$("#s"+k);
+      if (sel) sel.onchange=function(){ $("#s"+k+"e").style.display = this.value==="__etc"?"block":"none"; };
+    })(j);
+  }
+  $("#more").onclick=function(){ if (pickN<7){ pickN++; render(); } };
   $("#sgo").onclick=function(){
-    var names=[$("#s1").value];
-    var v2=$("#s2").value;
-    if (v2==="__random") names.push("랜덤");
-    else if (v2==="__etc"){
-      var e2=($("#s2e").value||"").trim(); if(!e2) return alert("이름을 넣어줘."); names.push(e2);
-    } else names.push(v2);
-    var v3=$("#s3").value;
-    if (v3==="__etc"){ var e3=($("#s3e").value||"").trim(); if(e3) names.push(e3); }
-    else if (v3) names.push(v3);
-    if (names[0]===names[1]) return alert("보내는 사람과 받는 사람이 같아.");
+    var names=[$("#s1").value], seen={};
+    seen[names[0]]=1;
+    for (var k=2;k<=pickN;k++){
+      var el=$("#s"+k); if(!el) continue;
+      var v=el.value;
+      if (!v) continue;
+      if (v==="__random"){ names.push("랜덤"); continue; }
+      if (v==="__etc"){
+        var e=($("#s"+k+"e").value||"").trim();
+        if (e && !seen[e]){ names.push(e); seen[e]=1; }
+        continue;
+      }
+      if (!seen[v]){ names.push(v); seen[v]=1; }
+    }
+    if (names.length<2) return alert("최소 두 명은 있어야 해.");
+    pickN=3;
     makeThread(c, names);
   };
 }
@@ -1962,7 +1987,7 @@ function paintSms(err, thinking){
   var h = '<div class="smswrap" data-th="'+esc(cfg.smsTheme||"기본")+'">';
   h += '<div class="smsbar">'+avaHTML(other.avatar,"💬","sm")
      + '<div class="nm" id="smsnm">'+esc(t.title)+'<div class="sub">'+(t.peek?"엿보는 중":"문자")+'</div></div>'
-     + '<button id="smstime">시각</button><button id="smslist2">목록</button><button id="smsx">✕</button></div>';
+     + '<button id="smsadd">인원</button><button id="smstime">시각</button><button id="smslist2">목록</button><button id="smsx">✕</button></div>';
   h += '<div class="smsbody">';
 
   var prev = null, prevDay = "";
@@ -1979,6 +2004,10 @@ function paintSms(err, thinking){
         h += '<div class="sday"><i>'+esc(dayLabel(m.at))+'</i></div>';
         prevDay = d; prev = null;
       }
+    }
+    if (m.sys){
+      h += '<div class="sday" data-si="'+i+'"><i>'+esc(m.t)+'</i></div>';
+      prev=null; return;
     }
     var right = (m.who === t.from);
     var p = personByName(c, m.who);
@@ -2007,11 +2036,37 @@ function paintSms(err, thinking){
   $("#smsx").onclick=function(){ go("chat", c.id); };
   $("#smslist2").onclick=function(){ go("smslist", c.id); };
   if ($("#smsnm")) $("#smsnm").onclick=function(){
-    var v=prompt("저장명 · 방 이름", t.title||"");
+    var ownerNm = (t.parts[0] && (t.parts[0].disp||t.parts[0].name)) || "폰 주인";
+    var v=prompt(ownerNm+"의 폰에 저장된 이름이야.\n직접 적거나, ? 만 넣으면 알아서 지어줄게.", t.title||"");
     if (v===null) return;
-    v=String(v).trim().slice(0,24);
+    v=String(v).trim();
     if (!v) return;
-    t.title=v; t.named=true; saveThread(c,t); paintSms();
+    if (v==="?"){
+      t.named=false; saveThread(c,t);
+      var keep=t.log.length; if (keep<4) return alert("문자를 조금 더 주고받은 다음에 눌러줘.");
+      nameThread(c, t, true);
+      return;
+    }
+    t.title=v.slice(0,24); t.named=true; saveThread(c,t); paintSms();
+  };
+  $("#smsadd").onclick=function(){
+    var ps=peopleOf(c);
+    var have={}; t.parts.forEach(function(x){ have[x.name]=1; });
+    var left=ps.filter(function(x){ return !have[x.name]; });
+    var menu=left.map(function(x,i){ return (i+1)+" "+x.disp; }).join(" · ");
+    var v=prompt("이 방에 넣을 사람\n"+(menu||"설정에 있는 사람은 다 들어와 있어.")+"\n\n번호를 넣거나 이름을 직접 적어줘.", "");
+    if (v===null) return;
+    v=String(v).trim(); if(!v) return;
+    var pick=null, n=parseInt(v,10);
+    if (n>=1 && n<=left.length) pick=left[n-1];
+    else pick=personByName(c, v);
+    if (!pick || !pick.name) return;
+    if (have[pick.name]) return alert("이미 들어와 있어.");
+    t.parts.push(pick);
+    t.title = t.parts.map(function(x){ return x.disp||x.name; }).join(", ");
+    t.named = false;
+    t.log.push({ who:"", t:pick.disp+"님이 들어왔어요.", sys:true, at:stampAt(t) });
+    saveThread(c,t); paintSms();
   };
   $("#smstime").onclick=function(){
     var base = t.start || Date.now(), d = new Date(base);
@@ -2228,13 +2283,14 @@ function tidyName(v){
              .replace(/^\(|\)$/g,"").slice(0,24);
 }
 /* 개인톡은 연락처 저장명, 단톡은 방 이름을 지어 준다 */
-function nameThread(c, t){
-  if (t.named || t.log.length < 4 || !cfg.key) return;
+function nameThread(c, t, force){
+  if ((t.named && !force) || t.log.length < 4 || !cfg.key) return;
   var others = t.parts.filter(function(x){ return x.key!=="user"; });
-  var group = (others.length >= 2 || t.parts.length >= 3);
-  if (!group) return;   /* 개인톡 저장명은 직접 정한다 */
+  var group = (t.parts.length >= 3);
+  if (!group && !force) return;   /* 개인톡 저장명은 직접 정한다 */
   t.named = true; saveThread(c, t);
-  var owner  = t.peek ? (t.parts[0].disp||t.parts[0].name) : (udispOf(c));
+  var ownerP = t.parts[0] || {};
+  var owner  = ownerP.disp || ownerP.name || "폰 주인";
   var script = t.log.slice(-14).map(function(m){ return m.who+": "+m.t; }).join("\n");
   var sys, ask;
   if (group){
@@ -2246,7 +2302,9 @@ function nameThread(c, t){
     ].join("\n");
     ask = "대화:\n"+script+"\n\n방 이름 한 줄만.";
   } else {
-    var them = others[0] ? (others[0].disp||others[0].name) : "상대";
+    var themP = null;
+    for (var z=1;z<t.parts.length;z++) if (t.parts[z]) { themP=t.parts[z]; break; }
+    var them = themP ? (themP.disp||themP.name) : "상대";
     sys = [
       "너는 연락처 저장명을 짓는다.",
       owner+"가 "+them+"을(를) 자기 폰에 뭐라고 저장해 두었을지 정한다.",
