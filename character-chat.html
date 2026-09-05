@@ -1582,11 +1582,20 @@ function buildSystem(c, turn){
     p.push("# 설정집");
     lore.forEach(function(it){ p.push("- "+(it.title?it.title+": ":"")+fillVars(c, it.text)); });
   }
-  var sm = getSms(c.id);
-  if (sm && sm.log && sm.log.length){
-    p.push("");
-    p.push("# 최근 주고받은 문자");
-    p.push(sm.log.slice(-14).map(function(m){ return m.who+": "+m.t; }).join("\n"));
+  var ths = getThreads(c.id);
+  if (ths && ths.length){
+    var recent = [];
+    ths.slice(0,2).forEach(function(t){
+      if (t.log && t.log.length){
+        recent.push("["+t.title+"]");
+        t.log.slice(-8).forEach(function(m){ recent.push(m.who+": "+m.t); });
+      }
+    });
+    if (recent.length){
+      p.push("");
+      p.push("# 최근 주고받은 문자");
+      p.push(recent.join("\n"));
+    }
   }
 
   p.push("");
@@ -1654,6 +1663,14 @@ function apiText(m){
 function cutLog(c, log){
   var b = c.breakAt||0;
   return (b>0 && b<log.length) ? log.slice(b) : log;
+}
+function fetchJSON(url, opt, ms){
+  return new Promise(function(res, rej){
+    var done=false;
+    var tm=setTimeout(function(){ if(!done){ done=true; rej(new Error("응답이 너무 오래 걸려서 멈췄어. 잠시 뒤 다시 해보거나 최대 응답 길이를 줄여봐.")); } }, ms||90000);
+    fetch(url, opt).then(function(r){ if(done) return; done=true; clearTimeout(tm); res(r); },
+                         function(e){ if(done) return; done=true; clearTimeout(tm); rej(e); });
+  });
 }
 function callAPI(c, log, turnInstr){
   log = cutLog(c, log);
