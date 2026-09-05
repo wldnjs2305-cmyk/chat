@@ -462,6 +462,7 @@ function render(){
   if (screen==="cfg")  return viewCfg();
   if (screen==="note") return viewNote();
   if (screen==="lore") return viewLore();
+  if (screen==="lorebulk") return viewLoreBulk();
   if (screen==="sms")  return viewSms();
   if (screen==="smslist") return viewSmsList();
   if (screen==="smspick") return viewSmsPick();
@@ -973,6 +974,7 @@ function viewLore(){
        + '<button class="btn danger" data-ldel="'+i+'">이 항목 삭제</button></div>';
   });
   h += '<button class="btn primary" id="ladd">항목 추가</button>';
+  h += '<button class="btn" id="lbulk">한꺼번에 넣기</button>';
   view.innerHTML = h;
 
   Array.prototype.forEach.call(view.querySelectorAll("[data-l]"), function(el){
@@ -990,11 +992,58 @@ function viewLore(){
       c.lore.splice(i,1); saveChars(); render();
     };
   });
+  $("#lbulk").onclick=function(){ go("lorebulk", c.id); };
   $("#ladd").onclick=function(){
     c.lore.push({title:"", keys:"", text:"", always:false});
     saveChars(); render();
     view.scrollTop = view.scrollHeight;
   };
+}
+
+
+/* 로어북 한꺼번에 넣기 */
+function viewLoreBulk(){
+  var c=cur(); if(!c) return go("list");
+  elTitle.textContent="한꺼번에 넣기"; elSub.textContent=c.name||"";
+  elLeft.textContent="로어북"; elLeft.onclick=function(){ go("lore", c.id); };
+  var h = '<div class="hint" style="margin-bottom:8px">제타에서 복사한 걸 그대로 붙여넣어도 돼. 빈 줄로 항목이 나뉘어.<br><br>'
+        + '제목: 마당<br>키워드: 마당, 대문, 평상<br>내용: 마당에는 평상이 있고...<br><br>'
+        + '이 형식이나 <b>마당 | 마당, 대문, 평상</b> 형식 둘 다 돼.</div>';
+  h += '<textarea id="lb" style="min-height:320px"></textarea>';
+  h += '<button class="btn primary" id="lbgo">넣기</button>';
+  view.innerHTML = h;
+  $("#lbgo").onclick=function(){
+    var raw = $("#lb").value;
+    var items = parseLoreBulk(raw);
+    if (!items.length) return alert("읽을 수 있는 항목이 없어. 형식을 확인해줘.");
+    if (!c.lore) c.lore = [];
+    c.lore = c.lore.concat(items);
+    saveChars();
+    alert(items.length+"개 넣었어.");
+    go("lore", c.id);
+  };
+}
+
+function parseLoreBulk(raw){
+  var blocks = String(raw||"").replace(/\r/g,"").split(/\n\s*\n/);
+  var out = [];
+  blocks.forEach(function(b){
+    var t="", k="", body=[], mode=null;
+    b.split("\n").forEach(function(L){
+      var m;
+      if ((m = L.match(/^\s*제목\s*[:：]\s*(.*)$/))){ t=m[1].trim(); mode="t"; return; }
+      if ((m = L.match(/^\s*키워드\s*[:：]\s*(.*)$/))){ k=m[1].trim(); mode="k"; return; }
+      if ((m = L.match(/^\s*내용\s*[:：]\s*(.*)$/))){ if(m[1].trim()) body.push(m[1]); mode="c"; return; }
+      if (!t && !k && (m = L.match(/^\s*([^|\n]{1,30})\|\s*(.*)$/))){ t=m[1].trim(); k=m[2].trim(); mode="c"; return; }
+      if (mode==="c" || mode===null) body.push(L);
+      else if (mode==="k" && L.trim()) k += ", "+L.trim();
+      else if (mode==="t" && L.trim()) body.push(L);
+    });
+    var text = body.join("\n").trim();
+    if (!text && !k) return;
+    out.push({ title:t, keys:k, text:text, always:false });
+  });
+  return out;
 }
 
 /* 지금 대화에 걸리는 항목만 골라오기 */
@@ -1006,7 +1055,10 @@ function pickLore(c){
   items.forEach(function(it){
     if (!it.text) return;
     if (it.always){ out.push(it); return; }
-    var keys = (it.keys||"").split(/[,，]/).map(function(x){ return x.trim(); }).filter(Boolean);
+    var kk = (it.keys||"")
+      .replace(/\{\{\s*user\s*\}\}/gi, c.userName||"")
+      .replace(/\{\{\s*char\s*\}\}/gi, c.name||"");
+    var keys = kk.split(/[,，]/).map(function(x){ return x.trim(); }).filter(Boolean);
     for (var i=0;i<keys.length;i++){
       if (log.indexOf(keys[i]) >= 0){ rest.push(it); return; }
     }
@@ -1235,13 +1287,13 @@ function buildSmsSystem(c, t){
   p.push((c.name||"") + " — " + (c.tagline||"") + " " + (c.prompt||""));
   cs.forEach(function(x){ p.push(x.name+" — "+(x.prompt||"")+(x.style?" / 말투: "+x.style:"")); });
   p.push((c.userName||"나") + " — " + (c.userPrompt||""));
-  if (c.world){ p.push(""); p.push("# 상황"); p.push(c.world); }
-  if (c.note){ p.push(""); p.push("# 반드시 기억할 것"); p.push(c.note); }
+  if (c.world){ p.push(""); p.push("# 상황"); p.push(fillVars(c, c.world)); }
+  if (c.note){ p.push(""); p.push("# 반드시 기억할 것"); p.push(fillVars(c, c.note)); }
   if (c.recap){ p.push(""); p.push("# 지금까지의 이야기"); p.push(c.recap); }
   var lore = pickLore(c);
   if (lore.length){
     p.push(""); p.push("# 설정집");
-    lore.forEach(function(it){ p.push("- "+(it.title?it.title+": ":"")+it.text); });
+    lore.forEach(function(it){ p.push("- "+(it.title?it.title+": ":"")+fillVars(c, it.text)); });
   }
   var rl = getLog(c.id).slice(-8).map(function(m){
     return (m.r==="u" ? (c.userName||"나") : (c.name||"상대")) + ": " + m.t;
@@ -1487,6 +1539,12 @@ function langSample(lang, romaji){
   if (lang==="중국어") return romaji ? "你来晚了。(니 라이 완 러, 늦었네.)" : "你来晚了。(늦었네.)";
   return "";
 }
+function fillVars(c, t){
+  if (!t) return t;
+  return String(t)
+    .replace(/\{\{\s*user\s*\}\}/gi, c.userName || "상대")
+    .replace(/\{\{\s*char\s*\}\}/gi, c.name || "캐릭터");
+}
 function buildSystem(c, turn){
   var lenMap = {
     "짧게":"한 번의 답은 2~5줄로 끝낸다. 톡 주고받듯 짧게 쓰고, 절대 그보다 길게 쓰지 않는다.",
@@ -1499,7 +1557,7 @@ function buildSystem(c, turn){
   p.push("");
   p.push("# "+name);
   if (c.tagline) p.push(c.tagline);
-  if (c.prompt) p.push(c.prompt);
+  if (c.prompt) p.push(fillVars(c, c.prompt));
   if (cs.length){
     p.push("");
     p.push("# 같이 나오는 인물");
@@ -1512,17 +1570,17 @@ function buildSystem(c, turn){
     p.push("한 번의 답에 모든 인물이 다 등장할 필요는 없다. 그 자리에 있을 이유가 있는 인물만 나온다.");
     p.push("아래 분량 기준은 답 전체의 길이다. 인물 한 명당 길이가 아니다.");
   }
-  if (c.world){ p.push(""); p.push("# 상황"); p.push(c.world); }
+  if (c.world){ p.push(""); p.push("# 상황"); p.push(fillVars(c, c.world)); }
   p.push("");
   p.push("# 상대역");
   p.push((c.userName||"상대") + (c.userPrompt ? " — "+c.userPrompt : ""));
-  if (c.note){ p.push(""); p.push("# 반드시 기억할 것"); p.push(c.note); }
+  if (c.note){ p.push(""); p.push("# 반드시 기억할 것"); p.push(fillVars(c, c.note)); }
   if (c.recap){ p.push(""); p.push("# 지금까지의 이야기"); p.push(c.recap); }
   var lore = pickLore(c);
   if (lore.length){
     p.push("");
     p.push("# 설정집");
-    lore.forEach(function(it){ p.push("- "+(it.title?it.title+": ":"")+it.text); });
+    lore.forEach(function(it){ p.push("- "+(it.title?it.title+": ":"")+fillVars(c, it.text)); });
   }
   var sm = getSms(c.id);
   if (sm && sm.log && sm.log.length){
