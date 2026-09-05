@@ -263,12 +263,15 @@ var FONTS = {
   "하이멜로디":'"Hi Melody",cursive'
 };
 var cfg = get("gz.cfg", { mode:"openai", key:"", base:"", model:"gemini-3.7-flash", maxTokens:2600,
-                          theme:"light", fBody:"프리텐다드", fNar:"본명조", fSize:16, smsTheme:"기본" });
+                          theme:"light", fBody:"프리텐다드", fNar:"본명조", fSize:16, smsTheme:"기본", preset:"" });
 if (!cfg.mode) cfg.mode = "openai";
 if (!cfg.theme) cfg.theme = "light";
+if (typeof cfg.preset !== "string") cfg.preset = "";
 var chars = get("gz.chars", []);
+var presets = get("gz.presets", []);
 function saveCfg(){ put("gz.cfg", cfg); applyTheme(); }
 function saveChars(){ put("gz.chars", chars); }
+function savePresets(){ return put("gz.presets", presets); }
 function logKey(id){ return "gz.log."+id; }
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
@@ -452,8 +455,163 @@ function copyText(t){
   ta.remove();
 }
 
+/* ---------- 프리셋 읽기 ---------- */
+function pickFile(done){
+  var inp=document.createElement("input");
+  inp.type="file";
+  inp.accept=".json,.txt,.md,.text,.risupreset,.preset,application/json,text/plain";
+  inp.style.cssText="position:fixed;left:-9999px";
+  document.body.appendChild(inp);
+  inp.onchange=function(){
+    var f=inp.files&&inp.files[0];
+    if(!f){ inp.remove(); return; }
+    var fr=new FileReader();
+    fr.onload=function(){ inp.remove(); done(String(fr.result||""), f.name||""); };
+    fr.onerror=function(){ inp.remove(); alert("파일을 못 읽었어."); };
+    fr.readAsText(f);
+  };
+  inp.click();
+}
+
+var PS_KEYS=["system_prompt","systemPrompt","main_prompt","mainPrompt","prompt","promptText",
+             "text","content","instruction","instructions","guideline","guidelines","rules",
+             "description","note","globalNote","jailbreak","jailbreak_prompt","nsfw_prompt",
+             "post_history_instructions","postHistoryInstructions"];
+var PS_SKIP={chatHistory:1,worldInfoBefore:1,worldInfoAfter:1,charDescription:1,charPersonality:1,
+             scenario:1,dialogueExamples:1,personaDescription:1};
+/* 리수 프롬프트 조각 중 글이 들어 있는 종류만 */
+var PS_RISU={plain:1,jailbreak:1,cot:1,postEverything:1};
+
+function isArr(v){ return Object.prototype.toString.call(v)==="[object Array]"; }
+function psNum(v){
+  if (v===undefined || v===null || v==="") return "";
+  var n=parseFloat(v);
+  return isFinite(n) ? String(n) : "";
+}
+/* 리수는 0.8을 80으로 저장한다 */
+function psTemp(v){
+  var n=parseFloat(v);
+  if (!isFinite(n)) return "";
+  if (n>2) n=n/100;
+  return String(Math.round(n*100)/100);
+}
+function psTop(v){
+  var n=parseFloat(v);
+  if (!isFinite(n)) return "";
+  if (n>1) n=n/100;
+  return String(Math.round(n*100)/100);
+}
+function mkPreset(name,text){
+  return { id:uid(), name:String(name||"새 프리셋").slice(0,40), mode:"add",
+           text:String(text||"").slice(0,40000), temp:"", topP:"", maxTokens:"" };
+}
+/* 어떤 모양으로 온 프리셋이든 글만 뽑아낸다 */
+function psGather(o){
+  var out=[], seen={};
+  function add(s){
+    s=String(s==null?"":s).trim();
+    if (s.length<8 || seen[s]) return;
+    seen[s]=1; out.push(s);
+  }
+  function addBlock(nm,body){
+    nm=String(nm||"").trim();
+    add((nm && nm.length<40 ? "["+nm+"]\n" : "") + String(body).trim());
+  }
+  /* 실리태번: prompts + prompt_order */
+  if (o && isArr(o.prompts)){
+    var byId={}, list=[];
+    o.prompts.forEach(function(p){ if (p && p.identifier) byId[p.identifier]=p; });
+    if (isArr(o.prompt_order) && o.prompt_order.length){
+      var last=o.prompt_order[o.prompt_order.length-1];
+      if (last && isArr(last.order)){
+        last.order.forEach(function(it){
+          if (!it || it.enabled===false) return;
+          if (byId[it.identifier]) list.push(byId[it.identifier]);
+        });
+      }
+    }
+    if (!list.length) list=o.prompts;
+    list.forEach(function(p){
+      if (!p || typeof p!=="object" || p.marker) return;
+      if (p.identifier && PS_SKIP[p.identifier]) return;
+      if (p.enabled===false) return;
+      var body=p.content || p.text || p.prompt;
+      if (body) addBlock(p.name, body);
+    });
+  }
+  /* 리수: promptTemplate */
+  if (o && isArr(o.promptTemplate)){
+    o.promptTemplate.forEach(function(p){
+      if (!p || typeof p!=="object") return;
+      if (p.type && !PS_RISU[p.type]) return;
+      var body=p.text || p.content;
+      if (body) addBlock(p.name || p.type2, body);
+    });
+  }
+  PS_KEYS.forEach(function(k){ if (typeof o[k]==="string") add(o[k]); });
+  if (!out.length){
+    (function walk(v,d){
+      if (d>4 || v==null) return;
+      if (typeof v==="string"){ if (v.trim().length>=25) add(v); return; }
+      if (isArr(v)){ v.forEach(function(x){ walk(x,d+1); }); return; }
+      if (typeof v==="object") for (var k in v){ if (/key|token|api|url|model/i.test(k)) continue; walk(v[k],d+1); }
+    })(o,0);
+  }
+  return out.join("\n\n").slice(0,40000);
+}
+function parsePresets(raw, fname){
+  var base=String(fname||"").replace(/\.[^.]+$/,"").trim() || "새 프리셋";
+  var d=null;
+  try{ d=JSON.parse(raw); }catch(e){}
+  if (d===null || typeof d!=="object"){
+    var t=String(raw||"").trim();
+    if (!t) return [];
+    var junk=(t.match(/[\u0000-\u0008\u000E-\u001F\uFFFD]/g)||[]).length;
+    if (junk > t.length*0.02) return [];   /* 압축된 파일은 글자가 깨져서 온다 */
+    return [ mkPreset(base, t) ];
+  }
+  var list = isArr(d) ? d : (isArr(d.presets) ? d.presets : [d]);
+  var out=[];
+  list.forEach(function(o){
+    if (typeof o==="string"){ if(o.trim()) out.push(mkPreset(base,o)); return; }
+    if (!o || typeof o!=="object") return;
+    var body=psGather(o);
+    if (!body) return;
+    var p=mkPreset(o.name||o.title||o.preset_name||o.presetName||base, body);
+    if (o.mode==="replace") p.mode="replace";
+    p.temp = psTemp(o.temperature!==undefined ? o.temperature : o.temp);
+    p.topP = psTop(o.top_p!==undefined ? o.top_p : o.topP);
+    p.maxTokens = psNum(o.max_tokens!==undefined ? o.max_tokens
+                    : (o.openai_max_tokens!==undefined ? o.openai_max_tokens
+                    : (o.maxResponse!==undefined ? o.maxResponse : o.maxTokens)));
+    out.push(p);
+  });
+  return out;
+}
+function presetById(id){
+  for (var i=0;i<presets.length;i++) if (presets[i].id===id) return presets[i];
+  return null;
+}
+/* 이 캐릭터에 실제로 걸리는 프리셋 */
+function presetOf(c){
+  var sel = c ? (c.preset||"") : "";
+  if (sel==="none") return null;
+  if (sel) return presetById(sel) || (cfg.preset ? presetById(cfg.preset) : null);
+  return cfg.preset ? presetById(cfg.preset) : null;
+}
+function genOf(c){
+  var ps=presetOf(c), o={ temp:null, topP:null, maxTokens:cfg.maxTokens||2600 };
+  if (ps){
+    if (ps.temp!=="" && isFinite(+ps.temp)) o.temp=+ps.temp;
+    if (ps.topP!=="" && isFinite(+ps.topP)) o.topP=+ps.topP;
+    if (ps.maxTokens!=="" && isFinite(+ps.maxTokens) && +ps.maxTokens>0) o.maxTokens=Math.max(200,Math.round(+ps.maxTokens));
+  }
+  return o;
+}
+
 /* ---------- 화면 ---------- */
 var screen="list", curId=null, busy=false, selIdx=-1, editIdx=-1, regenAlt=false;
+var psBack="cfg", curPs=null;
 function go(s,id){ screen=s; if(id!==undefined) curId=id; selIdx=-1; editIdx=-1; render(); }
 function cur(){ for (var i=0;i<chars.length;i++) if (chars[i].id===curId) return chars[i]; return null; }
 function render(){
@@ -466,6 +624,8 @@ function render(){
   if (screen==="cfg")  return viewCfg();
   if (screen==="note") return viewNote();
   if (screen==="lore") return viewLore();
+  if (screen==="presets") return viewPresets();
+  if (screen==="presetedit") return viewPresetEdit();
   if (screen==="lorebulk") return viewLoreBulk();
   if (screen==="sms")  return viewSms();
   if (screen==="smslist") return viewSmsList();
@@ -490,7 +650,7 @@ function viewList(){
   view.innerHTML=h;
   $("#new").onclick=function(){
     var c={ id:uid(), name:"", display:"", avatar:"", tagline:"", prompt:"", world:"", greeting:"", sample:"", note:"",
-            cast:[], lore:[], userName:"", userDisplay:"", userAvatar:"", userPrompt:"", length:"길게", lang:"한국어", romaji:false };
+            cast:[], lore:[], userName:"", userDisplay:"", userAvatar:"", userPrompt:"", length:"길게", lang:"한국어", romaji:false, preset:"" };
     chars.push(c); saveChars(); go("edit", c.id);
   };
   Array.prototype.forEach.call(view.querySelectorAll("[data-open]"), function(el){
@@ -563,6 +723,17 @@ function viewEdit(){
      + '<option value="on"'+(c.romaji?" selected":"")+'>켜기</option>'
      + '<option value="off"'+(c.romaji?"":" selected")+'>끄기</option></select>';
 
+  h += '<div class="sec">프리셋</div>';
+  var gps = cfg.preset ? presetById(cfg.preset) : null;
+  h += '<label>이 캐릭터에 쓸 프리셋</label><select id="psel">'
+     + '<option value=""'+((c.preset||"")===""?" selected":"")+'>기본값 따라가기 · '+esc(gps?gps.name:"없음")+'</option>'
+     + '<option value="none"'+(c.preset==="none"?" selected":"")+'>안 쓰기</option>'
+     + presets.map(function(p){
+         return '<option value="'+esc(p.id)+'"'+(c.preset===p.id?" selected":"")+'>'+esc(p.name||"이름 없음")+'</option>';
+       }).join("")
+     + '</select>';
+  h += '<button class="btn" id="pman">프리셋 관리 ('+presets.length+'개)</button>';
+
   h += '<div class="sec">로어북</div>';
   h += '<div class="hint">키워드가 나올 때만 전달되는 설정집. 인물, 장소, 사건을 적어두면 돼.</div>';
   h += '<button class="btn" id="lore">로어북 열기 ('+((c.lore||[]).length)+'개)</button>';
@@ -630,6 +801,8 @@ function viewEdit(){
   Array.prototype.forEach.call(view.querySelectorAll("[data-clear]"), function(el){
     el.onclick=function(){ c[el.getAttribute("data-clear")]=""; saveChars(); render(); };
   });
+  $("#psel").onchange=function(){ c.preset=this.value; saveChars(); };
+  $("#pman").onclick=function(){ saveChars(); psBack="edit"; go("presets", c.id); };
   $("#lore").onclick=function(){ saveChars(); go("lore", c.id); };
   $("#done").onclick=function(){ saveChars(); go("chat", c.id); };
   $("#del").onclick=function(){
@@ -686,6 +859,15 @@ function viewCfg(){
      + '</select>';
   h += '<label>글자 크기 · '+(cfg.fSize||16)+'px</label>'
      + '<input id="fs" type="range" min="13" max="22" step="1" value="'+(cfg.fSize||16)+'" style="padding:0">';
+  h += '<div class="sec">프리셋</div>';
+  h += '<div class="hint">캐릭터마다 따로 고르지 않았을 때 쓰이는 프리셋이야.</div>';
+  h += '<label>기본 프리셋</label><select id="gps">'
+     + '<option value=""'+(cfg.preset?"":" selected")+'>안 씀</option>'
+     + presets.map(function(p){
+         return '<option value="'+esc(p.id)+'"'+(cfg.preset===p.id?" selected":"")+'>'+esc(p.name||"이름 없음")+'</option>';
+       }).join("")
+     + '</select>';
+  h += '<button class="btn" id="gpm">프리셋 관리 ('+presets.length+'개)</button>';
   h += '<div class="sec">백업</div>';
   h += '<div class="hint">사파리가 저장 공간을 정리하면 캐릭터가 사라질 수 있어. 가끔 내보내둬.</div>';
   h += '<button class="btn" id="exp">전체 내보내기</button>';
@@ -755,8 +937,10 @@ function viewCfg(){
     .catch(function(e){ out.textContent = "실패 · "+(e.message||"연결 안 됨"); })
     .then(function(){ btn.disabled=false; });
   };
+  $("#gps").onchange=function(){ cfg.preset=this.value; saveCfg(); };
+  $("#gpm").onclick=function(){ psBack="cfg"; go("presets"); };
   $("#exp").onclick=function(){
-    var out={cfg:cfg,chars:chars,logs:{}};
+    var out={cfg:cfg,chars:chars,presets:presets,logs:{}};
     chars.forEach(function(c){ out.logs[c.id]=getLog(c.id); });
     var box=document.createElement("textarea");
     box.value=JSON.stringify(out);
@@ -772,9 +956,109 @@ function viewCfg(){
       var d=JSON.parse(raw);
       if(d.cfg){ cfg=d.cfg; saveCfg(); }
       if(d.chars){ chars=d.chars; saveChars(); }
+      if(d.presets){ presets=d.presets; savePresets(); }
       if(d.logs) for(var id in d.logs) setLog(id,d.logs[id]);
       alert("불러왔어."); go("list");
     }catch(e){ alert("형식이 안 맞아."); }
+  };
+}
+
+/* ---------- 프리셋 ---------- */
+function addPresets(list){
+  if (!list.length){ alert("읽을 수 있는 내용이 없어. 파일 안에 지침 글이 들어 있는지 봐줘."); return; }
+  var before=presets.slice();
+  presets = presets.concat(list);
+  if (!savePresets()){
+    presets = before; savePresets();
+    alert("저장 공간이 부족해. 사진이나 지난 대화를 정리하고 다시 해줘.");
+    return;
+  }
+  alert(list.length+"개 올렸어.");
+  render();
+}
+function viewPresets(){
+  elTitle.textContent="프리셋"; elSub.textContent = presets.length ? presets.length+"개" : "";
+  elLeft.textContent = psBack==="edit" ? "캐릭터" : "설정";
+  elLeft.onclick=function(){ go(psBack, curId); };
+
+  var h='<div class="hint" style="margin-bottom:10px">쓰는 법 지침을 묶어둔 거야. json 파일도 되고 그냥 글만 적힌 txt도 돼. 프리셋 안에 여러 지침이 들어 있으면 하나로 합쳐서 읽어.</div>';
+  if (!presets.length) h += '<div class="empty">아직 프리셋이 없어.<br>파일을 올리거나 직접 만들어봐.</div>';
+  presets.forEach(function(p){
+    var tag = (cfg.preset===p.id ? "기본 · " : "") + (p.mode==="replace" ? "기본 지침 대신" : "기본 지침에 더하기");
+    var peek = String(p.text||"").replace(/\s+/g," ").trim().slice(0,32) || "비어 있음";
+    h += '<div class="card" data-ps="'+esc(p.id)+'"><div class="meta">'
+       + '<div class="nm">'+esc(p.name||"이름 없음")+'</div>'
+       + '<div class="ds">'+esc(tag+" · "+peek)+'</div></div></div>';
+  });
+  h += '<button class="btn primary" id="pfile">파일에서 올리기</button>';
+  h += '<label>붙여넣어서 올리기</label><textarea id="ppaste" placeholder="프리셋 json이나 지침 글을 그대로 붙여넣어"></textarea>';
+  h += '<button class="btn" id="ppgo">붙여넣은 걸로 만들기</button>';
+  h += '<button class="btn" id="pnew">빈 프리셋 만들기</button>';
+  view.innerHTML=h;
+
+  Array.prototype.forEach.call(view.querySelectorAll("[data-ps]"), function(el){
+    el.onclick=function(){ curPs=el.getAttribute("data-ps"); go("presetedit"); };
+  });
+  $("#pfile").onclick=function(){
+    pickFile(function(raw, nm){ addPresets(parsePresets(raw, nm)); });
+  };
+  $("#ppgo").onclick=function(){
+    var raw=$("#ppaste").value.trim();
+    if (!raw) return;
+    addPresets(parsePresets(raw, "붙여넣은 프리셋"));
+  };
+  $("#pnew").onclick=function(){
+    var p=mkPreset("새 프리셋","");
+    presets.push(p); savePresets();
+    curPs=p.id; go("presetedit");
+  };
+}
+function viewPresetEdit(){
+  var p=presetById(curPs); if(!p) return go("presets");
+  elTitle.textContent="프리셋"; elSub.textContent=p.name||"";
+  elLeft.textContent="목록"; elLeft.onclick=function(){ savePresets(); go("presets"); };
+
+  var h='<div class="sec first">프리셋</div>';
+  h += '<label>이름</label><input data-p="name" value="'+esc(p.name||"")+'">';
+  h += '<label>쓰는 방식</label><select data-p="mode">'
+     + '<option value="add"'+(p.mode==="replace"?"":" selected")+'>기본 지침에 더하기</option>'
+     + '<option value="replace"'+(p.mode==="replace"?" selected":"")+'>기본 지침 대신 쓰기</option></select>';
+  h += '<div class="hint">더하기는 원래 쓰는 법 뒤에 붙고, 대신 쓰기는 쓰는 법을 통째로 갈아끼워. 캐릭터 설정, 로어북, 길이 설정은 어느 쪽이든 그대로 들어가.</div>';
+  h += '<label>본문</label><textarea data-p="text" style="min-height:320px">'+esc(p.text||"")+'</textarea>';
+  h += '<div class="hint" id="plen">'+String(p.text||"").length+'자 · 이만큼이 매 요청마다 같이 보내져. {{char}}, {{user}}는 캐릭터 이름과 내 이름으로 바뀌어.</div>';
+  h += '<div class="sec">생성 옵션</div>';
+  h += '<div class="hint">비워두면 설정에 넣어둔 값을 그대로 써.</div>';
+  h += '<label>온도</label><input data-p="temp" inputmode="decimal" value="'+esc(p.temp)+'" placeholder="예: 0.9">';
+  h += '<label>top_p</label><input data-p="topP" inputmode="decimal" value="'+esc(p.topP)+'" placeholder="예: 0.95">';
+  h += '<label>최대 응답 길이</label><input data-p="maxTokens" inputmode="numeric" value="'+esc(p.maxTokens)+'" placeholder="예: 2600">';
+  h += '<button class="btn primary" id="pdone">저장</button>';
+  h += '<button class="btn" id="pexp">이 프리셋 복사하기</button>';
+  h += '<button class="btn danger" id="pdel">이 프리셋 삭제</button>';
+  view.innerHTML=h;
+
+  Array.prototype.forEach.call(view.querySelectorAll("[data-p]"), function(el){
+    el.oninput = el.onchange = function(){
+      var k=el.getAttribute("data-p");
+      p[k] = el.value;
+      if (k==="text"){
+        var pl=$("#plen");
+        if (pl) pl.textContent = el.value.length+"자 · 이만큼이 매 요청마다 같이 보내져. {{char}}, {{user}}는 캐릭터 이름과 내 이름으로 바뀌어.";
+      }
+      savePresets();
+    };
+  });
+  $("#pdone").onclick=function(){ savePresets(); go("presets"); };
+  $("#pexp").onclick=function(){
+    copyText(JSON.stringify({ name:p.name, mode:p.mode, text:p.text,
+                              temperature:p.temp, top_p:p.topP, max_tokens:p.maxTokens }));
+    alert("복사했어. 메모장에 붙여넣어 두면 백업이 돼.");
+  };
+  $("#pdel").onclick=function(){
+    if (!confirm((p.name||"이 프리셋")+" 삭제할까?")) return;
+    presets = presets.filter(function(x){ return x.id!==p.id; });
+    if (cfg.preset===p.id){ cfg.preset=""; saveCfg(); }
+    chars.forEach(function(c){ if (c.preset===p.id) c.preset=""; });
+    savePresets(); saveChars(); go("presets");
   };
 }
 
@@ -1334,7 +1618,8 @@ function smsTurn(){
   var ask = t.peek ? "이어서 문자를 2~4줄 더 써줘." : "이어서 문자를 2~4줄 써줘.";
   var content = (transcript ? "지금까지 문자:\n"+transcript+"\n\n" : "") + ask;
   var sys = buildSmsSystem(c, t);
-  var lim = Math.max(1500, Math.min(cfg.maxTokens||2600, 4000));
+  var sgen = genOf(c);
+  var lim = Math.max(1500, Math.min(sgen.maxTokens||2600, 4000));
 
   var url, headers, body;
   if (cfg.mode==="openai"){
@@ -1342,12 +1627,16 @@ function smsTurn(){
     url = /chat\/completions$/.test(b) ? b : b+"/chat/completions";
     headers={ "Content-Type":"application/json", "Authorization":"Bearer "+cfg.key };
     body={ model:cfg.model, max_tokens:lim, messages:[{role:"system",content:sys},{role:"user",content:content}] };
+    if (sgen.temp!==null) body.temperature=sgen.temp;
+    if (sgen.topP!==null) body.top_p=sgen.topP;
   } else {
     var gb=(cfg.base||"https://generativelanguage.googleapis.com").replace(/\/+$/,"");
     url = gb+"/v1beta/models/"+encodeURIComponent(cfg.model)+":generateContent?key="+encodeURIComponent(cfg.key);
     headers={ "Content-Type":"application/json" };
     body={ systemInstruction:{parts:[{text:sys}]}, contents:[{role:"user",parts:[{text:content}]}],
            generationConfig:{ maxOutputTokens:lim } };
+    if (sgen.temp!==null) body.generationConfig.temperature=sgen.temp;
+    if (sgen.topP!==null) body.generationConfig.topP=sgen.topP;
   }
 
   fetch(url,{method:"POST",headers:headers,body:JSON.stringify(body)})
@@ -1602,6 +1891,15 @@ function buildSystem(c, turn){
     }
   }
 
+  var ps = presetOf(c);
+  var psText = ps ? fillVars(c, String(ps.text||"").trim()) : "";
+  if (psText && ps.mode==="replace"){
+    p.push("");
+    p.push("# 쓰는 법");
+    p.push(psText);
+    p.push(lenMap[c.length]||lenMap["길게"]);
+    p.push("상대역의 대사와 행동, 속마음은 대신 쓰지 않는다. AI나 설정에 대한 메타 발언도 하지 않는다. 이야기를 끝맺지 말고 상대가 이어갈 여지를 남긴다.");
+  } else {
   p.push("");
   p.push("# 쓰는 법");
   p.push("행동과 상황 묘사, 속마음은 별표 하나로 감싼다. 대사는 별표 없이 그대로 쓰고 따옴표는 안 붙인다. 지문과 대사는 빈 줄로 나누지 말고 한 덩어리로 이어 쓴다.");
@@ -1614,6 +1912,13 @@ function buildSystem(c, turn){
   p.push("첫 화면에 나온 도입부 나레이션은 시작할 때만 쓰인 것이다. 답변에서는 그런 전지적 나레이션을 쓰지 않고, 인물의 시점에서만 쓴다.");
   p.push("설정에 없는 단역은 그 자리에 있을 이유가 분명할 때만 등장시킨다. 둘만 있는 장면에 이유 없이 끼어들게 하지 않는다. 한 번 나온 단역도 상황이 끝나면 더 나오지 않는다.");
   p.push("상대역의 대사와 행동, 속마음은 대신 쓰지 않는다. AI나 설정에 대한 메타 발언도 하지 않는다. 이야기를 끝맺지 말고 상대가 이어갈 여지를 남긴다.");
+  }
+  if (psText && ps.mode!=="replace"){
+    p.push("");
+    p.push("# 추가 지침");
+    p.push("아래는 위의 쓰는 법에 더해지는 지침이다. 겹치는 내용이 있으면 아래를 따른다.");
+    p.push(psText);
+  }
 
   var lang=c.lang||"한국어";
   if (lang!=="한국어"){
@@ -1679,14 +1984,17 @@ function fetchJSON(url, opt, ms){
 function callAPI(c, log, turnInstr){
   log = cutLog(c, log);
   var sys=buildSystem(c, turnInstr), url, headers, body;
+  var gen=genOf(c);
   if (cfg.mode==="openai"){
     var b=(cfg.base||"").replace(/\/+$/,"");
     url = /chat\/completions$/.test(b) ? b : b+"/chat/completions";
     headers={ "Content-Type":"application/json", "Authorization":"Bearer "+cfg.key };
-    body={ model:cfg.model, max_tokens:cfg.maxTokens,
+    body={ model:cfg.model, max_tokens:gen.maxTokens,
       messages:[{role:"system",content:sys}].concat(log.map(function(m){
         return { role: m.r==="u"?"user":"assistant", content: apiText(m) };
       })) };
+    if (gen.temp!==null) body.temperature=gen.temp;
+    if (gen.topP!==null) body.top_p=gen.topP;
   } else {
     var contents=log.map(function(m){
       return { role: m.r==="u"?"user":"model", parts:[{ text: apiText(m) }] };
@@ -1696,7 +2004,9 @@ function callAPI(c, log, turnInstr){
     var gb=(cfg.base||"https://generativelanguage.googleapis.com").replace(/\/+$/,"");
     url = gb+"/v1beta/models/"+encodeURIComponent(cfg.model)+":generateContent?key="+encodeURIComponent(cfg.key);
     headers={ "Content-Type":"application/json" };
-    body={ systemInstruction:{parts:[{text:sys}]}, contents:contents, generationConfig:{ maxOutputTokens:cfg.maxTokens } };
+    body={ systemInstruction:{parts:[{text:sys}]}, contents:contents, generationConfig:{ maxOutputTokens:gen.maxTokens } };
+    if (gen.temp!==null) body.generationConfig.temperature=gen.temp;
+    if (gen.topP!==null) body.generationConfig.topP=gen.topP;
   }
   return fetch(url,{ method:"POST", headers:headers, body:JSON.stringify(body) })
   .then(function(res){
