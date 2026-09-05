@@ -5,7 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" id="tc" content="#FFFFFF">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>캐릭터 대화</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMTgwIDE4MCI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9IiNGM0VGRkEiLz4KPHRleHQgeD0iOTAiIHk9IjkyIiBmb250LXNpemU9IjEwNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9ImNlbnRyYWwiPiYjMTI4MTQwOzwvdGV4dD4KPC9zdmc+">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMTgwIDE4MCI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9IiNGM0VGRkEiLz4KPHRleHQgeD0iOTAiIHk9IjkyIiBmb250LXNpemU9IjEwNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9ImNlbnRyYWwiPiYjMTI4MTQwOzwvdGV4dD4KPC9zdmc+">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@400;600&family=Nanum+Gothic&family=Nanum+Myeongjo&family=Gowun+Dodum&family=Gowun+Batang&family=Song+Myung&family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Gaegu&family=Hi+Melody&family=Black+Han+Sans&display=swap">
@@ -657,6 +662,8 @@ function viewCfg(){
      + '<button class="btn sm" id="kv">보기</button></div>';
   h += '<label>모델</label><input id="m" value="'+esc(cfg.model)+'" autocapitalize="off" spellcheck="false">';
   h += '<label>최대 응답 길이</label><input id="t" value="'+esc(cfg.maxTokens)+'" inputmode="numeric">';
+  h += '<button class="btn" id="ping">연결 테스트</button>';
+  h += '<div class="hint" id="pingout"></div>';
   h += '<div class="sec">화면</div>';
   h += '<label>테마</label><select id="th">'
      + '<option value="light"'+(cfg.theme==="light"?" selected":"")+'>밝게</option>'
@@ -700,6 +707,49 @@ function viewCfg(){
   };
   $("#m").oninput=function(){ cfg.model=this.value.trim(); saveCfg(); };
   $("#t").oninput=function(){ cfg.maxTokens=parseInt(this.value,10)||2600; saveCfg(); };
+  $("#ping").onclick=function(){
+    var out=$("#pingout"), btn=this;
+    if (!cfg.key){ out.textContent="API 키가 비어 있어."; return; }
+    if (cfg.mode==="openai" && !cfg.base){ out.textContent="API 주소가 비어 있어."; return; }
+    btn.disabled=true; out.textContent="확인하는 중…";
+    var t0=Date.now(), url, headers, body;
+    var sys="한 문장으로만 답한다.";
+    if (cfg.mode==="openai"){
+      var b=(cfg.base||"").replace(/\/+$/,"");
+      url = /chat\/completions$/.test(b) ? b : b+"/chat/completions";
+      headers={ "Content-Type":"application/json", "Authorization":"Bearer "+cfg.key };
+      body={ model:cfg.model, max_tokens:300, messages:[{role:"system",content:sys},{role:"user",content:"연결 확인. '좋아'라고만 답해줘."}] };
+    } else {
+      var gb=(cfg.base||"https://generativelanguage.googleapis.com").replace(/\/+$/,"");
+      url = gb+"/v1beta/models/"+encodeURIComponent(cfg.model)+":generateContent?key="+encodeURIComponent(cfg.key);
+      headers={ "Content-Type":"application/json" };
+      body={ systemInstruction:{parts:[{text:sys}]},
+             contents:[{role:"user",parts:[{text:"연결 확인. '좋아'라고만 답해줘."}]}],
+             generationConfig:{ maxOutputTokens:300 } };
+    }
+    fetch(url,{method:"POST",headers:headers,body:JSON.stringify(body)})
+    .then(function(res){ return res.text().then(function(txt){
+      var ms=Date.now()-t0, d=null;
+      try{ d=JSON.parse(txt); }catch(e){}
+      if(!res.ok){
+        var em=(d&&d.error&&(d.error.message||d.error))||txt.slice(0,200);
+        throw new Error(res.status+" · "+em);
+      }
+      var o="";
+      if (cfg.mode==="openai"){
+        var ch=d&&d.choices&&d.choices[0];
+        o=ch?((ch.message&&ch.message.content)||ch.text||""):"";
+      } else {
+        var cd=d&&d.candidates&&d.candidates[0];
+        o=cd?((cd.content&&cd.content.parts)||[]).map(function(x){return x.text||"";}).join(""):"";
+      }
+      o=(o||"").trim();
+      out.textContent = o ? ("연결 성공 · "+ms+"ms · 응답: "+o.slice(0,60))
+                          : ("응답은 왔는데 본문이 비었어 · "+ms+"ms · 모델 이름을 확인해봐");
+    });})
+    .catch(function(e){ out.textContent = "실패 · "+(e.message||"연결 안 됨"); })
+    .then(function(){ btn.disabled=false; });
+  };
   $("#exp").onclick=function(){
     var out={cfg:cfg,chars:chars,logs:{}};
     chars.forEach(function(c){ out.logs[c.id]=getLog(c.id); });
