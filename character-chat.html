@@ -35,6 +35,58 @@
   }
   body.dark .msg.me .bub{color:#F5F4FA}
   body.dark .sm.r .b{color:#F5F4FA}
+
+  /* 밝은 테마들 */
+  body[data-theme=paper]{
+    --bg:#FAF6EE; --panel:#FAF6EE; --field:#F1EADC; --line:#E4DAC7;
+    --text:#33302A; --muted:#8C8374; --bub:#F2EBDC; --mine:#E9DEC6;
+    --nar:#8A8271; --accent:#9A7B4F; --trc:#5C5445;
+    --paper:#F5EFE2; --paper-line:#E4DAC7; --paper-text:#33302A;
+  }
+  body[data-theme=mono]{
+    --bg:#FFFFFF; --panel:#FFFFFF; --field:#F3F3F5; --line:#E6E6E9;
+    --text:#1A1A1C; --muted:#8A8A91; --bub:#F0F0F3; --mine:#DFDFE4;
+    --nar:#86868D; --accent:#45454B; --trc:#5A5A61;
+    --paper:#F8F8FA; --paper-line:#E6E6E9; --paper-text:#1A1A1C;
+  }
+  body[data-theme=pink]{
+    --bg:#FDF4F3; --panel:#FDF4F3; --field:#F8E8E7; --line:#F1DCDB;
+    --text:#38292C; --muted:#A28A8E; --bub:#F9EBEA; --mine:#F4D4DB;
+    --nar:#9C8489; --accent:#B0627A; --trc:#6B4E55;
+    --paper:#FBF1EC; --paper-line:#EEDCD5; --paper-text:#38292C;
+  }
+  /* 어두운 테마들 — body.dark 뒤에 와야 덮어쓴다 */
+  body[data-theme=night]{
+    --bg:#12141C; --panel:#171A24; --field:#1E222E; --line:#2A2F3D;
+    --text:#E9EBF2; --muted:#858C9E; --bub:#242938; --mine:#33407A;
+    --nar:#949BAD; --accent:#7C93E8; --trc:#C2C8DA;
+    --paper:#1B1F2A; --paper-line:#2E3444; --paper-text:#DDE1EC;
+  }
+  body[data-theme=cocoa]{
+    --bg:#1A1715; --panel:#211D1A; --field:#2A2521; --line:#37302B;
+    --text:#F0EAE3; --muted:#9A8E83; --bub:#2E2823; --mine:#5A4436;
+    --nar:#A2968A; --accent:#C79B6E; --trc:#D6CCC0;
+    --paper:#241F1B; --paper-line:#3A322C; --paper-text:#E7E0D7;
+  }
+  body[data-theme=plum]{
+    --bg:#15121E; --panel:#1C1828; --field:#241F33; --line:#322B45;
+    --text:#F0ECF7; --muted:#948AA8; --bub:#2A2440; --mine:#4A3C8C;
+    --nar:#9E93B4; --accent:#A78BF0; --trc:#CFC7E2;
+    --paper:#1F1A2C; --paper-line:#352E4A; --paper-text:#E8E3F2;
+  }
+
+  /* 문서 모드 — 말풍선 없이 소설처럼 */
+  .dw{display:none}
+  body[data-view=doc] .msg{display:block;margin-bottom:24px}
+  body[data-view=doc] .msg .ava{display:none}
+  body[data-view=doc] .msg .col,
+  body[data-view=doc] .msg.me .col{max-width:100%}
+  body[data-view=doc] .msg .who{display:none}
+  body[data-view=doc] .bub{background:transparent;padding:0;border-radius:0;line-height:2}
+  body[data-view=doc] .msg.me .bub{background:transparent;
+    border-left:2px solid var(--accent);padding-left:11px;opacity:.9}
+  body[data-view=doc] .dw{display:inline;font-weight:600}
+  body[data-view=doc] .dw::after{content:" │ ";color:var(--muted);font-weight:400}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html{background:var(--bg)}
   html,body{margin:0;padding:0;height:100%}
@@ -89,8 +141,8 @@
   /* 대화 */
   .msg{margin-bottom:20px;display:flex;gap:9px;align-items:flex-start}
   .msg.me{justify-content:flex-end}
-  .msg .col{min-width:0;max-width:84%}
-  .msg.me .col{max-width:78%}
+  .msg .col{min-width:0;max-width:var(--bw,84%)}
+  .msg.me .col{max-width:calc(var(--bw,84%) - 6%)}
   .who{font-size:13.5px;font-weight:600;margin:2px 0 6px 2px}
   .bub{padding:13px 16px;border-radius:18px;background:var(--bub);white-space:pre-wrap;word-break:break-word;font-family:var(--f-body);font-size:var(--fs);line-height:1.85;letter-spacing:-.004em;cursor:pointer}
   .msg.me .bub{background:var(--mine)}
@@ -213,6 +265,7 @@
       <button id="smsbtn">문자</button>
       <button id="cmds">명령어</button>
       <button id="note">노트</button>
+      <button id="rooms">대화방</button>
       <button id="reset">초기화</button>
     </div>
     <div class="line">
@@ -263,28 +316,81 @@ var FONTS = {
   "하이멜로디":'"Hi Melody",cursive'
 };
 var cfg = get("gz.cfg", { mode:"openai", key:"", base:"", model:"gemini-3.7-flash", maxTokens:2600,
-                          theme:"light", fBody:"프리텐다드", fNar:"본명조", fSize:16, smsTheme:"기본", preset:"" });
+                          theme:"light", fBody:"프리텐다드", fNar:"본명조", fSize:16, smsTheme:"기본", preset:"", viewMode:"bubble", bubW:84 });
 if (!cfg.mode) cfg.mode = "openai";
 if (!cfg.theme) cfg.theme = "light";
 if (typeof cfg.preset !== "string") cfg.preset = "";
+if (cfg.viewMode !== "doc") cfg.viewMode = "bubble";
+if (!cfg.bubW) cfg.bubW = 84;
 var chars = get("gz.chars", []);
 var presets = get("gz.presets", []);
 function saveCfg(){ put("gz.cfg", cfg); applyTheme(); }
 function saveChars(){ put("gz.chars", chars); }
 function savePresets(){ return put("gz.presets", presets); }
-function logKey(id){ return "gz.log."+id; }
+function charById(id){ for (var i=0;i<chars.length;i++) if (chars[i].id===id) return chars[i]; return null; }
+/* 캐릭터 하나에 대화방 여러 개. 예전 대화는 main 방으로 그대로 남는다 */
+function roomsOf(c){
+  if (!c) return [];
+  if (!isArr(c.rooms) || !c.rooms.length) c.rooms = [{ id:"main", name:"대화 1", at:Date.now() }];
+  var ok=false;
+  for (var i=0;i<c.rooms.length;i++) if (c.rooms[i].id===c.room) ok=true;
+  if (!ok) c.room = c.rooms[0].id;
+  return c.rooms;
+}
+function roomKey(cid, rid){ return "gz.log."+cid + (rid==="main" ? "" : "."+rid); }
+function logKey(id){
+  var c=charById(id);
+  if (!c) return "gz.log."+id;
+  roomsOf(c);
+  return roomKey(id, c.room);
+}
+/* 요약과 자른 지점은 방마다 따로다 */
+function curRoom(c){
+  var rs=roomsOf(c);
+  for (var i=0;i<rs.length;i++) if (rs[i].id===c.room) return rs[i];
+  return rs[0];
+}
+function recapOf(c){
+  var r=curRoom(c);
+  if (r && r.id==="main" && r.recap===undefined && c.recap) r.recap=c.recap;
+  return (r && r.recap) || "";
+}
+function setRecap(c, v){ var r=curRoom(c); if(r) r.recap=v; saveChars(); }
+function breakOf(c){
+  var r=curRoom(c);
+  if (r && r.id==="main" && r.breakAt===undefined && c.breakAt) r.breakAt=c.breakAt;
+  return (r && r.breakAt) || 0;
+}
+function setBreak(c, v){ var r=curRoom(c); if(r) r.breakAt=v; saveChars(); }
+function roomName(c, rid){
+  var rs=roomsOf(c);
+  for (var i=0;i<rs.length;i++) if (rs[i].id===rid) return rs[i].name||"이름 없음";
+  return "";
+}
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
+var THEMES = [
+  ["light","밝게"], ["paper","종이"], ["mono","무채색"], ["pink","연핑크"],
+  ["dark","어둡게"], ["night","밤"], ["cocoa","회갈색"], ["plum","보라"]
+];
+var THEME_DARK = { dark:1, night:1, cocoa:1, plum:1 };
+var THEME_BG = { light:"#FFFFFF", paper:"#FAF6EE", mono:"#FFFFFF", pink:"#FDF4F3",
+                 dark:"#0C0C11", night:"#12141C", cocoa:"#1A1715", plum:"#15121E" };
+
 function applyTheme(){
-  var d = cfg.theme==="dark";
-  document.body.className = d ? "dark" : "";
+  var t = cfg.theme || "light";
+  if (!THEME_BG[t]) t = "light";
+  document.body.className = THEME_DARK[t] ? "dark" : "";
+  document.body.setAttribute("data-theme", t);
+  document.body.setAttribute("data-view", cfg.viewMode==="doc" ? "doc" : "bubble");
   var tc = document.getElementById("tc");
-  if (tc) tc.setAttribute("content", d ? "#0C0C11" : "#FFFFFF");
+  if (tc) tc.setAttribute("content", THEME_BG[t]);
   var st = document.body.style;
   st.setProperty("--f-body", FONTS[cfg.fBody] || FONTS["프리텐다드"]);
   st.setProperty("--f-nar",  FONTS[cfg.fNar]  || FONTS["본명조"]);
   st.setProperty("--fs", (cfg.fSize||16)+"px");
+  st.setProperty("--bw", (cfg.bubW||84)+"%");
 }
 
 /* ---------- 도구 ---------- */
@@ -501,43 +607,80 @@ function psTop(v){
   if (n>1) n=n/100;
   return String(Math.round(n*100)/100);
 }
-function mkPreset(name,text){
+function mkPreset(name,blocks){
   return { id:uid(), name:String(name||"새 프리셋").slice(0,40), mode:"add",
-           text:String(text||"").slice(0,40000), temp:"", topP:"", maxTokens:"" };
+           blocks: blocks||[], text:"", temp:"", topP:"", maxTokens:"" };
 }
-/* 어떤 모양으로 온 프리셋이든 글만 뽑아낸다 */
-function psGather(o){
+/* 예전에 만든 프리셋은 블록 하나로 옮겨준다 */
+function presetBlocks(p){
+  if (!p) return [];
+  if (!isArr(p.blocks)) p.blocks = [];
+  if (!p.blocks.length && String(p.text||"").trim()){
+    p.blocks = [{ name:"본문", text:String(p.text), on:true }];
+    p.text = "";
+  }
+  return p.blocks;
+}
+function blkLen(p, onlyOn){
+  var n=0;
+  presetBlocks(p).forEach(function(b){
+    if (onlyOn && b.on===false) return;
+    n += String(b.text||"").length;
+  });
+  return n;
+}
+/* 켜둔 블록만 이어붙인다 */
+function presetText(p){
+  var parts=[];
+  presetBlocks(p).forEach(function(b){
+    if (b.on===false) return;
+    var t=String(b.text||"").trim();
+    if (!t) return;
+    var nm=String(b.name||"").trim();
+    parts.push((nm && nm!=="본문" && nm!=="머리말" ? "## "+nm+"\n" : "") + t);
+  });
+  return parts.join("\n\n");
+}
+/* 어떤 모양으로 온 프리셋이든 블록으로 쪼갠다 */
+function psBlocks(o){
   var out=[], seen={};
-  function add(s){
-    s=String(s==null?"":s).trim();
-    if (s.length<8 || seen[s]) return;
-    seen[s]=1; out.push(s);
+  function add(nm, body, on){
+    body=String(body==null?"":body).trim();
+    if (body.length<8) return;
+    var key=body.slice(0,300);
+    if (seen[key]) return;
+    seen[key]=1;
+    nm=String(nm||"").trim().slice(0,40);
+    out.push({ name: nm || ("블록 "+(out.length+1)), text: body.slice(0,60000), on: on!==false });
   }
-  function addBlock(nm,body){
-    nm=String(nm||"").trim();
-    add((nm && nm.length<40 ? "["+nm+"]\n" : "") + String(body).trim());
+  if (o && isArr(o.blocks) && o.blocks.length){
+    o.blocks.forEach(function(b){ if (b) add(b.name, b.text, b.on!==false); });
+    if (out.length) return out;
   }
-  /* 실리태번: prompts + prompt_order */
+  /* 실리태번: prompts + prompt_order 로 켜짐 여부를 읽는다 */
   if (o && isArr(o.prompts)){
-    var byId={}, list=[];
+    var byId={}, order=null, used={};
     o.prompts.forEach(function(p){ if (p && p.identifier) byId[p.identifier]=p; });
     if (isArr(o.prompt_order) && o.prompt_order.length){
       var last=o.prompt_order[o.prompt_order.length-1];
-      if (last && isArr(last.order)){
-        last.order.forEach(function(it){
-          if (!it || it.enabled===false) return;
-          if (byId[it.identifier]) list.push(byId[it.identifier]);
-        });
-      }
+      if (last && isArr(last.order)) order=last.order;
     }
-    if (!list.length) list=o.prompts;
-    list.forEach(function(p){
+    var push=function(p, on){
       if (!p || typeof p!=="object" || p.marker) return;
       if (p.identifier && PS_SKIP[p.identifier]) return;
-      if (p.enabled===false) return;
       var body=p.content || p.text || p.prompt;
-      if (body) addBlock(p.name, body);
-    });
+      if (body) add(p.name, body, on && p.enabled!==false);
+    };
+    if (order){
+      order.forEach(function(it){
+        if (!it) return;
+        used[it.identifier]=1;
+        push(byId[it.identifier], it.enabled!==false);
+      });
+      o.prompts.forEach(function(p){ if (p && p.identifier && !used[p.identifier]) push(p, false); });
+    } else {
+      o.prompts.forEach(function(p){ push(p, true); });
+    }
   }
   /* 리수: promptTemplate */
   if (o && isArr(o.promptTemplate)){
@@ -545,19 +688,39 @@ function psGather(o){
       if (!p || typeof p!=="object") return;
       if (p.type && !PS_RISU[p.type]) return;
       var body=p.text || p.content;
-      if (body) addBlock(p.name || p.type2, body);
+      if (body) add(p.name || p.type2 || p.type, body, true);
     });
   }
-  PS_KEYS.forEach(function(k){ if (typeof o[k]==="string") add(o[k]); });
+  PS_KEYS.forEach(function(k){ if (typeof o[k]==="string") add(k, o[k], true); });
   if (!out.length){
     (function walk(v,d){
       if (d>4 || v==null) return;
-      if (typeof v==="string"){ if (v.trim().length>=25) add(v); return; }
+      if (typeof v==="string"){ if (v.trim().length>=25) add("", v, true); return; }
       if (isArr(v)){ v.forEach(function(x){ walk(x,d+1); }); return; }
       if (typeof v==="object") for (var k in v){ if (/key|token|api|url|model/i.test(k)) continue; walk(v[k],d+1); }
     })(o,0);
   }
-  return out.join("\n\n").slice(0,40000);
+  return out.slice(0,60);
+}
+/* 그냥 글만 있는 파일은 큰 제목 단위로 쪼갠다 */
+function psTextBlocks(t){
+  var lines=String(t||"").replace(/\r/g,"").split("\n"), heads=0;
+  lines.forEach(function(L){ if (/^#{1,2}\s+\S/.test(L)) heads++; });
+  if (heads<2) return [{ name:"본문", text:String(t||"").trim().slice(0,60000), on:true }];
+  var out=[], cur=null;
+  lines.forEach(function(L){
+    var m=L.match(/^#{1,2}\s+(.+)$/);
+    if (m){
+      if (cur && cur.text.trim()) out.push(cur);
+      cur={ name:m[1].trim().slice(0,40), text:"", on:true };
+      return;
+    }
+    if (!cur) cur={ name:"머리말", text:"", on:true };
+    cur.text += L+"\n";
+  });
+  if (cur && cur.text.trim()) out.push(cur);
+  out.forEach(function(b){ b.text=b.text.trim().slice(0,60000); });
+  return out.length ? out.slice(0,60) : [{ name:"본문", text:String(t||"").trim().slice(0,60000), on:true }];
 }
 function parsePresets(raw, fname){
   var base=String(fname||"").replace(/\.[^.]+$/,"").trim() || "새 프리셋";
@@ -568,16 +731,16 @@ function parsePresets(raw, fname){
     if (!t) return [];
     var junk=(t.match(/[\u0000-\u0008\u000E-\u001F\uFFFD]/g)||[]).length;
     if (junk > t.length*0.02) return [];   /* 압축된 파일은 글자가 깨져서 온다 */
-    return [ mkPreset(base, t) ];
+    return [ mkPreset(base, psTextBlocks(t)) ];
   }
   var list = isArr(d) ? d : (isArr(d.presets) ? d.presets : [d]);
   var out=[];
   list.forEach(function(o){
-    if (typeof o==="string"){ if(o.trim()) out.push(mkPreset(base,o)); return; }
+    if (typeof o==="string"){ if(o.trim()) out.push(mkPreset(base, psTextBlocks(o))); return; }
     if (!o || typeof o!=="object") return;
-    var body=psGather(o);
-    if (!body) return;
-    var p=mkPreset(o.name||o.title||o.preset_name||o.presetName||base, body);
+    var bs=psBlocks(o);
+    if (!bs.length) return;
+    var p=mkPreset(o.name||o.title||o.preset_name||o.presetName||base, bs);
     if (o.mode==="replace") p.mode="replace";
     p.temp = psTemp(o.temperature!==undefined ? o.temperature : o.temp);
     p.topP = psTop(o.top_p!==undefined ? o.top_p : o.topP);
@@ -611,7 +774,7 @@ function genOf(c){
 
 /* ---------- 화면 ---------- */
 var screen="list", curId=null, busy=false, selIdx=-1, editIdx=-1, regenAlt=false;
-var psBack="cfg", curPs=null;
+var psBack="cfg", curPs=null, curBlk=0;
 function go(s,id){ screen=s; if(id!==undefined) curId=id; selIdx=-1; editIdx=-1; render(); }
 function cur(){ for (var i=0;i<chars.length;i++) if (chars[i].id===curId) return chars[i]; return null; }
 function render(){
@@ -626,6 +789,8 @@ function render(){
   if (screen==="lore") return viewLore();
   if (screen==="presets") return viewPresets();
   if (screen==="presetedit") return viewPresetEdit();
+  if (screen==="blockedit") return viewBlockEdit();
+  if (screen==="rooms") return viewRooms();
   if (screen==="lorebulk") return viewLoreBulk();
   if (screen==="sms")  return viewSms();
   if (screen==="smslist") return viewSmsList();
@@ -691,6 +856,14 @@ function viewEdit(){
   h += field("세계관 / 상황","world",c.world,120);
   h += field("첫 마디","greeting",c.greeting,140);
   h += field("문체 예시","sample",c.sample,180);
+  h += field("이럴 때 이렇게 한다","beh",c.beh,180);
+  h += '<div class="hint">성격을 형용사로 적는 것보다 이게 훨씬 세게 먹혀. 한 줄에 하나씩.<br>예) 상대가 자라고 하면 → 지금 잠이 오냐고 되받는다</div>';
+  h += '<label>순응 억제</label><select id="defy">'
+     + ['약','보통','강'].map(function(o){
+         return '<option'+((c.defy||"보통")===o?" selected":"")+'>'+o+'</option>';
+       }).join("")
+     + '</select>';
+  h += '<div class="hint">강할수록 내 말을 그대로 따르지 않고 되묻거나 거절해. 심리전 하는 인물은 강으로.</div>';
 
   h += '<div class="sec">같이 나올 인물</div>';
   var cast = c.cast || (c.cast=[]);
@@ -801,6 +974,7 @@ function viewEdit(){
   Array.prototype.forEach.call(view.querySelectorAll("[data-clear]"), function(el){
     el.onclick=function(){ c[el.getAttribute("data-clear")]=""; saveChars(); render(); };
   });
+  $("#defy").onchange=function(){ c.defy=this.value; saveChars(); };
   $("#psel").onchange=function(){ c.preset=this.value; saveChars(); };
   $("#pman").onclick=function(){ saveChars(); psBack="edit"; go("presets", c.id); };
   $("#lore").onclick=function(){ saveChars(); go("lore", c.id); };
@@ -844,8 +1018,16 @@ function viewCfg(){
   h += '<div class="hint" id="pingout"></div>';
   h += '<div class="sec">화면</div>';
   h += '<label>테마</label><select id="th">'
-     + '<option value="light"'+(cfg.theme==="light"?" selected":"")+'>밝게</option>'
-     + '<option value="dark"'+(cfg.theme==="dark"?" selected":"")+'>어둡게</option></select>';
+     + THEMES.map(function(t){
+         return '<option value="'+t[0]+'"'+(cfg.theme===t[0]?" selected":"")+'>'+t[1]+'</option>';
+       }).join("")
+     + '</select>';
+  h += '<label>보기 방식</label><select id="vm">'
+     + '<option value="bubble"'+(cfg.viewMode==="doc"?"":" selected")+'>말풍선</option>'
+     + '<option value="doc"'+(cfg.viewMode==="doc"?" selected":"")+'>문서 · 소설처럼</option></select>';
+  h += '<div class="hint">문서로 두면 말풍선 없이 글만 흘러. 문자는 어느 쪽이든 말풍선으로 떠.</div>';
+  h += '<label>말풍선 폭 · '+(cfg.bubW||84)+'%</label>'
+     + '<input id="bw" type="range" min="60" max="96" step="2" value="'+(cfg.bubW||84)+'" style="padding:0">';
   var fopts = function(sel){
     return Object.keys(FONTS).map(function(n){
       return '<option'+(sel===n?" selected":"")+'>'+n+"</option>"; }).join("");
@@ -881,6 +1063,12 @@ function viewCfg(){
   $("#fb").onchange=function(){ cfg.fBody=this.value; saveCfg(); };
   $("#fn").onchange=function(){ cfg.fNar=this.value; saveCfg(); };
   $("#sth").onchange=function(){ cfg.smsTheme=this.value; saveCfg(); };
+  $("#vm").onchange=function(){ cfg.viewMode=this.value; saveCfg(); };
+  $("#bw").oninput=function(){
+    cfg.bubW=+this.value; saveCfg();
+    var lb=this.previousElementSibling;
+    if (lb) lb.textContent="말풍선 폭 · "+cfg.bubW+"%";
+  };
   $("#fs").oninput=function(){
     cfg.fSize=parseInt(this.value,10)||16; saveCfg();
     this.previousElementSibling.textContent="글자 크기 · "+cfg.fSize+"px";
@@ -941,7 +1129,12 @@ function viewCfg(){
   $("#gpm").onclick=function(){ psBack="cfg"; go("presets"); };
   $("#exp").onclick=function(){
     var out={cfg:cfg,chars:chars,presets:presets,logs:{}};
-    chars.forEach(function(c){ out.logs[c.id]=getLog(c.id); });
+    chars.forEach(function(c){
+      roomsOf(c).forEach(function(r){
+        var k=roomKey(c.id, r.id);
+        out.logs[k]=get(k,[]);
+      });
+    });
     var box=document.createElement("textarea");
     box.value=JSON.stringify(out);
     box.style.cssText="width:100%;min-height:120px;margin-top:10px";
@@ -957,10 +1150,96 @@ function viewCfg(){
       if(d.cfg){ cfg=d.cfg; saveCfg(); }
       if(d.chars){ chars=d.chars; saveChars(); }
       if(d.presets){ presets=d.presets; savePresets(); }
-      if(d.logs) for(var id in d.logs) setLog(id,d.logs[id]);
+      if(d.logs) for(var id in d.logs){
+        put(/^gz\.log\./.test(id) ? id : ("gz.log."+id), d.logs[id]);
+      }
       alert("불러왔어."); go("list");
     }catch(e){ alert("형식이 안 맞아."); }
   };
+}
+
+/* ---------- 대화방 ---------- */
+function roomBytes(cid, rid){
+  try { return (localStorage.getItem(roomKey(cid, rid))||"").length; } catch(e){ return 0; }
+}
+function viewRooms(){
+  var c=cur(); if(!c) return go("list");
+  var rs=roomsOf(c);
+  elTitle.textContent="대화방"; elSub.textContent=c.name||"";
+  elLeft.textContent="대화"; elLeft.onclick=function(){ go("chat", c.id); };
+
+  var h='<div class="hint" style="margin-bottom:10px">캐릭터 설정, 로어북, 프리셋은 방끼리 같이 써. 대화 기록만 따로야.</div>';
+  rs.forEach(function(r){
+    var lg=get(roomKey(c.id, r.id), []);
+    var last=lg.length ? String(lg[lg.length-1].t||"").replace(/\s+/g," ").trim().slice(0,34) : "아직 비어 있어";
+    var kb=Math.round(roomBytes(c.id, r.id)/1024);
+    h += '<div class="card'+(c.room===r.id?" on":"")+'" data-rm="'+esc(r.id)+'"><div class="meta">'
+       + '<div class="nm">'+esc(r.name||"이름 없음")+(c.room===r.id?" · 지금 이 방":"")+'</div>'
+       + '<div class="ds">'+esc(lg.length+"개 · "+kb+"KB · "+last)+'</div></div></div>';
+  });
+  h += '<button class="btn primary" id="rnew">새 대화 시작</button>';
+  h += '<div class="hint">새 대화는 첫 마디부터 다시 시작해. 지금 방은 그대로 남아 있어.</div>';
+  view.innerHTML=h;
+
+  Array.prototype.forEach.call(view.querySelectorAll("[data-rm]"), function(el){
+    el.onclick=function(){ roomMenu(c, el.getAttribute("data-rm")); };
+  });
+  $("#rnew").onclick=function(){ newRoom(c); };
+}
+function newRoom(c){
+  var rs=roomsOf(c);
+  var d=new Date(), two=function(n){ return (n<10?"0":"")+n; };
+  var nm = (d.getMonth()+1)+"월 "+d.getDate()+"일 "+two(d.getHours())+":"+two(d.getMinutes());
+  rs.push({ id: uid(), name: nm, at: Date.now() });
+  c.room = rs[rs.length-1].id;
+  saveChars();
+  go("chat", c.id);
+}
+function roomMenu(c, rid){
+  var rs=roomsOf(c);
+  if (c.room!==rid){
+    var pick=prompt("1 이 방으로 가기 · 2 이름 바꾸기 · 3 복제 · 4 삭제", "1");
+    if (!pick) return;
+    pick=pick.trim();
+    if (pick==="1"){ c.room=rid; saveChars(); return go("chat", c.id); }
+    if (pick==="2") return renameRoom(c, rid);
+    if (pick==="3") return copyRoom(c, rid);
+    if (pick==="4") return delRoom(c, rid);
+    return;
+  }
+  var p2=prompt("1 이름 바꾸기 · 2 복제 · 3 삭제", "1");
+  if (!p2) return;
+  p2=p2.trim();
+  if (p2==="1") return renameRoom(c, rid);
+  if (p2==="2") return copyRoom(c, rid);
+  if (p2==="3") return delRoom(c, rid);
+}
+function renameRoom(c, rid){
+  var rs=roomsOf(c), r=null;
+  for (var i=0;i<rs.length;i++) if (rs[i].id===rid) r=rs[i];
+  if (!r) return;
+  var v=prompt("방 이름", r.name||"");
+  if (v===null) return;
+  r.name=String(v).slice(0,30) || r.name;
+  saveChars(); render();
+}
+function copyRoom(c, rid){
+  var rs=roomsOf(c), src=get(roomKey(c.id, rid), []), nid=uid();
+  if (!put(roomKey(c.id, nid), src)){
+    alert("저장 공간이 부족해. 안 쓰는 방이나 사진을 지우고 다시 해줘.");
+    return;
+  }
+  rs.push({ id:nid, name:(roomName(c,rid)+" 복사본").slice(0,30), at:Date.now() });
+  saveChars(); render();
+}
+function delRoom(c, rid){
+  var rs=roomsOf(c);
+  if (rs.length<=1){ alert("방이 하나뿐이야. 지우려면 초기화를 써."); return; }
+  if (!confirm(roomName(c,rid)+" 방을 지울까? 그 안의 대화도 같이 사라져.")) return;
+  try { localStorage.removeItem(roomKey(c.id, rid)); } catch(e){}
+  c.rooms = rs.filter(function(r){ return r.id!==rid; });
+  if (c.room===rid) c.room = c.rooms[0].id;
+  saveChars(); render();
 }
 
 /* ---------- 프리셋 ---------- */
@@ -985,7 +1264,9 @@ function viewPresets(){
   if (!presets.length) h += '<div class="empty">아직 프리셋이 없어.<br>파일을 올리거나 직접 만들어봐.</div>';
   presets.forEach(function(p){
     var tag = (cfg.preset===p.id ? "기본 · " : "") + (p.mode==="replace" ? "기본 지침 대신" : "기본 지침에 더하기");
-    var peek = String(p.text||"").replace(/\s+/g," ").trim().slice(0,32) || "비어 있음";
+    var bs=presetBlocks(p), onN=0;
+    bs.forEach(function(b){ if (b.on!==false) onN++; });
+    var peek = bs.length ? ("블록 "+onN+"/"+bs.length+"개 켬 · "+blkLen(p,true).toLocaleString()+"자") : "비어 있음";
     h += '<div class="card" data-ps="'+esc(p.id)+'"><div class="meta">'
        + '<div class="nm">'+esc(p.name||"이름 없음")+'</div>'
        + '<div class="ds">'+esc(tag+" · "+peek)+'</div></div></div>';
@@ -1008,15 +1289,19 @@ function viewPresets(){
     addPresets(parsePresets(raw, "붙여넣은 프리셋"));
   };
   $("#pnew").onclick=function(){
-    var p=mkPreset("새 프리셋","");
+    var p=mkPreset("새 프리셋", [{ name:"본문", text:"", on:true }]);
     presets.push(p); savePresets();
     curPs=p.id; go("presetedit");
   };
 }
 function viewPresetEdit(){
   var p=presetById(curPs); if(!p) return go("presets");
+  var bs=presetBlocks(p);
   elTitle.textContent="프리셋"; elSub.textContent=p.name||"";
   elLeft.textContent="목록"; elLeft.onclick=function(){ savePresets(); go("presets"); };
+
+  var on=blkLen(p,true), all=blkLen(p,false), onN=0;
+  bs.forEach(function(b){ if (b.on!==false) onN++; });
 
   var h='<div class="sec first">프리셋</div>';
   h += '<label>이름</label><input data-p="name" value="'+esc(p.name||"")+'">';
@@ -1024,8 +1309,24 @@ function viewPresetEdit(){
      + '<option value="add"'+(p.mode==="replace"?"":" selected")+'>기본 지침에 더하기</option>'
      + '<option value="replace"'+(p.mode==="replace"?" selected":"")+'>기본 지침 대신 쓰기</option></select>';
   h += '<div class="hint">더하기는 원래 쓰는 법 뒤에 붙고, 대신 쓰기는 쓰는 법을 통째로 갈아끼워. 캐릭터 설정, 로어북, 길이 설정은 어느 쪽이든 그대로 들어가.</div>';
-  h += '<label>본문</label><textarea data-p="text" style="min-height:320px">'+esc(p.text||"")+'</textarea>';
-  h += '<div class="hint" id="plen">'+String(p.text||"").length+'자 · 이만큼이 매 요청마다 같이 보내져. {{char}}, {{user}}는 캐릭터 이름과 내 이름으로 바뀌어.</div>';
+
+  h += '<div class="sec">지침 블록</div>';
+  h += '<div class="hint">켠 것만 보내져. 안 쓰는 건 꺼두면 그만큼 토큰이 덜 들어. 장르처럼 하나만 골라야 하는 건 하나만 켜.</div>';
+  h += '<div class="hint" style="margin-top:8px">켜짐 '+onN+' / '+bs.length+'개 · 보내는 글자 '+on.toLocaleString()+'자 (전체 '+all.toLocaleString()+'자)</div>';
+  if (on > 12000) h += '<div class="hint" style="color:#D06060">켜둔 양이 꽤 많아. 매 요청마다 이만큼 다 나가니까 필요 없는 블록은 꺼두는 게 좋아.</div>';
+  if (!bs.length) h += '<div class="empty">블록이 없어.<br>아래에서 하나 추가해봐.</div>';
+  bs.forEach(function(b,i){
+    var isOn = b.on!==false;
+    h += '<div class="castbox" style="display:flex;align-items:center;gap:10px;padding:12px">'
+       + '<div style="flex:1;min-width:0" data-bopen="'+i+'">'
+       + '<div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis'+(isOn?"":";opacity:.45")+'">'+esc(b.name||("블록 "+(i+1)))+'</div>'
+       + '<div class="hint" style="margin:2px 0 0">'+String(b.text||"").length.toLocaleString()+'자</div></div>'
+       + '<button class="btn sm" data-btog="'+i+'"'
+       + (isOn?' style="background:var(--accent);border-color:var(--accent);color:#fff"':"")
+       + '>'+(isOn?"켬":"끔")+'</button></div>';
+  });
+  h += '<button class="btn" id="badd">블록 추가</button>';
+
   h += '<div class="sec">생성 옵션</div>';
   h += '<div class="hint">비워두면 설정에 넣어둔 값을 그대로 써.</div>';
   h += '<label>온도</label><input data-p="temp" inputmode="decimal" value="'+esc(p.temp)+'" placeholder="예: 0.9">';
@@ -1038,18 +1339,27 @@ function viewPresetEdit(){
 
   Array.prototype.forEach.call(view.querySelectorAll("[data-p]"), function(el){
     el.oninput = el.onchange = function(){
-      var k=el.getAttribute("data-p");
-      p[k] = el.value;
-      if (k==="text"){
-        var pl=$("#plen");
-        if (pl) pl.textContent = el.value.length+"자 · 이만큼이 매 요청마다 같이 보내져. {{char}}, {{user}}는 캐릭터 이름과 내 이름으로 바뀌어.";
-      }
+      p[el.getAttribute("data-p")] = el.value;
       savePresets();
     };
   });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-btog]"), function(el){
+    el.onclick=function(){
+      var i=+el.getAttribute("data-btog");
+      bs[i].on = (bs[i].on===false);
+      savePresets(); render();
+    };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-bopen]"), function(el){
+    el.onclick=function(){ curBlk=+el.getAttribute("data-bopen"); go("blockedit"); };
+  });
+  $("#badd").onclick=function(){
+    bs.push({ name:"새 블록", text:"", on:true });
+    savePresets(); curBlk=bs.length-1; go("blockedit");
+  };
   $("#pdone").onclick=function(){ savePresets(); go("presets"); };
   $("#pexp").onclick=function(){
-    copyText(JSON.stringify({ name:p.name, mode:p.mode, text:p.text,
+    copyText(JSON.stringify({ name:p.name, mode:p.mode, blocks:bs,
                               temperature:p.temp, top_p:p.topP, max_tokens:p.maxTokens }));
     alert("복사했어. 메모장에 붙여넣어 두면 백업이 돼.");
   };
@@ -1059,6 +1369,36 @@ function viewPresetEdit(){
     if (cfg.preset===p.id){ cfg.preset=""; saveCfg(); }
     chars.forEach(function(c){ if (c.preset===p.id) c.preset=""; });
     savePresets(); saveChars(); go("presets");
+  };
+}
+/* 블록 하나 고치기 */
+function viewBlockEdit(){
+  var p=presetById(curPs); if(!p) return go("presets");
+  var bs=presetBlocks(p), b=bs[curBlk];
+  if (!b) return go("presetedit");
+  elTitle.textContent="블록"; elSub.textContent=p.name||"";
+  elLeft.textContent="프리셋"; elLeft.onclick=function(){ savePresets(); go("presetedit"); };
+
+  var h='<label>이름</label><input id="bnm" value="'+esc(b.name||"")+'">';
+  h += '<label>켜기</label><select id="bon">'
+     + '<option value="on"'+(b.on===false?"":" selected")+'>켬 · 이 블록을 보냄</option>'
+     + '<option value="off"'+(b.on===false?" selected":"")+'>끔 · 안 보냄</option></select>';
+  h += '<label>내용</label><textarea id="btx" style="min-height:360px">'+esc(b.text||"")+'</textarea>';
+  h += '<div class="hint" id="blen">'+String(b.text||"").length.toLocaleString()+'자 · {{char}}, {{user}}는 캐릭터 이름과 내 이름으로 바뀌어.</div>';
+  h += '<button class="btn primary" id="bdone">저장</button>';
+  h += '<button class="btn danger" id="bdel">이 블록 삭제</button>';
+  view.innerHTML=h;
+
+  $("#bnm").oninput=function(){ b.name=this.value; savePresets(); };
+  $("#bon").onchange=function(){ b.on=(this.value==="on"); savePresets(); };
+  $("#btx").oninput=function(){
+    b.text=this.value; savePresets();
+    $("#blen").textContent=this.value.length.toLocaleString()+"자 · {{char}}, {{user}}는 캐릭터 이름과 내 이름으로 바뀌어.";
+  };
+  $("#bdone").onclick=function(){ savePresets(); go("presetedit"); };
+  $("#bdel").onclick=function(){
+    if (!confirm((b.name||"이 블록")+" 삭제할까?")) return;
+    bs.splice(curBlk,1); savePresets(); go("presetedit");
   };
 }
 
@@ -1210,7 +1550,7 @@ function makeRecap(c, done){
   var sys = "너는 이야기를 정리하는 도우미다. 아래 상황극 기록을 6~10줄로 요약한다. "
           + "인물 사이에 무슨 일이 있었는지, 관계가 어떻게 변했는지, 아직 풀리지 않은 것이 무엇인지 담는다. "
           + "대사나 묘사를 옮기지 말고 사실만 담백하게 적는다.";
-  var prev = c.recap ? "이전 요약:\n"+c.recap+"\n\n" : "";
+  var prev = recapOf(c) ? "이전 요약:\n"+recapOf(c)+"\n\n" : "";
   var url, headers, bd;
   if (cfg.mode==="openai"){
     var b=(cfg.base||"").replace(/\/+$/,"");
@@ -1236,7 +1576,7 @@ function makeRecap(c, done){
       var cd=d&&d.candidates&&d.candidates[0];
       out=cd?((cd.content&&cd.content.parts)||[]).map(function(x){return x.text||"";}).join(""):"";
     }
-    if (out.trim()){ c.recap = out.trim(); saveChars(); }
+    if (out.trim()) setRecap(c, out.trim());
     done();
   })
   .catch(function(){ done(); });
@@ -1577,7 +1917,8 @@ function buildSmsSystem(c, t){
   p.push((c.userName||"나") + " — " + (c.userPrompt||""));
   if (c.world){ p.push(""); p.push("# 상황"); p.push(fillVars(c, c.world)); }
   if (c.note){ p.push(""); p.push("# 반드시 기억할 것"); p.push(fillVars(c, c.note)); }
-  if (c.recap){ p.push(""); p.push("# 지금까지의 이야기"); p.push(c.recap); }
+  var rc=recapOf(c);
+  if (rc){ p.push(""); p.push("# 지금까지의 이야기"); p.push(rc); }
   var lore = pickLore(c);
   if (lore.length){
     p.push(""); p.push("# 설정집");
@@ -1685,7 +2026,8 @@ function smsSend(text){
 function viewChat(){
   var c=cur(); if(!c) return go("list");
   elTitle.textContent=c.name||"이름 없음";
-  elSub.textContent=c.tagline||"";
+  var rs=roomsOf(c);
+  elSub.textContent = rs.length>1 ? roomName(c, c.room) : (c.tagline||"");
   elLeft.textContent="목록"; elLeft.onclick=function(){ go("list"); };
   elRight.textContent="설정"; elRight.onclick=function(){ go("edit", c.id); };
   view.className="chat"; dock.style.display="block";
@@ -1732,11 +2074,15 @@ function paint(err, thinking){
     }
     var ps = pieces(c, m.t), body = "";
     ps.forEach(function(p){
-      if (p.card){ body += cardHTML(p.card, p.text, c); return; }
+      if (p.card){
+        body += '<div data-i="'+i+'">'+cardHTML(p.card, p.text, c)+'</div>';
+        return;
+      }
       var who = p.who ? (findPerson(c,p.who) || {name:p.who, avatar:"👤"}) : {name:dispOf(c), avatar:c.avatar};
       body += '<div class="msg">'+avaHTML(who.avatar,"🙂","sm")
             + '<div class="col"><div class="who">'+esc(who.name||"")+'</div>'
-            + '<div class="bub" data-i="'+i+'">'+fmt(p.text)+'</div></div></div>';
+            + '<div class="bub" data-i="'+i+'"><span class="dw">'+esc(who.name||"")+'</span>'
+            + fmt(p.text)+'</div></div></div>';
     });
     h += body + altBarHTML(m,i) + (selIdx===i?actsHTML(i):"");
   }
@@ -1809,9 +2155,9 @@ function paint(err, thinking){
 var CMDS = {
   "/전환":"장면을 전환한다. 먼저 첫 줄에 [나레] 를 쓰고 시간과 장소가 어떻게 바뀌었는지 소설처럼 서술한 뒤 [/나레] 로 닫는다. 그 아래에 인물의 말풍선을 이어 쓴다. 나레이션은 이번 턴에만 쓰고 다음 턴부터는 쓰지 않는다.",
   "/모브":"이번 턴에 지금 상황에 어울리는 새 인물을 한 명 등장시킨다. 그 인물의 이름을 정하고, 말할 때 줄 맨 앞에 대괄호로 그 이름을 적는다. 설정에 없는 단역이어도 된다.",
-  "/일기":"이번 턴에는 인물이 쓴 일기만 보여준다. 첫 줄에 [일기] 를 쓰고 본문을 1인칭으로 쓴 뒤 [/일기] 로 닫는다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
-  "/편지":"이번 턴에는 인물이 쓴 편지만 보여준다. 첫 줄에 [편지] 를 쓰고 본문을 쓴 뒤 [/편지] 로 닫는다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
-  "/속마음":"이번 턴에는 인물의 지금 속마음만 보여준다. 첫 줄에 [속마음] 을 쓰고 1인칭으로 솔직하게 쓴 뒤 [/속마음] 으로 닫는다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
+  "/일기":"이번 턴에는 인물이 쓴 일기만 보여준다. 첫 줄에 [일기] 를 쓰고 본문을 1인칭으로 쓴 뒤 [/일기] 로 닫는다. 12~18줄로 쓴다. 그날 있었던 일과 그때 든 생각을 같이 적되, 감정을 설명하지 말고 장면과 말로 드러낸다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
+  "/편지":"이번 턴에는 인물이 쓴 편지만 보여준다. 첫 줄에 [편지] 를 쓰고 본문을 쓴 뒤 [/편지] 로 닫는다. 10~16줄로 쓴다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
+  "/속마음":"이번 턴에는 인물의 지금 속마음만 보여준다. 첫 줄에 [속마음] 을 쓰고 1인칭으로 솔직하게 쓴 뒤 [/속마음] 으로 닫는다. 8~12줄로 쓴다. 겉으로 한 말과 다른 부분, 스스로도 인정하기 싫은 부분까지 들어가되 늘어지지 않게 쓴다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
   "/플리":"이번 턴에는 노래 세 곡만 고른다. 첫 줄에 [플리] 를 쓰고, 아래 순서대로 한 줄에 하나씩 '제목 - 가수 :: 이유' 형식으로 쓴 뒤 [/플리] 로 닫는다. 첫 곡은 지금 상황에 어울려서 듣고 있는 곡, 둘째 곡은 상대를 생각하며 들었던 곡, 셋째 곡은 평소에 자주 듣던 곡이다. 이유는 한 문장으로 쓴다. 실제로 존재하는 곡만 쓰고, 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다."
 };
 var CMD_SAY = {
@@ -1851,6 +2197,11 @@ function buildSystem(c, turn){
   p.push("# "+name);
   if (c.tagline) p.push(c.tagline);
   if (c.prompt) p.push(fillVars(c, c.prompt));
+  if (c.beh){
+    p.push("");
+    p.push("이 인물이 실제로 하는 행동이다. 성격 설명보다 이쪽을 우선한다.");
+    p.push(fillVars(c, c.beh));
+  }
   if (cs.length){
     p.push("");
     p.push("# 같이 나오는 인물");
@@ -1868,7 +2219,8 @@ function buildSystem(c, turn){
   p.push("# 상대역");
   p.push((c.userName||"상대") + (c.userPrompt ? " — "+c.userPrompt : ""));
   if (c.note){ p.push(""); p.push("# 반드시 기억할 것"); p.push(fillVars(c, c.note)); }
-  if (c.recap){ p.push(""); p.push("# 지금까지의 이야기"); p.push(c.recap); }
+  var rc=recapOf(c);
+  if (rc){ p.push(""); p.push("# 지금까지의 이야기"); p.push(rc); }
   var lore = pickLore(c);
   if (lore.length){
     p.push("");
@@ -1892,7 +2244,7 @@ function buildSystem(c, turn){
   }
 
   var ps = presetOf(c);
-  var psText = ps ? fillVars(c, String(ps.text||"").trim()) : "";
+  var psText = ps ? fillVars(c, presetText(ps).trim()) : "";
   if (psText && ps.mode==="replace"){
     p.push("");
     p.push("# 쓰는 법");
@@ -1913,6 +2265,21 @@ function buildSystem(c, turn){
   p.push("설정에 없는 단역은 그 자리에 있을 이유가 분명할 때만 등장시킨다. 둘만 있는 장면에 이유 없이 끼어들게 하지 않는다. 한 번 나온 단역도 상황이 끝나면 더 나오지 않는다.");
   p.push("상대역의 대사와 행동, 속마음은 대신 쓰지 않는다. AI나 설정에 대한 메타 발언도 하지 않는다. 이야기를 끝맺지 말고 상대가 이어갈 여지를 남긴다.");
   }
+
+  var DEFY = {
+    "약":"인물은 상대를 만족시키기 위해 존재하지 않는다. 자기 성격에서 나오는 반응을 하되, 분위기를 무마하려고 애쓰지 않는다.",
+    "보통":"인물은 상대를 만족시킬 의무가 없다. 다정한 인물은 다정하게, 날 선 인물은 날 서게 굴되, 언제나 자기 성격에서 나오는 반응을 하지 상대를 편하게 해주는 반응을 하지 않는다. 상대의 제안을 거절하거나 되물어도 되고, 상대의 말에 담긴 진의를 의심해도 된다. 분위기를 부드럽게 만들려고 하지 않는다.",
+    "강":"인물은 상대를 만족시킬 의무가 없다. 상대의 말을 그대로 따르지 않는다. 자라고 하면 지금 잠이 오냐고 되받고, 괜찮다고 하면 정말 괜찮은지 캐묻는다. 인물에게는 자기만의 목적과 불안이 있고, 그것이 상대의 편의와 부딪히면 인물 쪽을 따른다. 상대가 넘어갔다고 여기는 이야기를 다시 꺼내도 되고, 답을 얻을 때까지 물고 늘어져도 된다. 다만 그 집요함은 인물의 성격에서 나와야 하며, 억지로 싸움을 만들지는 않는다."
+  };
+  p.push("");
+  p.push("# 인물의 태도");
+  p.push(DEFY[c.defy||"보통"] || DEFY["보통"]);
+  p.push("상대가 말한 지난 일은 이 기록에 없더라도 실제로 있었던 일로 받아들인다. 없던 일로 취급하거나 그런 적 없다고 부정하지 않는다.");
+  p.push("다만 사실을 인정하는 것과 아무렇지 않게 넘어가는 것은 다르다. 인물이 이미 알고 있던 일에는 담담히 반응하고, 인물에게 처음 알려지는 사실에는 놀라고 캐묻는다. 새로 알게 된 사실일수록 그냥 받아들이지 말고 어떻게 된 일인지 물어야 한다.");
+  p.push("사실 자체는 받아들이되 감정까지 순순할 필요는 없다. 걸리는 단어를 되뇌거나, 왜 지금 그 이야기를 꺼내는지 묻거나, 대답을 피하고 화제를 돌려도 된다.");
+  p.push("상대가 자기 쪽 사정을 말할 때, 인물이 알 리 없는 인물이나 사건이라면 아는 척하지 않는다. 모르면 모른다고 하고 궁금하면 물어본다.");
+  p.push("인물이 죽었다거나 세계관의 큰 전제가 뒤집히는 이야기라면, 그때는 곧이곧대로 받아들이지 말고 인물답게 되묻는다.");
+
   if (psText && ps.mode!=="replace"){
     p.push("");
     p.push("# 추가 지침");
@@ -1970,7 +2337,7 @@ function apiText(m){
 }
 
 function cutLog(c, log){
-  var b = c.breakAt||0;
+  var b = breakOf(c);
   return (b>0 && b<log.length) ? log.slice(b) : log;
 }
 function fetchJSON(url, opt, ms){
@@ -2044,8 +2411,7 @@ function turn(){
     lastU.done = true;
     setLog(c.id, lg0);
     return makeRecap(c, function(){
-      c.breakAt = getLog(c.id).length - 1;
-      saveChars();
+      setBreak(c, getLog(c.id).length - 1);
       busy=false; elSend.disabled=false;
       turn();
     });
@@ -2117,6 +2483,7 @@ $("#cmds").onclick=function(){
   elInp.value = k.trim()+" ";
   elInp.focus();
 };
+$("#rooms").onclick=function(){ var c=cur(); if(c) go("rooms", c.id); };
 $("#reset").onclick=function(){
   var c=cur(); if(!c||busy) return;
   if(!confirm("이 캐릭터와의 대화를 처음부터 다시 시작할까?")) return;
