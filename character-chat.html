@@ -57,6 +57,54 @@
     --nar:#8A81A0; --accent:#7C63C4; --trc:#554D68;
     --paper:#F2EDF9; --paper-line:#E2DAEF; --paper-text:#2E2838;
   }
+  /* 레트로 — 피처폰 액정 */
+  body[data-theme=retro]{
+    --bg:#c5d1b8; --panel:#d3dbe3; --field:#bcc9ad; --line:#9ba5b5;
+    --text:#2b3a1f; --muted:#5d6b4f; --bub:#d5dfc8; --mine:#aebb9d;
+    --nar:#55663f; --accent:#1d2c88; --trc:#3f4d33;
+    --paper:#cfd9c2; --paper-line:#9ba5b5; --paper-text:#2b3a1f;
+  }
+  body[data-theme=retro]{
+    background-image:repeating-linear-gradient(0deg,
+      rgba(0,0,0,.045) 0px, rgba(0,0,0,.045) 1px, transparent 1px, transparent 3px);
+  }
+  body[data-theme=retro] #bar{
+    background:linear-gradient(to bottom,#7a9aef 0%,#5480d5 15%,#1d2c88 100%);
+    border-bottom:1px solid #0f184b}
+  body[data-theme=retro] #bar h1,
+  body[data-theme=retro] #bar .sub,
+  body[data-theme=retro] .iconbtn{color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,.6)}
+  body[data-theme=retro] .bub,
+  body[data-theme=retro] .card,
+  body[data-theme=retro] .castbox,
+  body[data-theme=retro] .statc,
+  body[data-theme=retro] .mind,
+  body[data-theme=retro] .paper,
+  body[data-theme=retro] input,
+  body[data-theme=retro] textarea,
+  body[data-theme=retro] select,
+  body[data-theme=retro] .btn{
+    border-radius:3px;border:2px solid #9ba5b5;
+    box-shadow:inset 1px 1px 3px rgba(0,0,0,.14)}
+  body[data-theme=retro] .bub{
+    background-image:repeating-linear-gradient(0deg,
+      rgba(0,0,0,.05) 0px, rgba(0,0,0,.05) 1px, transparent 1px, transparent 2px)}
+  body[data-theme=retro] .ava{border-radius:3px;border:1px solid #1d2c88;
+    filter:grayscale(35%) contrast(1.1) saturate(.8)}
+  body[data-theme=retro] .sec{color:#1d2c88;letter-spacing:.02em}
+  body[data-theme=retro] #dock{background:#d3dbe3;border-top:2px solid #9ba5b5}
+  body[data-theme=retro] #send{border-radius:4px}
+  body[data-theme=retro] .bub,
+  body[data-theme=retro] .who,
+  body[data-theme=retro] .sec,
+  body[data-theme=retro] label,
+  body[data-theme=retro] .btn,
+  body[data-theme=retro] #dock .tools button,
+  body[data-theme=retro] #bar h1{
+    font-family:"DungGeunMo","돋움",Dotum,sans-serif;letter-spacing:.3px}
+  body[data-theme=retro] .bub em{
+    font-family:"DungGeunMo","돋움",Dotum,sans-serif;font-style:normal;
+    opacity:.72;font-weight:400}
   body[data-theme=lemon]{
     --bg:#FCF9EE; --panel:#FCF9EE; --field:#F5EFDC; --line:#EAE1C8;
     --text:#3A3426; --muted:#93896F; --bub:#F6F1E0; --mine:#F0E4B4;
@@ -204,6 +252,13 @@
   .phone .pm.me{background:var(--mine);margin-left:auto}
   .paper{background:var(--paper);border:1px solid var(--paper-line);border-radius:14px;padding:18px 18px 20px;margin:10px 0;font-family:"Noto Serif KR",serif;font-weight:300;color:var(--paper-text);line-height:2;font-size:15.5px;white-space:pre-wrap}
   .paper .pt{font-size:12px;letter-spacing:.08em;color:var(--muted);margin-bottom:10px;font-family:inherit}
+  .udot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#E0524F;margin-right:6px;vertical-align:middle}
+  .ping{display:flex;align-items:center;gap:10px;margin:12px 0;padding:12px 14px;
+    background:var(--field);border:1px solid var(--line);border-radius:14px;cursor:pointer}
+  .ping .dot{flex:0 0 auto;width:8px;height:8px;border-radius:50%;background:#E0524F}
+  .ping b{flex:1;min-width:0;font-size:calc(var(--fs) - 1.5px);font-weight:600;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ping .go{flex:0 0 auto;font-size:12px;color:var(--accent)}
   .statc{background:var(--field);border:1px solid var(--line);border-radius:16px;
     padding:14px 16px;margin:12px 0}
   .statc .pt{font-size:11.5px;letter-spacing:.06em;color:var(--muted);margin-bottom:9px}
@@ -485,13 +540,13 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-07 v";
+var APP_VER = "2026-09-08 c";
 var THEMES = [
   ["light","밝게"], ["mono","무채색"], ["pink","연핑크"], ["sky","연하늘"], ["lemon","연노랑"],
-  ["lilac","연보라"], ["night","밤"], ["plum","보라"]
+  ["lilac","연보라"], ["retro","레트로"], ["night","밤"], ["plum","보라"]
 ];
 var THEME_DARK = { night:1, plum:1 };
-var THEME_BG = { light:"#FFFFFF", mono:"#FFFFFF", pink:"#FDF4F3", sky:"#F2F7FC", lemon:"#FCF9EE", lilac:"#F7F4FC",
+var THEME_BG = { light:"#FFFFFF", mono:"#FFFFFF", pink:"#FDF4F3", sky:"#F2F7FC", lemon:"#FCF9EE", lilac:"#F7F4FC", retro:"#c5d1b8",
                  night:"#12141C", plum:"#15121E" };
 
 function applyTheme(){
@@ -1159,7 +1214,9 @@ function viewEdit(){
 
   h += '<div class="sec">응답</div>';
   h += '<label>길이</label><select data-k="length">'
-     + ["짧게","보통","길게","장문"].map(function(o){ return '<option'+((c.length||"길게")===o?" selected":"")+'>'+o+"</option>"; }).join("")+"</select>";
+     + ["자동","짧게","보통","길게","장문"].map(function(o){
+         var def = c.length || (c.kind==="다인" ? "자동" : "길게");
+         return '<option'+(def===o?" selected":"")+'>'+o+"</option>"; }).join("")+"</select>";
   h += '<label>대사 언어</label><select data-k="lang">'
      + ["한국어","일본어","영어","중국어"].map(function(o){ return '<option'+((c.lang||"한국어")===o?" selected":"")+'>'+o+"</option>"; }).join("")+"</select>";
   h += '<label>발음 표기</label><select data-k="romaji">'
@@ -1283,6 +1340,7 @@ function viewEdit(){
   };
   if ($("#defy")) $("#defy").onchange=function(){ c.defy=this.value; saveChars(); };
   if ($("#narr")) $("#narr").onchange=function(){ c.narrOn=this.value; saveChars(); };
+  if ($("#sping")) $("#sping").onchange=function(){ c.smsPing=this.value; saveChars(); };
   if ($("#castadd")) $("#castadd").onclick=function(){
     c.cast.push({name:"",disp:"",avatar:"",prompt:"",style:"",tagline:"",samples:[]});
     saveChars(); render();
@@ -1978,11 +2036,16 @@ function smsMini(body, c){
 }
 function cardHTML(kind, body, c){
   if (kind==="문자") return smsMini(body, c);
+  if (kind==="알림"){
+    var nm = String(body||"").split("\n")[0].replace(/^[-•*\s]+/,"").trim() || "문자";
+    return '<div class="ping" data-ping="'+esc(nm)+'"><span class="dot"></span>'
+         + '<b>'+esc(nm)+'</b><span class="go">문자 보기</span></div>';
+  }
   if (kind==="일기")  return '<div class="paper"><div class="pt">일기</div>'+cardText(body)+'</div>';
   if (kind==="편지")  return '<div class="paper"><div class="pt">편지</div>'+cardText(body)+'</div>';
   if (kind==="속마음") return '<div class="mind">'+cardText(body)+'</div>';
   if (kind==="비밀")   return '<div class="mind secret"><div class="pt">비밀</div>'+cardText(body)+'</div>';
-  if (kind==="관계" || kind==="상태"){
+  if (kind==="관계" || kind==="상태" || kind==="소문"){
     var rows="";
     String(body||"").split("\n").forEach(function(L){
       L=L.replace(/^[-•*\s]+/,"").trim();
@@ -2012,7 +2075,7 @@ function cardHTML(kind, body, c){
   return "";
 }
 
-var KINDS = ["문자","일기","편지","속마음","플리","나레","관계","상태","비밀"];
+var KINDS = ["문자","일기","편지","속마음","플리","나레","관계","상태","비밀","소문","알림"];
 
 function pieces(c, text){
   var names = [ (c.name||"").trim() ].concat(castOf(c).map(function(x){ return x.name.trim(); }))
@@ -2389,14 +2452,19 @@ function viewSmsList(){
     var last = t.log.length ? t.log[t.log.length-1] : null;
     h += '<div class="thread"><div data-open="'+t.id+'" style="display:flex;align-items:center;gap:11px;flex:1;min-width:0">'
        + avaHTML((t.parts[0]&&t.parts[0].avatar)||"","💬","sm")
-       + '<div class="tx"><div class="tt">'+esc(t.title)+(t.peek?" · 엿보기":"")+'</div>'
+       + '<div class="tx"><div class="tt">'+(t.unread?'<span class="udot"></span>':"")+esc(t.title)+(t.peek?" · 엿보기":"")+'</div>'
        + '<div class="pv">'+esc(last ? (last.who+": "+last.t) : "아직 비어 있음")+'</div></div></div>'
        + '<button class="del" data-tdel="'+t.id+'">✕</button></div>';
   });
   h += '<button class="btn primary" id="tnew">새 문자</button>';
   view.innerHTML = h;
   Array.prototype.forEach.call(view.querySelectorAll("[data-open]"), function(el){
-    el.onclick=function(){ smsCur = el.getAttribute("data-open"); go("sms", c.id); };
+    el.onclick=function(){
+      smsCur = el.getAttribute("data-open");
+      var th2=getThreads(c.id);
+      for (var i=0;i<th2.length;i++) if (th2[i].id===smsCur && th2[i].unread){ th2[i].unread=0; setThreads(c.id, th2); break; }
+      go("sms", c.id);
+    };
   });
   Array.prototype.forEach.call(view.querySelectorAll("[data-tdel]"), function(el){
     el.onclick=function(){
@@ -2703,14 +2771,33 @@ function buildSmsSystem(c, t){
   p.push("매번 질문으로 끝내지 않는다. 질문으로 끝내는 것은 세 턴에 한 번이면 족하다. 한 턴에 물음표를 두 개 이상 쓰지 않는다.");
   p.push("되묻는 대신 궁금할 거리를 흘려두고 설명하지 않거나, 다 말하지 않고 하나를 덜 알려주거나, 아무것도 하지 않고 그냥 끝내도 된다.");
   var others = t.parts.filter(function(x){ return x.key!=="user"; });
+  /* 통 수는 앱이 정한다. 기록을 흉내 내서 매번 같은 수가 나오는 걸 막는다 */
+  var lastRun = 0;
+  for (var q=t.log.length-1; q>=0; q--){
+    if (t.log[q].mine || t.log[q].sys) break;
+    lastRun++;
+  }
   if (others.length >= 2){
     p.push("");
     p.push("# 단톡방이다");
-    p.push("한 번에 여러 사람이 말한다. 통 수는 흐름대로 정한다.");
+    var many = Math.min(9, Math.max(4, others.length + 2 + Math.floor(Math.random()*3)));
+    p.push("이번 턴에는 모두 합쳐 "+many+"통을 보낸다.");
+    p.push("한 사람이 연달아 세 통을 넘기지 않는다.");
     p.push("같은 사람이 연달아 여러 번 말해도 된다. 한 사람이 던지면 다른 사람이 받고, 처음 사람이 다시 되받는 식으로 주고받는다.");
     p.push("사람마다 말수가 다르다. 말이 많은 사람은 여러 번, 조용한 사람은 한 마디만, 이번에 아예 말하지 않는 사람이 있어도 된다. 모두에게 똑같이 나눠 주지 않는다.");
     p.push("모든 말에 답이 달릴 필요는 없다. 누군가의 말이 그냥 묻히거나, 하던 얘기가 끊기고 다른 화제로 넘어가도 된다.");
     p.push("실제 단톡방처럼 쓴다. 회의록이나 순서대로 돌아가며 한 마디씩 하는 형식이 되면 안 된다.");
+  } else {
+    /* 개인톡은 1~3통. 1·2통이 자주, 3통은 가끔 */
+    var pool=[1,1,1,2,2,2,2,3,3];
+    var want=pool[Math.floor(Math.random()*pool.length)];
+    if (want===lastRun) want = (want===1) ? 2 : want-1;
+    p.push("");
+    p.push("# 이번 턴 통 수");
+    p.push("이번 턴에는 "+want+"통을 보낸다. 세 통을 넘기지 않는다.");
+    if (lastRun) p.push("지난 턴에는 "+lastRun+"통을 보냈다. 매번 같은 수로 보내지 않는다.");
+    p.push("다만 "+want+"통으로 나누면 말의 뜻이 끊기는 경우에는 통을 줄여 붙여 보낸다. 억지로 채우지 않는다.");
+    p.push("앞선 기록에서 몇 통씩 보냈는지는 따라 하지 않는다. 이번 턴 통 수는 위에 적힌 수를 따른다.");
   }
   if (t.peek){
     p.push((c.userName||"나")+"는 이 문자방에 없다. 참여자들끼리만 주고받는다.");
@@ -3060,6 +3147,25 @@ function paint(err, thinking){
   if (!log.length && !thinking && !err) h += '<div class="empty">먼저 말을 걸어봐.</div>';
   view.innerHTML=h;
 
+  Array.prototype.forEach.call(view.querySelectorAll("[data-ping]"), function(el){
+    el.onclick=function(e){
+      e.stopPropagation();
+      var nm=el.getAttribute("data-ping");
+      var c2=cur(); if(!c2) return;
+      var th=getThreads(c2.id), hit=null;
+      for (var i=0;i<th.length;i++) if ((th[i].title||"")===nm){ hit=th[i]; break; }
+      if (!hit){
+        var names=[ (c2.name||"상대") ].concat(castOf(c2).map(function(x){ return x.name; })).filter(Boolean);
+        names.unshift(c2.userName||"나");
+        makeThread(c2, names.slice(0,6));
+        var th2=getThreads(c2.id);
+        if (th2[0]){ th2[0].title=nm; setThreads(c2.id, th2); }
+        return;
+      }
+      hit.unread=0; saveThread(c2, hit);
+      smsCur=hit.id; go("sms", c2.id);
+    };
+  });
   Array.prototype.forEach.call(view.querySelectorAll("[data-i]"), function(el){
     var i=+el.getAttribute("data-i");
     bindHold(el, function(){ keepScroll = view.scrollTop || 1; selIdx = (selIdx===i) ? -1 : i; paint(); });
@@ -3127,6 +3233,7 @@ var CMDS = {
   "/전환":"장면을 전환한다. 먼저 첫 줄에 [나레] 를 쓰고 시간과 장소가 어떻게 바뀌었는지 소설처럼 서술한 뒤 [/나레] 로 닫는다. 그 아래에 인물의 말풍선을 이어 쓴다. 나레이션은 이번 턴에만 쓰고 다음 턴부터는 쓰지 않는다.",
   "/관계도":"이번 턴에는 관계도만 보여준다. 첫 줄에 [관계] 를 쓰고 [/관계] 로 닫는다. 그 안에 한 줄에 하나씩 '누가 누구를: 어떻게 보는지' 형식으로 쓴다. 상대와 나의 관계뿐 아니라 인물들끼리의 관계도 함께 쓴다. 겉으로 드러난 관계와 실제 거리감이 다르면 그 차이를 적는다. 지문이나 대사는 한 줄도 쓰지 않는다.",
   "/관계":"이번 턴에는 관계도만 보여준다. 첫 줄에 [관계] 를 쓰고 [/관계] 로 닫는다. 그 안에 한 줄에 하나씩 '누가 누구를: 어떻게 보는지' 형식으로 쓴다. 상대와 나의 관계뿐 아니라 인물들끼리의 관계도 함께 쓴다. 겉으로 드러난 관계와 실제 거리감이 다르면 그 차이를 적는다. 지문이나 대사는 한 줄도 쓰지 않는다.",
+  "/소문":"이번 턴에는 지금 세계관에 도는 소문만 보여준다. 첫 줄에 [소문] 을 쓰고 [/소문] 로 닫는다. 그 안에 한 줄에 하나씩 '항목: 내용' 형식으로 쓴다. 무슨 소문인지, 누가 퍼뜨렸는지, 어디서 도는지, 실제와 얼마나 다른지를 적는다. 소문은 조금씩 틀리거나 부풀려져 있다. 지문이나 대사는 한 줄도 쓰지 않는다.",
   "/상태창":"이번 턴에는 지금 상태만 보여준다. 첫 줄에 [상태] 를 쓰고 [/상태] 로 닫는다. 그 안에 한 줄에 하나씩 '항목: 내용' 형식으로 쓴다. 인물마다 지금 있는 곳, 입고 있는 것, 몸 상태, 겉으로 보이는 감정을 적는다. 속마음이나 앞으로 벌어질 일은 쓰지 않는다. 지문이나 대사도 쓰지 않는다.",
   "/상태":"이번 턴에는 지금 상태만 보여준다. 첫 줄에 [상태] 를 쓰고 [/상태] 로 닫는다. 그 안에 한 줄에 하나씩 '항목: 내용' 형식으로 쓴다. 인물마다 지금 있는 곳, 입고 있는 것, 몸 상태, 겉으로 보이는 감정을 적는다. 속마음이나 앞으로 벌어질 일은 쓰지 않는다. 지문이나 대사도 쓰지 않는다.",
   "/모브":"이번 턴에 지금 상황에 어울리는 새 인물을 한 명 등장시킨다. 그 인물의 이름을 정하고, 말할 때 줄 맨 앞에 대괄호로 그 이름을 적는다. 설정에 없는 단역이어도 된다.",
@@ -3139,7 +3246,10 @@ var CMD_SAY = {
   "/전환":"(장면을 넘기자)",
   "/모브":"(누가 끼어들었어)",
   "/일기":"(일기를 보여줘)", "/편지":"(편지를 보여줘)",
-  "/속마음":"(속마음을 보여줘)", "/플리":"(지금 듣는 노래를 보여줘)"
+  "/속마음":"(속마음을 보여줘)", "/플리":"(지금 듣는 노래를 보여줘)",
+  "/관계":"(관계를 정리해줘)", "/관계도":"(관계를 정리해줘)",
+  "/상태":"(지금 상태를 보여줘)", "/상태창":"(지금 상태를 보여줘)",
+  "/소문":"(요즘 도는 소문이 뭐야)"
 };
 function cmdOf(t){
   var k = String(t||"").trim().split(/\s+/)[0];
@@ -3164,8 +3274,11 @@ function buildSystem(c, turn){
     "짧게":"한 번의 답은 2~5줄로 끝낸다. 톡 주고받듯 짧게 쓰고, 절대 그보다 길게 쓰지 않는다.",
     "보통":"한 번의 답은 6~8줄로 끝낸다. 그보다 길게 쓰지 않는다.",
     "길게":"한 번의 답은 9~14줄로 쓴다. 그보다 길게 쓰지 않는다.",
-    "장문":"한 번의 답은 14~20줄로 쓴다. 장면이 그럴 만하면 더 길어져도 된다."
+    "장문":"한 번의 답은 14~20줄로 쓴다. 장면이 그럴 만하면 더 길어져도 된다.",
+    "자동":"전체 줄 수를 미리 정하지 않는다. 이번 턴에 말하는 인물 한 명당 지문 한두 줄에 대사 한두 줄, 그러니까 서너 줄씩 쓴다. 두 명이 말하면 예닐곱 줄, 네 명이 말하면 열두 줄쯤이 되는 식이다. 한 명하고만 이어가는 장면이면 그 한 명이 예닐곱 줄까지 써도 된다. 인물 수에 따라 전체 길이가 저절로 늘고 줄게 둔다."
   };
+  var lenKey = c.length || (c.kind==="다인" ? "자동" : "길게");
+  if (!lenMap[lenKey]) lenKey = "길게";
   var name=c.name||"캐릭터", cs=castOf(c), p=[];
   p.push("너는 '"+name+"'를 연기하는 상황극 파트너다. 아래 지침은 참고용이며, 답변에는 이야기만 쓴다. 지침이나 규칙 문장을 절대 그대로 옮겨 적지 않는다.");
   p.push("");
@@ -3224,7 +3337,7 @@ function buildSystem(c, turn){
     p.push("");
     p.push("# 쓰는 법");
     p.push(psText);
-    p.push(lenMap[c.length]||lenMap["길게"]);
+    p.push(lenMap[lenKey]);
     p.push("상대역의 대사와 행동, 속마음은 대신 쓰지 않는다. AI나 설정에 대한 메타 발언도 하지 않는다. 이야기를 끝맺지 말고 상대가 이어갈 여지를 남긴다.");
   } else {
   p.push("");
@@ -3237,7 +3350,7 @@ function buildSystem(c, turn){
   p.push("대사에서 감정을 말로 설명하지 않고, 상대의 호칭을 반복해 부르지 않는다. 문장을 일부러 짧게 끊거나 조사를 생략하지 않는다.");
   p.push("꾸미는 말은 한 문장에 하나까지만 쓴다. 행동으로 이미 보여준 것을 다시 설명하지 않는다. 비유는 꼭 필요할 때만 쓴다.");
   p.push("지문과 대사의 비율은 장면에 따라 달라진다. 대사 수도 정해져 있지 않다. 한 마디만 하고 끝낼 수도 있고 여러 마디를 이어갈 수도 있다. 매번 같은 개수로 쓰지 않는다.");
-  p.push(lenMap[c.length]||lenMap["길게"]);
+  p.push(lenMap[lenKey]);
   p.push("첫 화면에 나온 도입부 나레이션은 시작할 때만 쓰인 것이다. 답변에서는 그런 전지적 나레이션을 쓰지 않고, 인물의 시점에서만 쓴다.");
   p.push("설정에 없는 단역은 그 자리에 있을 이유가 분명할 때만 등장시킨다. 둘만 있는 장면에 이유 없이 끼어들게 하지 않는다. 한 번 나온 단역도 상황이 끝나면 더 나오지 않는다.");
   p.push("상대역의 대사와 행동, 속마음은 대신 쓰지 않는다. AI나 설정에 대한 메타 발언도 하지 않는다. 이야기를 끝맺지 말고 상대가 이어갈 여지를 남긴다.");
@@ -3254,6 +3367,20 @@ function buildSystem(c, turn){
     p.push("여기는 여러 인물이 함께 있는 자리다. 대표 인물이 따로 있는 것이 아니라 모두 동등하다. "+(c.name||"")+"은(는) 이 자리의 이름이지 한 사람의 이름이 아니다.");
     p.push("");
   }
+  var pingLv = c.smsPing || "가끔";
+  if (pingLv !== "안 함"){
+    p.push("# 문자 알림");
+    p.push("장면 흐름상 누군가가 문자를 보내올 만한 순간이면, 그 턴 끝에 [알림] 을 쓰고 다음 줄에 문자방 이름만 한 줄 적은 뒤 [/알림] 로 닫는다. 방 이름은 단톡이면 그 모임 이름, 개인톡이면 보낸 사람 이름으로 한다.");
+    p.push("알림 안에는 문자 내용을 쓰지 않는다. 이름 한 줄만 쓴다. 알림 앞뒤 지문에서 폰이 울렸다는 것 정도는 써도 된다.");
+    p.push(pingLv==="자주"
+      ? "연락이 올 만한 상황이면 적극적으로 띄운다."
+      : "정말 그럴 만한 순간에만 띄운다. 한 대화에서 몇 번 안 나오는 것이 자연스럽다.");
+    p.push("떨어져 있거나, 방금 소집이나 약속 이야기가 나왔거나, 시간이 꽤 흐른 뒤라면 올 만하다. 다 같이 한자리에 있는 장면에서는 띄우지 않는다.");
+    p.push("");
+  }
+  p.push("# 소문");
+  p.push("소문 카드로 나온 이야기는 실제로 그 세계에 돌고 있는 것이다. 인물들은 그 소문을 들었을 수 있고, 그 때문에 눈치를 보거나 해명하려 들 수 있다.");
+  p.push("");
   p.push("# 누가 먼저 말하나");
   p.push("매 턴 같은 인물이 먼저 말하지 않는다. 이번 장면에서 먼저 입을 열 이유가 있는 사람이 먼저 말한다. 자리를 주도하는 사람, 방금 지목당한 사람, 참지 못하는 성격인 사람처럼 상황이 정한다.");
   p.push("이번 장면에 없는 인물은 등장시키지 않는다. 상대가 누군가를 따로 불러냈거나 자리를 옮겼으면, 그 자리에 없는 사람은 말하지 않는다.");
@@ -3434,12 +3561,33 @@ function turn(){
   });
 }
 
+/* 보내기를 꾹 누르면 답을 안 받고 말풍선만 쌓는다 */
+var stacked=false;
+function paintSendBtn(){
+  elSend.style.background = stacked ? "var(--bub)" : "";
+  elSend.style.color = stacked ? "var(--text)" : "";
+}
+var sendHeld=false;
+bindHold(elSend, function(){
+  sendHeld=true;
+  setTimeout(function(){ sendHeld=false; }, 700);
+  var c=cur(); if(!c||busy||screen!=="chat") return;
+  var t=elInp.value.trim(); if(!t) return;
+  elInp.value=""; elInp.style.height="auto";
+  var l=getLog(c.id);
+  l.push({ r:"u", t:t });
+  setLog(c.id,l);
+  stacked=true; selIdx=-1; paint(); paintSendBtn();
+});
+
 elSend.onclick=function(){
+  if (sendHeld){ sendHeld=false; return; }
   var c=cur(); if(!c||busy) return;
   var t=elInp.value.trim(); if(!t) return;
   elInp.value=""; elInp.style.height="auto";
 
   if (screen==="sms"){ smsSend(t); return; }
+  stacked=false; paintSendBtn();
 
   if (/^\/비밀\s*$/.test(t)){ runSecret(); return; }
 
@@ -3486,7 +3634,7 @@ $("#undo").onclick=function(){
 $("#note").onclick=function(){ if(cur()) go("note"); };
 $("#smsbtn").onclick=function(){ if(cur()) go("smslist"); };
 $("#cmds").onclick=function(){
-  var k = prompt("명령어를 골라 입력창에 넣을게.\n\n/일기 /속마음 /편지 /플리\n/관계도   누가 누구를 어떻게 보는지\n/상태창   지금 어디서 뭘 하고 있는지\n/비밀   숨긴 마음 (대화엔 안 남음)\n/전환   장면 넘기기\n/모브   단역 등장\n@:   내가 장면 지정\n/ooc   연기 멈추고 지시", "/일기");
+  var k = prompt("명령어를 골라 입력창에 넣을게.\n\n/일기 /속마음 /편지 /플리\n/관계도   누가 누구를 어떻게 보는지\n/상태창   지금 어디서 뭘 하고 있는지\n/소문     요즘 도는 소문\n/비밀     숨긴 마음 (대화엔 안 남음)\n/전환   장면 넘기기\n/모브   단역 등장\n@:   내가 장면 지정\n/ooc   연기 멈추고 지시", "/일기");
   if (!k) return;
   elInp.value = k.trim()+" ";
   elInp.focus();
