@@ -18,6 +18,7 @@
   @font-face{font-family:"RIDIBatang";font-display:swap;
     src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/RIDIBatang.woff") format("woff")}
   @import url('https://fonts.googleapis.com/css2?family=DungGeunMo&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap');
   @font-face{font-family:"MaruBuri";font-display:swap;
     src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/MaruBuri-Regular.woff") format("woff")}
   :root{
@@ -127,8 +128,8 @@
     box-shadow:0 3px 8px rgba(255,111,145,.32)}
   /* 프사에 흰 테두리와 분홍 링 */
   body[data-theme=berry] .ava{
-    border:3px solid #fff;
-    box-shadow:0 0 0 3px #ffd6e4, 0 4px 10px rgba(255,120,160,.28)}
+    border:2px solid #fff;
+    box-shadow:0 3px 9px rgba(255,120,160,.30)}
   body[data-theme=berry] .card,
   body[data-theme=berry] .castbox,
   body[data-theme=berry] .statc,
@@ -142,6 +143,209 @@
     background:linear-gradient(135deg,#ff9ab8,#ff5c7f);color:#fff;
     box-shadow:0 4px 10px rgba(255,92,127,.38)}
   body[data-theme=berry] .sec{color:#ff5c7f}
+
+  /* 하늘소다 · 멜론소다 — 딸기토끼와 같은 구조, 색만 다르게 */
+  body[data-theme=soda]{
+    --bg:#f4fbff; --panel:#fdfeff; --field:#e9f5ff; --line:#c9e4f8;
+    --text:#2d4759; --muted:#7ba4bf; --bub:#f2faff; --mine:#d8eeff;
+    --nar:#6f9ab5; --accent:#3aa5e0; --trc:#3f5c6e;
+    --paper:#fbfdff; --paper-line:#c9e4f8; --paper-text:#2d4759;
+  }
+  body[data-theme=soda]{
+    background:linear-gradient(135deg,#f4fbff 0%,#e3f3ff 40%,#c9e8ff 75%,#a8d8f8 100%);
+    background-attachment:fixed}
+  body[data-theme=melon]{
+    --bg:#f7fdf3; --panel:#fdfffb; --field:#eaf8e2; --line:#cbe9bd;
+    --text:#35492f; --muted:#82a878; --bub:#f4fcef; --mine:#dcf2cd;
+    --nar:#7aa06f; --accent:#4fae5c; --trc:#46603f;
+    --paper:#fbfef8; --paper-line:#cbe9bd; --paper-text:#35492f;
+  }
+  body[data-theme=melon]{
+    background:linear-gradient(135deg,#f7fdf3 0%,#eaf9e0 40%,#d3f0c4 75%,#b6e5a2 100%);
+    background-attachment:fixed}
+  /* 탄산 방울 */
+  body[data-theme=soda]::before, body[data-theme=melon]::before,
+  body[data-theme=soda]::after,  body[data-theme=melon]::after{
+    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-repeat:no-repeat;animation-timing-function:ease-in-out;
+    animation-iteration-count:infinite;animation-direction:alternate}
+  body[data-theme=soda]::before, body[data-theme=melon]::before{
+    animation-name:sb-a;animation-duration:9s;
+    background-image:
+      radial-gradient(circle 3px at 14% 26%, rgba(255,255,255,.95), transparent 100%),
+      radial-gradient(circle 4px at 28% 11%, rgba(255,255,255,.85), transparent 100%),
+      radial-gradient(circle 3px at 41% 38%, rgba(255,255,255,.92), transparent 100%),
+      radial-gradient(circle 5px at 57% 17%, rgba(255,255,255,.80), transparent 100%),
+      radial-gradient(circle 3px at 72% 31%, rgba(255,255,255,.90), transparent 100%),
+      radial-gradient(circle 4px at 88% 44%, rgba(255,255,255,.85), transparent 100%),
+      radial-gradient(circle 3px at 9%  61%, rgba(255,255,255,.92), transparent 100%),
+      radial-gradient(circle 5px at 24% 76%, rgba(255,255,255,.78), transparent 100%),
+      radial-gradient(circle 3px at 46% 90%, rgba(255,255,255,.90), transparent 100%),
+      radial-gradient(circle 4px at 63% 68%, rgba(255,255,255,.84), transparent 100%),
+      radial-gradient(circle 3px at 81% 83%, rgba(255,255,255,.90), transparent 100%),
+      radial-gradient(circle 4px at 95% 20%, rgba(255,255,255,.82), transparent 100%)}
+  body[data-theme=soda]::after{
+    animation-name:sb-b;animation-duration:15s;animation-delay:-5s;
+    background-image:
+      radial-gradient(circle 28px at 20% 18%, rgba(150,205,240,.26), transparent 100%),
+      radial-gradient(circle 36px at 44% 72%, rgba(175,220,250,.22), transparent 100%),
+      radial-gradient(circle 24px at 68% 30%, rgba(150,205,240,.26), transparent 100%),
+      radial-gradient(circle 34px at 86% 66%, rgba(175,220,250,.20), transparent 100%)}
+  body[data-theme=melon]::after{
+    animation-name:sb-b;animation-duration:15s;animation-delay:-5s;
+    background-image:
+      radial-gradient(circle 28px at 20% 18%, rgba(165,220,145,.26), transparent 100%),
+      radial-gradient(circle 36px at 44% 72%, rgba(195,235,175,.22), transparent 100%),
+      radial-gradient(circle 24px at 68% 30%, rgba(165,220,145,.26), transparent 100%),
+      radial-gradient(circle 34px at 86% 66%, rgba(195,235,175,.20), transparent 100%)}
+  body[data-theme=soda] #app, body[data-theme=melon] #app{position:relative;z-index:1}
+  body[data-theme=soda] #bar, body[data-theme=soda] #dock{background:rgba(244,251,255,.74);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  body[data-theme=melon] #bar, body[data-theme=melon] #dock{background:rgba(247,253,243,.74);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  body[data-theme=soda] #view, body[data-theme=melon] #view{background:transparent}
+  body[data-theme=soda] .bub, body[data-theme=melon] .bub{
+    border-radius:18px;border:1px solid var(--line);
+    box-shadow:0 0 0 1px rgba(255,255,255,.85), 0 4px 13px rgba(80,140,180,.13)}
+  body[data-theme=melon] .bub{box-shadow:0 0 0 1px rgba(255,255,255,.85), 0 4px 13px rgba(100,160,90,.13)}
+  body[data-theme=soda] .msg .who, body[data-theme=melon] .msg .who{
+    display:inline-block;margin:0 0 5px 2px;padding:3px 12px;border-radius:11px;
+    color:#fff;font-size:11.5px;font-weight:800;letter-spacing:.02em}
+  body[data-theme=soda] .msg .who{background:linear-gradient(135deg,#7cc7ee,#3aa5e0);
+    box-shadow:0 3px 8px rgba(58,165,224,.30)}
+  body[data-theme=melon] .msg .who{background:linear-gradient(135deg,#8ed08a,#4fae5c);
+    box-shadow:0 3px 8px rgba(79,174,92,.30)}
+  body[data-theme=soda] .ava{border:2px solid #fff;box-shadow:0 3px 9px rgba(80,140,180,.28)}
+  body[data-theme=melon] .ava{border:2px solid #fff;box-shadow:0 3px 9px rgba(100,160,90,.28)}
+  body[data-theme=soda] .card, body[data-theme=soda] .castbox,
+  body[data-theme=melon] .card, body[data-theme=melon] .castbox{
+    border-radius:20px;border:1px solid var(--line)}
+  body[data-theme=soda] .btn, body[data-theme=melon] .btn{border-radius:14px}
+  body[data-theme=soda] #inwrap{border-radius:16px;border:1px solid #c9e4f8}
+  body[data-theme=melon] #inwrap{border-radius:16px;border:1px solid #cbe9bd}
+  body[data-theme=soda] #send{background:linear-gradient(135deg,#7cc7ee,#3aa5e0);color:#fff}
+  body[data-theme=melon] #send{background:linear-gradient(135deg,#8ed08a,#4fae5c);color:#fff}
+
+  /* 디토 — 캠코더로 찍은 90년대 */
+  body[data-theme=ditto]{
+    --bg:#f2ede1; --panel:#f7f3ea; --field:#eae4d5; --line:#d6cebb;
+    --text:#4a453c; --muted:#948c7c; --bub:#f6f2e8; --mine:#e4e2d2;
+    --nar:#8a8272; --accent:#6b8f8a; --trc:#5c574c;
+    --paper:#f5f1e6; --paper-line:#d6cebb; --paper-text:#4a453c;
+  }
+  body[data-theme=ditto]::before{
+    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:
+      radial-gradient(ellipse 120% 90% at 50% 50%, transparent 55%, rgba(60,52,40,.20) 100%),
+      repeating-linear-gradient(0deg, rgba(120,110,90,.05) 0px, rgba(120,110,90,.05) 1px, transparent 1px, transparent 3px);
+  }
+  body[data-theme=ditto] #app{position:relative;z-index:1}
+  body[data-theme=ditto] #view{background:transparent}
+  body[data-theme=ditto] #bar, body[data-theme=ditto] #dock{background:rgba(242,237,225,.82)}
+  body[data-theme=ditto] .bub{border-radius:10px;border:1px solid #ded6c4;box-shadow:none}
+  body[data-theme=ditto] .ava{border:2px solid #f7f3ea;
+    filter:saturate(.55) sepia(.16) contrast(.96);
+    box-shadow:0 2px 6px rgba(70,60,45,.20)}
+  body[data-theme=ditto] .msg .who{color:var(--muted);letter-spacing:.04em;font-size:11.5px}
+  body[data-theme=ditto] .card, body[data-theme=ditto] .castbox{border-radius:12px}
+  body[data-theme=ditto] .btn{border-radius:10px}
+  body[data-theme=ditto] #inwrap{border-radius:10px;border:1px solid #d6cebb}
+
+  /* 데코메 — 2000년대 가라케 꾸미기 */
+  body[data-theme=deco]{
+    --bg:#fdf3fb; --panel:#fffafd; --field:#fbe8f6; --line:#f0c6e4;
+    --text:#5a3b57; --muted:#b489ac; --bub:#fff5fc; --mine:#e6e2ff;
+    --nar:#a37b9d; --accent:#e46bb8; --trc:#6d4a68;
+    --paper:#fffafd; --paper-line:#f0c6e4; --paper-text:#5a3b57;
+  }
+  body[data-theme=deco]{
+    background:linear-gradient(160deg,#fdf3fb 0%,#f6e6fb 35%,#e8e4fd 68%,#dff0fd 100%);
+    background-attachment:fixed}
+  body[data-theme=deco]::before{
+    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+    animation:sb-a 6s ease-in-out infinite alternate;
+    background-repeat:no-repeat;
+    background-image:
+      radial-gradient(circle 2px at 11% 17%, rgba(255,255,255,1), transparent 100%),
+      radial-gradient(circle 3px at 26% 33%, rgba(255,225,250,.95), transparent 100%),
+      radial-gradient(circle 2px at 38% 8%,  rgba(255,255,255,1), transparent 100%),
+      radial-gradient(circle 3px at 52% 28%, rgba(225,235,255,.95), transparent 100%),
+      radial-gradient(circle 2px at 67% 12%, rgba(255,255,255,1), transparent 100%),
+      radial-gradient(circle 3px at 79% 37%, rgba(255,225,250,.90), transparent 100%),
+      radial-gradient(circle 2px at 91% 22%, rgba(255,255,255,1), transparent 100%),
+      radial-gradient(circle 3px at 7%  54%, rgba(225,235,255,.92), transparent 100%),
+      radial-gradient(circle 2px at 22% 71%, rgba(255,255,255,1), transparent 100%),
+      radial-gradient(circle 3px at 41% 86%, rgba(255,225,250,.92), transparent 100%),
+      radial-gradient(circle 2px at 58% 64%, rgba(255,255,255,1), transparent 100%),
+      radial-gradient(circle 3px at 73% 91%, rgba(225,235,255,.90), transparent 100%),
+      radial-gradient(circle 2px at 88% 76%, rgba(255,255,255,1), transparent 100%),
+      radial-gradient(circle 3px at 96% 58%, rgba(255,225,250,.92), transparent 100%)}
+  body[data-theme=deco] #app{position:relative;z-index:1}
+  body[data-theme=deco] #view{background:transparent}
+  body[data-theme=deco] #bar{
+    background:linear-gradient(to bottom, rgba(255,214,242,.92), rgba(238,206,250,.92));
+    border-bottom:2px solid #f0c6e4;
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+  body[data-theme=deco] #dock{background:rgba(255,247,253,.90);border-top:2px solid #f0c6e4}
+  body[data-theme=deco] .bub{
+    border-radius:16px;border:2px solid #f5cfe9;
+    box-shadow:0 0 0 2px rgba(255,255,255,.9), 0 3px 10px rgba(228,107,184,.18)}
+  body[data-theme=deco] .msg.me .bub{border-color:#cfcaf7}
+  body[data-theme=deco] .msg .who{
+    display:inline-block;margin:0 0 5px 2px;padding:2px 11px;border-radius:9px;
+    background:linear-gradient(135deg,#ffb3e2,#c9a8ff);color:#fff;
+    font-size:11px;font-weight:800;letter-spacing:.03em;
+    box-shadow:0 2px 6px rgba(200,120,190,.32)}
+  body[data-theme=deco] .msg .who::before{content:"★ "}
+  body[data-theme=deco] .ava{border:2px solid #fff;
+    box-shadow:0 0 0 2px #ffd6f2, 0 3px 8px rgba(200,120,190,.30)}
+  body[data-theme=deco] .card, body[data-theme=deco] .castbox{
+    border-radius:16px;border:2px solid #f5cfe9}
+  body[data-theme=deco] .btn{border-radius:12px;border:2px solid #f0c6e4}
+  body[data-theme=deco] #inwrap{border-radius:14px;border:2px solid #f0c6e4}
+  body[data-theme=deco] #send{background:linear-gradient(135deg,#ffb3e2,#c9a8ff);color:#fff}
+  body[data-theme=deco] .sec{color:#e46bb8}
+  body[data-theme=deco] .sec::before{content:"♡ "}
+
+  /* 홈페이지 — 2000년대 개인 사이트 */
+  body[data-theme=homepage]{
+    --bg:#ffffff; --panel:#ffffff; --field:#f6f8fb; --line:#cdd8e4;
+    --text:#3a4450; --muted:#8f9dad; --bub:#f7fafd; --mine:#eef4fa;
+    --nar:#7e8c9c; --accent:#6b8fc4; --trc:#54606e;
+    --paper:#fbfcfe; --paper-line:#cdd8e4; --paper-text:#3a4450;
+  }
+  body[data-theme=homepage]{
+    background:#ffffff;
+    background-image:repeating-linear-gradient(0deg,
+      rgba(107,143,196,.045) 0px, rgba(107,143,196,.045) 1px, transparent 1px, transparent 26px)}
+  body[data-theme=homepage] #view{background:transparent}
+  body[data-theme=homepage] #bar{background:#fff;border-bottom:1px dashed #cdd8e4}
+  body[data-theme=homepage] #dock{background:#fff;border-top:1px dashed #cdd8e4}
+  body[data-theme=homepage] .bub{
+    border-radius:2px;border:1px dashed #cdd8e4;box-shadow:none;
+    background:var(--bub);letter-spacing:.01em}
+  body[data-theme=homepage] .msg.me .bub{border-style:dashed;border-color:#b9cbe0}
+  body[data-theme=homepage] .ava{border-radius:2px;border:1px solid #cdd8e4;box-shadow:none}
+  body[data-theme=homepage] .msg .who{
+    color:#6b8fc4;font-size:11.5px;letter-spacing:.06em}
+  body[data-theme=homepage] .msg .who::before{content:"┃"}
+  body[data-theme=homepage] .card,
+  body[data-theme=homepage] .castbox,
+  body[data-theme=homepage] .statc{border-radius:2px;border:1px dashed #cdd8e4;box-shadow:none}
+  body[data-theme=homepage] .btn,
+  body[data-theme=homepage] input,
+  body[data-theme=homepage] textarea,
+  body[data-theme=homepage] select{border-radius:2px;border:1px solid #cdd8e4}
+  body[data-theme=homepage] #inwrap{border-radius:2px;border:1px solid #cdd8e4}
+  body[data-theme=homepage] #send{border-radius:2px}
+  body[data-theme=homepage] .sec{
+    color:#6b8fc4;letter-spacing:.08em;border-bottom:1px dashed #cdd8e4;padding-bottom:4px}
+  body[data-theme=homepage] .sec::before{content:"■ "}
+  body[data-theme=homepage] .bub,
+  body[data-theme=homepage] .who,
+  body[data-theme=homepage] .sec,
+  body[data-theme=homepage] #dock .tools button{
+    font-family:"Nanum Gothic Coding","Nanum Gothic",monospace}
 
   /* 레트로 — 피처폰 액정 */
   body[data-theme=retro]{
@@ -565,7 +769,8 @@ var FONTS = {
   "나눔손글씨 붓":'"Nanum Brush Script",cursive',
   "개구쟁이":'"Gaegu",cursive',
   "하이멜로디":'"Hi Melody",cursive',
-  "둥근모":'"DungGeunMo","돋움",Dotum,sans-serif'
+  "둥근모":'"DungGeunMo","돋움",Dotum,sans-serif',
+  "고정폭":'"Nanum Gothic Coding","Nanum Gothic",monospace'
 };
 var cfg = get("gz.cfg", { mode:"openai", key:"", base:"", model:"gemini-3.7-flash", maxTokens:2600,
                           theme:"light", fBody:"프리텐다드", fNar:"본명조", fSize:16, smsTheme:"기본", preset:"", viewMode:"bubble", bubW:84, fSms:"테마 따라가기", sSize:15, think:"auto", models:"" });
@@ -626,13 +831,13 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-08 d";
+var APP_VER = "2026-09-08 f";
 var THEMES = [
   ["light","밝게"], ["mono","무채색"], ["pink","연핑크"], ["sky","연하늘"], ["lemon","연노랑"],
-  ["lilac","연보라"], ["berry","딸기토끼"], ["retro","레트로"], ["night","밤"], ["plum","보라"]
+  ["lilac","연보라"], ["berry","딸기토끼"], ["soda","하늘소다"], ["melon","멜론소다"], ["ditto","디토"], ["deco","데코메"], ["homepage","홈페이지"], ["retro","레트로"], ["night","밤"], ["plum","보라"]
 ];
 var THEME_DARK = { night:1, plum:1 };
-var THEME_BG = { light:"#FFFFFF", mono:"#FFFFFF", pink:"#FDF4F3", sky:"#F2F7FC", lemon:"#FCF9EE", lilac:"#F7F4FC", retro:"#c5d1b8", berry:"#fff8fa",
+var THEME_BG = { light:"#FFFFFF", mono:"#FFFFFF", pink:"#FDF4F3", sky:"#F2F7FC", lemon:"#FCF9EE", lilac:"#F7F4FC", retro:"#c5d1b8", berry:"#fff8fa", soda:"#f4fbff", melon:"#f7fdf3", ditto:"#f2ede1", deco:"#fdf3fb", homepage:"#ffffff",
                  night:"#12141C", plum:"#15121E" };
 
 function applyTheme(){
