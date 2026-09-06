@@ -45,6 +45,104 @@
     --nar:#8A81A0; --accent:#7C63C4; --trc:#554D68;
     --paper:#F2EDF9; --paper-line:#E2DAEF; --paper-text:#2E2838;
   }
+  /* 로판 — 크림과 금박 */
+  body[data-theme=novel]{
+    --bg:#e8f1fb; --panel:#fffaf4; --field:#f7eede; --line:#d8c39a;
+    --text:#171412; --muted:#8a6b39; --bub:#fff4e4; --mine:#f4efe4;
+    --nar:#8f6640; --accent:#8a6b39; --trc:#5c4a2e;
+    --paper:#fffaf4; --paper-line:#d8c39a; --paper-text:#171412;
+  }
+  body[data-theme=novel]{
+    background:linear-gradient(180deg,#f1f8ff 0%,#dcefff 46%,#cfe4f8 100%);
+    background-attachment:fixed;
+    font-family:"Gowun Batang",serif}
+  body[data-theme=novel]::before{
+    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.42;
+    background:
+      linear-gradient(90deg, rgba(255,255,255,.30) 0 1px, transparent 1px 70px),
+      linear-gradient(rgba(255,255,255,.24) 0 1px, transparent 1px 70px)}
+  body[data-theme=novel]::after{
+    content:'';position:fixed;inset:22px;z-index:0;pointer-events:none;
+    border:1px solid rgba(255,255,255,.35);
+    box-shadow:inset 0 0 0 1px rgba(184,154,97,.22);
+    background:
+      radial-gradient(circle 3px at 9% 12%,  rgba(255,246,221,.95), transparent 100%),
+      radial-gradient(circle 2px at 88% 15%, rgba(255,246,221,.90), transparent 100%),
+      radial-gradient(circle 3px at 13% 78%, rgba(255,246,221,.90), transparent 100%),
+      radial-gradient(circle 2px at 91% 84%, rgba(255,246,221,.95), transparent 100%),
+      radial-gradient(circle 2px at 5%  46%, rgba(255,246,221,.85), transparent 100%),
+      radial-gradient(circle 3px at 95% 55%, rgba(255,246,221,.85), transparent 100%)}
+  body[data-theme=novel] #app{position:relative;z-index:1}
+  body[data-theme=novel] #view{background:transparent}
+  body[data-theme=novel] #bar, body[data-theme=novel] #dock{
+    background:rgba(255,250,244,.62);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  body[data-theme=novel] .bub{
+    border-radius:16px 16px 16px 4px;
+    background:linear-gradient(135deg, rgba(255,244,228,.97), rgba(245,224,197,.95) 55%, rgba(220,190,145,.90));
+    border:1px solid rgba(184,154,97,.52);
+    box-shadow:0 12px 26px rgba(22,24,36,.16), inset 0 1px 0 rgba(255,255,255,.36)}
+  body[data-theme=novel] .msg.me .bub{
+    border-radius:16px 16px 4px 16px;
+    background:linear-gradient(135deg, rgba(255,246,231,.96), rgba(224,224,220,.94) 48%, rgba(184,154,97,.82));
+    border-color:rgba(138,107,57,.55)}
+  body[data-theme=novel] .msg .who{color:#5c4a2e;font-weight:700;font-size:13px;letter-spacing:.03em}
+  body[data-theme=novel] .ava{border:2px solid rgba(255,250,244,.92);
+    box-shadow:0 0 0 1px rgba(184,154,97,.55), 0 4px 12px rgba(22,24,36,.20)}
+  body[data-theme=novel] .card, body[data-theme=novel] .castbox,
+  body[data-theme=novel] .statc{border-radius:12px;border:1px solid rgba(184,154,97,.45);
+    background:rgba(255,250,244,.86)}
+  body[data-theme=novel] .btn{border-radius:12px;border:1px solid rgba(184,154,97,.45)}
+  body[data-theme=novel] #inp{border-radius:14px;border:1px solid rgba(184,154,97,.55);
+    background:rgba(255,250,244,.90)}
+  body[data-theme=novel] #send{
+    background:linear-gradient(135deg,#fff1dc,#b89a61);color:#171412;
+    border:1px solid rgba(138,107,57,.55)}
+  body[data-theme=novel] .bub em{color:#8f6640}
+
+  /* 시원한 그레이 — 맑은 유리 */
+  body[data-theme=gray]{
+    --bg:#eef1f3; --panel:#f7f9fa; --field:#e6eaed; --line:#d3d9dd;
+    --text:#222222; --muted:#4e5f61; --bub:#ffffff; --mine:#f2f5f7;
+    --nar:#6f6f6f; --accent:#4e5f61; --trc:#4e5f61;
+    --paper:#f7f9fa; --paper-line:#d3d9dd; --paper-text:#222222;
+  }
+  body[data-theme=gray]{
+    background:linear-gradient(165deg,#f6f8f9 0%,#e9eef1 45%,#dbe3e7 100%);
+    background-attachment:fixed}
+  body[data-theme=gray]::before{
+    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(circle at 22% 12%, rgba(255,255,255,.55), transparent 34%),
+      radial-gradient(circle at 82% 78%, rgba(255,255,255,.40), transparent 36%)}
+  body[data-theme=gray] #app{position:relative;z-index:1}
+  body[data-theme=gray] #view{background:transparent}
+  body[data-theme=gray] #bar, body[data-theme=gray] #dock{
+    background:rgba(255,255,255,.34);
+    backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}
+  body[data-theme=gray] .bub{
+    border-radius:16px;
+    background:rgba(255,255,255,.42);
+    border:1.5px solid rgba(255,255,255,.86);
+    box-shadow:0 8px 32px rgba(31,38,135,.06);
+    backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}
+  body[data-theme=gray] .msg.me .bub{background:rgba(255,255,255,.26)}
+  body[data-theme=gray] .bub em{color:#6f6f6f}
+  body[data-theme=gray] .msg .who{color:#222;font-weight:700;font-size:13.5px;margin:0 0 6px 3px}
+  body[data-theme=gray] .ava{border:1.5px solid rgba(255,255,255,.9);
+    box-shadow:0 3px 10px rgba(31,38,135,.10)}
+  body[data-theme=gray] .card, body[data-theme=gray] .castbox,
+  body[data-theme=gray] .statc{
+    border-radius:16px;background:rgba(255,255,255,.40);
+    border:1.5px solid rgba(255,255,255,.76);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  body[data-theme=gray] .btn{border-radius:16px;border:1.5px solid rgba(255,255,255,.76);
+    background:rgba(255,255,255,.34)}
+  body[data-theme=gray] #inp{border-radius:16px;border:1.5px solid rgba(255,255,255,.76);
+    background:rgba(255,255,255,.40)}
+  body[data-theme=gray] #send{background:rgba(255,255,255,.42);
+    border:1.5px solid rgba(255,255,255,.8);color:#222}
+
   /* 푸른바다 — 유리 젤리 */
   body[data-theme=ocean]{
     --bg:#eef6ff; --panel:#f7fbff; --field:#e3eefc; --line:#c3ddf7;
@@ -93,10 +191,7 @@
   body[data-theme=ocean] .msg.me .bub{
     background:linear-gradient(180deg, rgba(255,255,255,.72), rgba(196,222,254,.60) 54%, rgba(96,164,244,.28))}
   body[data-theme=ocean] .msg .who{
-    display:inline-block;margin:0 0 5px 2px;padding:3px 12px;border-radius:11px;
-    background:linear-gradient(135deg,#7cb6f2,#246fc9);color:#fff;
-    font-size:11.5px;font-weight:800;letter-spacing:.02em;
-    box-shadow:0 3px 8px rgba(36,111,201,.30)}
+    color:#1b3355;font-weight:700;font-size:13.5px;margin:0 0 6px 3px}
   body[data-theme=ocean] .ava{border:2px solid rgba(255,255,255,.95);
     box-shadow:0 3px 10px rgba(45,102,184,.28)}
   body[data-theme=ocean] .card,
@@ -178,10 +273,7 @@
   body[data-theme=berry] .msg.me .bub{border-color:#ffd0e0}
   /* 이름은 분홍 알약 뱃지로 */
   body[data-theme=berry] .msg .who{
-    display:inline-block;margin:0 0 5px 2px;padding:3px 12px;border-radius:11px;
-    background:linear-gradient(135deg,#ff9ab8,#ff6f91);color:#fff;
-    font-size:11.5px;font-weight:800;letter-spacing:.02em;
-    box-shadow:0 3px 8px rgba(255,111,145,.32)}
+    color:#3a2b33;font-weight:700;font-size:13.5px;margin:0 0 6px 3px}
   /* 프사에 흰 테두리와 분홍 링 */
   body[data-theme=berry] .ava{
     border:2px solid #fff;
@@ -703,13 +795,13 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-08 i";
+var APP_VER = "2026-09-08 j";
 var THEMES = [
   ["light","밝게"], ["pink","연핑크"], ["sky","연하늘"],
-  ["lilac","연보라"], ["ocean","푸른바다"], ["berry","딸기토끼"], ["homepage","홈페이지"], ["retro","레트로"], ["night","밤"]
+  ["lilac","연보라"], ["ocean","푸른바다"], ["novel","로판"], ["gray","시원한그레이"], ["berry","딸기토끼"], ["homepage","홈페이지"], ["retro","레트로"], ["night","밤"]
 ];
 var THEME_DARK = { night:1 };
-var THEME_BG = { light:"#FFFFFF", pink:"#FDF4F3", sky:"#F2F7FC", lilac:"#F7F4FC", ocean:"#eef6ff", retro:"#c5d1b8", berry:"#fff8fa", homepage:"#ffffff",
+var THEME_BG = { light:"#FFFFFF", pink:"#FDF4F3", sky:"#F2F7FC", lilac:"#F7F4FC", ocean:"#eef6ff", novel:"#e8f1fb", gray:"#eef1f3", retro:"#c5d1b8", berry:"#fff8fa", homepage:"#ffffff",
                  night:"#12141C" };
 
 function applyTheme(){
