@@ -374,6 +374,7 @@
       <button id="cmds">명령어</button>
       <button id="find">찾기</button>
       <button id="note">노트</button>
+      <button id="model"></button>
       <button id="rooms">대화방</button>
       <button id="reset">초기화</button>
     </div>
@@ -426,7 +427,7 @@ var FONTS = {
   "둥근모":'"DungGeunMo","돋움",Dotum,sans-serif'
 };
 var cfg = get("gz.cfg", { mode:"openai", key:"", base:"", model:"gemini-3.7-flash", maxTokens:2600,
-                          theme:"light", fBody:"프리텐다드", fNar:"본명조", fSize:16, smsTheme:"기본", preset:"", viewMode:"bubble", bubW:84, fSms:"테마 따라가기", sSize:15, think:"auto" });
+                          theme:"light", fBody:"프리텐다드", fNar:"본명조", fSize:16, smsTheme:"기본", preset:"", viewMode:"bubble", bubW:84, fSms:"테마 따라가기", sSize:15, think:"auto", models:"" });
 if (!cfg.mode) cfg.mode = "openai";
 if (!cfg.theme) cfg.theme = "light";
 if (typeof cfg.preset !== "string") cfg.preset = "";
@@ -435,6 +436,7 @@ if (!cfg.bubW) cfg.bubW = 84;
 if (!cfg.fSms) cfg.fSms = "테마 따라가기";
 if (!cfg.sSize) cfg.sSize = 15;
 if (!cfg.think) cfg.think = "auto";
+if (typeof cfg.models !== "string") cfg.models = "";
 var chars = get("gz.chars", []);
 var presets = get("gz.presets", []);
 function saveCfg(){ put("gz.cfg", cfg); applyTheme(); }
@@ -483,7 +485,7 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-07 r";
+var APP_VER = "2026-09-07 s";
 var THEMES = [
   ["light","밝게"], ["mono","무채색"], ["pink","연핑크"], ["sky","연하늘"], ["lemon","연노랑"],
   ["lilac","연보라"], ["night","밤"], ["plum","보라"]
@@ -988,6 +990,20 @@ function applyThink(body, isGemini){
   }
   return body;
 }
+/* 모델 목록 — 이름 | 주소 | 키 | 진짜모델이름 */
+function modelList(){
+  return String(cfg.models||"").split("\n").map(function(L){
+    var v = L.split("|").map(function(x){ return x.trim(); });
+    if (!v[0]) return null;
+    return { label:v[0], base:v[1]||"", key:v[2]||"", model:v[3]||v[0] };
+  }).filter(Boolean);
+}
+function modelLabel(){
+  var ms=modelList();
+  for (var i=0;i<ms.length;i++) if (ms[i].model===cfg.model) return ms[i].label;
+  var m=String(cfg.model||"");
+  return m.length>14 ? m.slice(-14) : (m||"모델");
+}
 function genOf(c){
   var ps=presetOf(c), o={ temp:null, topP:null, maxTokens:cfg.maxTokens||2600 };
   if (ps){
@@ -1312,6 +1328,9 @@ function viewCfg(){
      + '<div style="display:flex;gap:8px"><input id="k" type="password" value="'+esc(cfg.key)+'" autocapitalize="off" autocorrect="off" spellcheck="false">'
      + '<button class="btn sm" id="kv">보기</button></div>';
   h += '<label>모델</label><input id="m" value="'+esc(cfg.model)+'" autocapitalize="off" spellcheck="false">';
+  h += '<label>모델 목록</label>'
+     + '<textarea id="mlist" style="min-height:110px" placeholder="프로&#10;젬마 | https://내앱.vercel.app/v1 | sk-키&#10;라우터젬마 | https://openrouter.ai/api/v1 | sk-or-키 | google/gemma-3-27b-it" autocapitalize="off" spellcheck="false">'+esc(cfg.models||"")+'</textarea>';
+  h += '<div class="hint">한 줄에 하나. 이름만 적으면 모델 이름으로 쓰고 주소·키는 그대로 둬. 세로줄로 나눠서 주소, 키, 진짜 모델 이름까지 붙일 수 있어.</div>';
   h += '<label>추론</label><select id="thk">'
      + [["auto","자동"],["off","끄기"],["low","낮음"],["mid","보통"],["high","높음"]].map(function(o){
          return '<option value="'+o[0]+'"'+((cfg.think||"auto")===o[0]?" selected":"")+'>'+o[1]+'</option>';
@@ -1374,6 +1393,7 @@ function viewCfg(){
   function on(sel, ev, fn){ var el=$(sel); if (el) el[ev]=fn; }
   on("#md","onchange",function(){ cfg.mode=this.value; saveCfg(); });
   on("#thk","onchange",function(){ cfg.think=this.value; saveCfg(); });
+  on("#mlist","oninput",function(){ cfg.models=this.value; saveCfg(); });
   on("#th","onchange",function(){ cfg.theme=this.value; saveCfg(); });
   on("#fb","onchange",function(){ cfg.fBody=this.value; saveCfg(); });
   on("#fn","onchange",function(){ cfg.fNar=this.value; saveCfg(); });
@@ -2956,6 +2976,7 @@ function viewChat(){
     if (g0) setLog(c.id, seedGreeting(c, g0));
   }
   paint();
+  paintModelBtn();
   refreshDigest(c);
 }
 
@@ -3458,6 +3479,24 @@ $("#cmds").onclick=function(){
   if (!k) return;
   elInp.value = k.trim()+" ";
   elInp.focus();
+};
+function paintModelBtn(){
+  var b=$("#model"); if(!b) return;
+  b.textContent = "모델 · " + modelLabel();
+}
+$("#model").onclick=function(){
+  var ms=modelList();
+  if (!ms.length) return alert("설정 → 연결 → 모델 목록에 먼저 적어줘.\n\n예)\n프로\n젬마 | https://내앱.vercel.app/v1 | sk-키");
+  var now=modelLabel();
+  var v=prompt("지금 · "+now+"\n\n"+ms.map(function(m,i){ return (i+1)+" "+m.label; }).join("\n"), "1");
+  if (v===null) return;
+  var n=parseInt(v,10);
+  if (!(n>=1 && n<=ms.length)) return;
+  var m=ms[n-1];
+  cfg.model = m.model;
+  if (m.base) cfg.base = m.base;
+  if (m.key)  cfg.key  = m.key;
+  saveCfg(); paintModelBtn();
 };
 $("#rooms").onclick=function(){ var c=cur(); if(c) go("rooms", c.id); };
 function runSecret(){
