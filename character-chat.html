@@ -485,7 +485,7 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-07 s";
+var APP_VER = "2026-09-07 t";
 var THEMES = [
   ["light","밝게"], ["mono","무채색"], ["pink","연핑크"], ["sky","연하늘"], ["lemon","연노랑"],
   ["lilac","연보라"], ["night","밤"], ["plum","보라"]
@@ -991,6 +991,14 @@ function applyThink(body, isGemini){
   return body;
 }
 /* 모델 목록 — 이름 | 주소 | 키 | 진짜모델이름 */
+function homeModel(){
+  if (!cfg.home || !cfg.home.model) cfg.home = { model:cfg.model, base:cfg.base, key:cfg.key };
+  return cfg.home;
+}
+function setHome(){
+  cfg.home = { model:cfg.model, base:cfg.base, key:cfg.key };
+  saveCfg();
+}
 function modelList(){
   return String(cfg.models||"").split("\n").map(function(L){
     var v = L.split("|").map(function(x){ return x.trim(); });
@@ -1001,6 +1009,7 @@ function modelList(){
 function modelLabel(){
   var ms=modelList();
   for (var i=0;i<ms.length;i++) if (ms[i].model===cfg.model) return ms[i].label;
+  if (homeModel().model===cfg.model) return "기본";
   var m=String(cfg.model||"");
   return m.length>14 ? m.slice(-14) : (m||"모델");
 }
@@ -1422,7 +1431,7 @@ function viewCfg(){
     if (el.type==="password"){ el.type="text"; this.textContent="가리기"; }
     else { el.type="password"; this.textContent="보기"; }
   };
-  $("#m").oninput=function(){ cfg.model=this.value.trim(); saveCfg(); };
+  $("#m").oninput=function(){ cfg.model=this.value.trim(); saveCfg(); setHome(); };
   $("#t").oninput=function(){ cfg.maxTokens=parseInt(this.value,10)||2600; saveCfg(); };
   $("#ping").onclick=function(){
     var out=$("#pingout"), btn=this;
@@ -3485,17 +3494,21 @@ function paintModelBtn(){
   b.textContent = "모델 · " + modelLabel();
 }
 $("#model").onclick=function(){
-  var ms=modelList();
-  if (!ms.length) return alert("설정 → 연결 → 모델 목록에 먼저 적어줘.\n\n예)\n프로\n젬마 | https://내앱.vercel.app/v1 | sk-키");
+  var hm=homeModel();
+  var ms=[{ label:"기본 · "+(hm.model||"없음"), base:hm.base, key:hm.key, model:hm.model, home:true }]
+         .concat(modelList());
   var now=modelLabel();
-  var v=prompt("지금 · "+now+"\n\n"+ms.map(function(m,i){ return (i+1)+" "+m.label; }).join("\n"), "1");
+  var v=prompt("지금 · "+now+"\n\n"+ms.map(function(m,i){ return (i+1)+" "+m.label; }).join("\n")
+             + "\n\n0 지금 것을 기본으로 정하기", "1");
   if (v===null) return;
+  v=String(v).trim();
+  if (v==="0"){ setHome(); paintModelBtn(); return alert("지금 모델을 기본으로 정했어."); }
   var n=parseInt(v,10);
   if (!(n>=1 && n<=ms.length)) return;
   var m=ms[n-1];
   cfg.model = m.model;
-  if (m.base) cfg.base = m.base;
-  if (m.key)  cfg.key  = m.key;
+  if (m.home){ cfg.base = m.base; cfg.key = m.key; }
+  else { if (m.base) cfg.base = m.base; if (m.key) cfg.key = m.key; }
   saveCfg(); paintModelBtn();
 };
 $("#rooms").onclick=function(){ var c=cur(); if(c) go("rooms", c.id); };
