@@ -485,7 +485,7 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-07 t";
+var APP_VER = "2026-09-07 u";
 var THEMES = [
   ["light","밝게"], ["mono","무채색"], ["pink","연핑크"], ["sky","연하늘"], ["lemon","연노랑"],
   ["lilac","연보라"], ["night","밤"], ["plum","보라"]
@@ -1006,13 +1006,11 @@ function modelList(){
     return { label:v[0], base:v[1]||"", key:v[2]||"", model:v[3]||v[0] };
   }).filter(Boolean);
 }
-function modelLabel(){
-  var ms=modelList();
-  for (var i=0;i<ms.length;i++) if (ms[i].model===cfg.model) return ms[i].label;
-  if (homeModel().model===cfg.model) return "기본";
-  var m=String(cfg.model||"");
-  return m.length>14 ? m.slice(-14) : (m||"모델");
+function shortModel(m){
+  m = String(m||"").split("/").pop();
+  return m.length>16 ? m.slice(-16) : (m||"없음");
 }
+function modelLabel(){ return shortModel(cfg.model); }
 function genOf(c){
   var ps=presetOf(c), o={ temp:null, topP:null, maxTokens:cfg.maxTokens||2600 };
   if (ps){
@@ -3490,15 +3488,21 @@ $("#cmds").onclick=function(){
   elInp.focus();
 };
 function paintModelBtn(){
+  if (typeof cfg==="undefined") return;
   var b=$("#model"); if(!b) return;
   b.textContent = "모델 · " + modelLabel();
 }
 $("#model").onclick=function(){
   var hm=homeModel();
-  var ms=[{ label:"기본 · "+(hm.model||"없음"), base:hm.base, key:hm.key, model:hm.model, home:true }]
+  var ms=[{ label:"기본", base:hm.base, key:hm.key, model:hm.model, home:true }]
          .concat(modelList());
   var now=modelLabel();
-  var v=prompt("지금 · "+now+"\n\n"+ms.map(function(m,i){ return (i+1)+" "+m.label; }).join("\n")
+  var v=prompt("지금 · "+(cfg.model||"없음")+"\n\n"
+             + ms.map(function(m,i){
+                 var mark = (m.model===cfg.model) ? " ●" : "";
+                 var nm = m.home ? m.model : (m.label + " · " + m.model);
+                 return (i+1)+" "+nm+mark;
+               }).join("\n")
              + "\n\n0 지금 것을 기본으로 정하기", "1");
   if (v===null) return;
   v=String(v).trim();
