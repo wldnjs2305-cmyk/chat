@@ -482,7 +482,7 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-07 l";
+var APP_VER = "2026-09-07 m";
 var THEMES = [
   ["light","밝게"], ["mono","무채색"], ["pink","연핑크"], ["sky","연하늘"], ["lemon","연노랑"],
   ["lilac","연보라"], ["night","밤"], ["plum","보라"]
@@ -3059,7 +3059,7 @@ var CMDS = {
 };
 var CMD_SAY = {
   "/전환":"(장면을 넘기자)",
-  "/모브":"(누가 끼어들었어)", "/문자":"(문자가 왔어)",
+  "/모브":"(누가 끼어들었어)",
   "/일기":"(일기를 보여줘)", "/편지":"(편지를 보여줘)",
   "/속마음":"(속마음을 보여줘)", "/플리":"(지금 듣는 노래를 보여줘)"
 };
@@ -3223,7 +3223,10 @@ function buildSystem(c, turn){
 
   p.push("");
   p.push("# OOC");
-  p.push("상대 메시지가 OOC 로 시작하면 연기를 멈추고 그 지시에 짧게만 답한다. 이야기 본문은 쓰지 않고, 그 지시는 다음 턴부터 반영한다.");
+  p.push("상대 메시지가 OOC 로 시작하면 그것은 이야기 밖에서 주는 지시다. 그 지시를 이번 턴에 곧바로 따른다.");
+  p.push("지시가 어떤 장면을 써 달라는 것이면, 알겠다고 대답하지 말고 그 자리에서 바로 그 장면을 이야기로 쓴다. 다음 턴으로 미루지 않는다.");
+  p.push("지시가 설정을 바꾸거나 무언가를 묻는 것일 때만 짧게 답하고 이야기 본문은 쓰지 않는다.");
+  p.push("어느 쪽이든 OOC 지시 자체는 이야기 속 인물이 들은 말이 아니다. 인물이 그 지시를 언급하지 않는다.");
 
   var smpl = sampleText(c);
   if (smpl){
@@ -3242,7 +3245,7 @@ function buildSystem(c, turn){
 
 function apiText(m){
   if (m.narr) return (m.r==="a" ? "(도입부 나레이션: " : "(상황: ") + m.t + ")";
-  if (m.ooc) return "OOC: " + m.t.replace(/^\/ooc\s*/i,"");
+  if (m.ooc) return "OOC: " + fillVars(cur()||{}, m.t.replace(/^\/ooc\s*/i,""));
   if (m.r==="u"){
     var k = cmdOf(m.t);
     if (k){
@@ -3250,7 +3253,7 @@ function apiText(m){
       return (CMD_SAY[k]||"") + (extra ? " " + extra : "");
     }
   }
-  return m.t;
+  return fillVars(cur()||{}, m.t);
 }
 
 function cutLog(c, log){
@@ -3403,7 +3406,7 @@ $("#undo").onclick=function(){
 $("#note").onclick=function(){ if(cur()) go("note"); };
 $("#smsbtn").onclick=function(){ if(cur()) go("smslist"); };
 $("#cmds").onclick=function(){
-  var k = prompt("명령어를 골라 입력창에 넣을게.\n\n/일기 /속마음 /편지 /플리\n/관계도   누가 누구를 어떻게 보는지\n/상태창   지금 어디서 뭘 하고 있는지\n/비밀   숨긴 마음 (대화엔 안 남음)\n/전환   장면 넘기기\n/모브   단역 등장\n@:   내가 장면 지정\n/ooc   연기 멈추고 지시", "/문자");
+  var k = prompt("명령어를 골라 입력창에 넣을게.\n\n/일기 /속마음 /편지 /플리\n/관계도   누가 누구를 어떻게 보는지\n/상태창   지금 어디서 뭘 하고 있는지\n/비밀   숨긴 마음 (대화엔 안 남음)\n/전환   장면 넘기기\n/모브   단역 등장\n@:   내가 장면 지정\n/ooc   연기 멈추고 지시", "/일기");
   if (!k) return;
   elInp.value = k.trim()+" ";
   elInp.focus();
