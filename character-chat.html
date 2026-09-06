@@ -38,17 +38,24 @@
   body.dark .sm.r .b{color:#F5F4FA}
 
   /* 밝은 테마들 */
-  body[data-theme=paper]{
-    --bg:#FAF6EE; --panel:#FAF6EE; --field:#F1EADC; --line:#E4DAC7;
-    --text:#33302A; --muted:#8C8374; --bub:#F2EBDC; --mine:#E9DEC6;
-    --nar:#8A8271; --accent:#9A7B4F; --trc:#5C5445;
-    --paper:#F5EFE2; --paper-line:#E4DAC7; --paper-text:#33302A;
-  }
   body[data-theme=mono]{
     --bg:#FFFFFF; --panel:#FFFFFF; --field:#F3F3F5; --line:#E6E6E9;
-    --text:#1A1A1C; --muted:#8A8A91; --bub:#F0F0F3; --mine:#DFDFE4;
+    --text:#1A1A1C; --muted:#8A8A91; --bub:#F1F1F4; --mine:#3F3F46;
     --nar:#86868D; --accent:#45454B; --trc:#5A5A61;
     --paper:#F8F8FA; --paper-line:#E6E6E9; --paper-text:#1A1A1C;
+  }
+  body[data-theme=mono] .msg.me .bub{color:#F4F4F6}
+  body[data-theme=sky]{
+    --bg:#F2F7FC; --panel:#F2F7FC; --field:#E3EDF7; --line:#D8E4F0;
+    --text:#22303C; --muted:#7C8E9F; --bub:#E7F0F8; --mine:#CBE0F2;
+    --nar:#7A8B9B; --accent:#4A7FB5; --trc:#455A6B;
+    --paper:#EDF4FA; --paper-line:#D8E4F0; --paper-text:#22303C;
+  }
+  body[data-theme=lemon]{
+    --bg:#FCF9EE; --panel:#FCF9EE; --field:#F5EFDC; --line:#EAE1C8;
+    --text:#3A3426; --muted:#93896F; --bub:#F6F1E0; --mine:#F0E4B4;
+    --nar:#8E8469; --accent:#A88B33; --trc:#5F5741;
+    --paper:#F8F3E4; --paper-line:#EAE1C8; --paper-text:#3A3426;
   }
   body[data-theme=pink]{
     --bg:#FDF4F3; --panel:#FDF4F3; --field:#F8E8E7; --line:#F1DCDB;
@@ -62,12 +69,6 @@
     --text:#E9EBF2; --muted:#858C9E; --bub:#242938; --mine:#33407A;
     --nar:#949BAD; --accent:#7C93E8; --trc:#C2C8DA;
     --paper:#1B1F2A; --paper-line:#2E3444; --paper-text:#DDE1EC;
-  }
-  body[data-theme=cocoa]{
-    --bg:#1A1715; --panel:#211D1A; --field:#2A2521; --line:#37302B;
-    --text:#F0EAE3; --muted:#9A8E83; --bub:#2E2823; --mine:#5A4436;
-    --nar:#A2968A; --accent:#C79B6E; --trc:#D6CCC0;
-    --paper:#241F1B; --paper-line:#3A322C; --paper-text:#E7E0D7;
   }
   body[data-theme=plum]{
     --bg:#15121E; --panel:#1C1828; --field:#241F33; --line:#322B45;
@@ -115,6 +116,7 @@
   .iconbtn:active{opacity:.5}
   #view{flex:1 1 auto;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 14px calc(env(safe-area-inset-bottom) + 24px)}
   #view.chat{padding:18px 14px 8px}
+  #view.sms{padding:0}
 
   .card{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:10px;cursor:pointer}
   .card:active{background:var(--field)}
@@ -181,6 +183,8 @@
   /* 특수 카드 */
   .phone{background:var(--field);border-radius:20px;padding:12px;margin:10px 0}
   .phone .ph{display:flex;align-items:center;gap:8px;padding:2px 4px 10px;border-bottom:1px solid var(--line);margin-bottom:10px;font-weight:600;font-size:14px}
+  .sm .b em, .phone .pm em, .mind em, .paper em{font-family:var(--f-nar);font-style:italic;
+    font-weight:300;opacity:.82}
   .phone .pm{background:var(--panel);border-radius:14px;padding:9px 13px;margin-bottom:7px;max-width:86%;
     font-family:var(--f-sms, var(--f-body));font-size:var(--sfs,15px);line-height:1.6}
   .phone .pm.me{background:var(--mine);margin-left:auto}
@@ -209,7 +213,7 @@
   #cropwrap .tip{color:#fff;opacity:.75;font-size:13px;text-align:center}
 
   /* 문자 화면 */
-  .smswrap{margin:-18px -14px 0;min-height:100%;padding:0 0 10px;background:var(--sbg)}
+  .smswrap{margin:0;min-height:100%;padding:0 0 10px;background:var(--sbg)}
   .smswrap{--sbg:var(--bg);--sother:var(--bub);--sotherink:var(--text);--smine:var(--mine);--smineink:var(--text);
     --sname:var(--muted);--stime:var(--muted);--sro:18px;--srm:18px;--stail:0;--savr:50%}
   .smswrap[data-th=kakao]{--sbg:#b2c7d9;--sother:#fff;--sotherink:#111;--smine:#fae100;--smineink:#1a1a1a;
@@ -257,6 +261,41 @@
   .sm .av.hide{visibility:hidden}
   .sm .col{max-width:74%;min-width:0}
   .sm .who2{font-size:12px;color:var(--sname);margin:0 0 4px 2px}
+  /* 꼬리 — 카톡·라인·기본은 묶음 첫 줄, 아이메시지는 마지막 줄 */
+  .sm .b{position:relative}
+  .smswrap[data-th=kakao] .sm.gap .b::after,
+  .smswrap[data-th=line] .sm.gap .b::after,
+  .smswrap[data-th=기본] .sm.gap .b::after{
+    content:'';position:absolute;top:0;left:-6px;width:9px;height:13px;
+    background:var(--sother);clip-path:polygon(100% 0,6% 0,100% 74%);
+    border-top-left-radius:4px;border-bottom-left-radius:9px}
+  .smswrap[data-th=kakao] .sm.r.gap .b::after,
+  .smswrap[data-th=line] .sm.r.gap .b::after,
+  .smswrap[data-th=기본] .sm.r.gap .b::after{
+    left:auto;right:-6px;background:var(--smine);clip-path:polygon(0 0,94% 0,0 74%);
+    border-top-left-radius:0;border-bottom-left-radius:0;
+    border-top-right-radius:4px;border-bottom-right-radius:9px}
+  .smswrap[data-th=imessage] .sm.last .b::before{
+    content:'';position:absolute;bottom:0;left:-6px;width:16px;height:16px;
+    background:var(--sother);border-bottom-right-radius:16px;z-index:-2}
+  .smswrap[data-th=imessage] .sm.last .b::after{
+    content:'';position:absolute;bottom:0;left:-16px;width:16px;height:16px;
+    background:var(--sbg);border-bottom-right-radius:12px;z-index:-1}
+  .smswrap[data-th=imessage] .sm.r.last .b::before{
+    left:auto;right:-6px;background:var(--smine);
+    border-bottom-right-radius:0;border-bottom-left-radius:16px}
+  .smswrap[data-th=imessage] .sm.r.last .b::after{
+    left:auto;right:-16px;background:var(--sbg);
+    border-bottom-right-radius:0;border-bottom-left-radius:12px}
+  .smswrap[data-th=imessage] .sm .b{z-index:0}
+  .smswrap[data-th=imessage] .sm{align-items:flex-end}
+  /* 이어지는 말풍선은 모서리를 덜 둥글게 */
+  .sm:not(.gap) .b{border-radius:var(--srb,14px)}
+  .sm .av{position:relative;z-index:2}
+  .smswrap[data-th=imessage] .sm .av{width:28px;height:28px}
+  .smswrap[data-th=imessage][data-dm="1"] .sm .av{display:none}
+  .smswrap[data-th=kakao] .sm .av,
+  .smswrap[data-th=line] .sm .av{width:35px;height:35px}
   .brow{display:flex;align-items:flex-end;gap:5px}
   .sm.r .brow{flex-direction:row-reverse}
   .stime{flex:0 0 auto;font-size:10.5px;color:var(--stime,var(--muted));padding-bottom:3px;white-space:nowrap}
@@ -417,18 +456,18 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-06 f";
+var APP_VER = "2026-09-07 a";
 var THEMES = [
-  ["light","밝게"], ["paper","종이"], ["mono","무채색"], ["pink","연핑크"],
-  ["dark","어둡게"], ["night","밤"], ["cocoa","회갈색"], ["plum","보라"]
+  ["light","밝게"], ["mono","무채색"], ["pink","연핑크"], ["sky","연하늘"], ["lemon","연노랑"],
+  ["night","밤"], ["plum","보라"]
 ];
-var THEME_DARK = { dark:1, night:1, cocoa:1, plum:1 };
-var THEME_BG = { light:"#FFFFFF", paper:"#FAF6EE", mono:"#FFFFFF", pink:"#FDF4F3",
-                 dark:"#0C0C11", night:"#12141C", cocoa:"#1A1715", plum:"#15121E" };
+var THEME_DARK = { night:1, plum:1 };
+var THEME_BG = { light:"#FFFFFF", mono:"#FFFFFF", pink:"#FDF4F3", sky:"#F2F7FC", lemon:"#FCF9EE",
+                 night:"#12141C", plum:"#15121E" };
 
 function applyTheme(){
   var t = cfg.theme || "light";
-  if (!THEME_BG[t]) t = "light";
+  if (!THEME_BG[t]){ t = (t==="dark"||t==="cocoa") ? "night" : "light"; cfg.theme = t; }
   document.body.className = THEME_DARK[t] ? "dark" : "";
   document.body.setAttribute("data-theme", t);
   document.body.setAttribute("data-view", cfg.viewMode==="doc" ? "doc" : "bubble");
@@ -930,13 +969,15 @@ function viewEdit(){
   elLeft.textContent="목록"; elLeft.onclick=function(){ saveChars(); go("list"); };
 
   var h="";
-  h += '<div class="sec first">캐릭터</div>';
+  h += '<div class="sec first">세계관</div>';
+  h += field("세계관 / 상황","world",c.world,160);
+  h += '<div class="hint">언제 어디서 벌어지는 이야기인지. 인물이 여럿이면 여기 적은 게 다 같이 적용돼.</div>';
+  h += '<div class="sec">캐릭터</div>';
   h += field("이름","name",c.name);
   h += field("표시 이름","display",c.display);
   h += photoBlock("프로필 사진","avatar",c.avatar);
   h += field("한 줄 소개","tagline",c.tagline);
   h += field("캐릭터 프롬프트","prompt",c.prompt,200);
-  h += field("세계관 / 상황","world",c.world,120);
   h += field("첫 마디","greeting",c.greeting,140);
   h += field("문체 예시","sample",c.sample,180);
   h += field("이럴 때 이렇게 한다","beh",c.beh,180);
@@ -1517,6 +1558,12 @@ function viewBlockEdit(){
 }
 
 /* ---------- 특수 블록 렌더 ---------- */
+/* 카드 본문 — 한 줄씩 끊긴 걸 문단으로 잇고 별표는 기울임으로 */
+function cardText(t){
+  var out=esc(flow(t));
+  out=out.replace(/\*{1,3}([^*\n]+?)\*{1,3}/g,'<em>$1</em>');
+  return out;
+}
 function cardHTML(kind, body, c){
   if (kind==="문자"){
     var rows = body.split("\n").filter(function(l){ return l.trim(); });
@@ -1526,15 +1573,15 @@ function cardHTML(kind, body, c){
       var nm = m ? m[1].trim() : "", tx = m ? m[2] : l;
       var mine = nm && c.userName && nm===c.userName.trim();
       if (!who && !mine && nm) who = nm;
-      inner += '<div class="pm'+(mine?" me":"")+'">'+esc(tx)+'</div>';
+      inner += '<div class="pm'+(mine?" me":"")+'">'+cardText(tx)+'</div>';
     });
     var p = findPerson(c, who) || { name:who||c.name, avatar:c.avatar };
     return '<div class="phone"><div class="ph">'+avaHTML(p.avatar,"🙂","xs")+esc(p.name||"")+'</div>'+inner+'</div>';
   }
-  if (kind==="일기")  return '<div class="paper"><div class="pt">일기</div>'+esc(body)+'</div>';
-  if (kind==="편지")  return '<div class="paper"><div class="pt">편지</div>'+esc(body)+'</div>';
-  if (kind==="속마음") return '<div class="mind">'+esc(body)+'</div>';
-  if (kind==="나레")   return '<div class="narr">'+esc(body)+'</div>';
+  if (kind==="일기")  return '<div class="paper"><div class="pt">일기</div>'+cardText(body)+'</div>';
+  if (kind==="편지")  return '<div class="paper"><div class="pt">편지</div>'+cardText(body)+'</div>';
+  if (kind==="속마음") return '<div class="mind">'+cardText(body)+'</div>';
+  if (kind==="나레")   return '<div class="narr">'+cardText(body)+'</div>';
   if (kind==="플리"){
     var out = '<div class="pl">';
     body.split("\n").forEach(function(l){
@@ -1974,7 +2021,7 @@ function viewSms(){
   elTitle.textContent="문자"; elSub.textContent="";
   elLeft.textContent=""; elLeft.onclick=null;
   elRight.textContent=""; elRight.onclick=null;
-  view.className="chat"; dock.style.display = t.peek ? "none" : "block";
+  view.className="chat sms"; dock.style.display = t.peek ? "none" : "block";
   paintSms();
 }
 
@@ -1984,7 +2031,7 @@ function paintSms(err, thinking){
   var head = t.parts[0] || {disp:"", avatar:""};
   var other = t.peek ? head : (t.parts.filter(function(p){ return p.key!=="user"; })[0] || head);
 
-  var h = '<div class="smswrap" data-th="'+esc(cfg.smsTheme||"기본")+'">';
+  var h = '<div class="smswrap" data-th="'+esc(cfg.smsTheme||"기본")+'" data-dm="'+(t.parts.length<=2?"1":"0")+'">';
   h += '<div class="smsbar">'+avaHTML(other.avatar,"💬","sm")
      + '<div class="nm" id="smsnm">'+esc(t.title)+'<div class="sub">'+(t.peek?"엿보는 중":"문자")+'</div></div>'
      + '<button id="smsadd">인원</button><button id="smstime">시각</button><button id="smslist2">목록</button><button id="smsx">✕</button></div>';
@@ -2016,11 +2063,13 @@ function paintSms(err, thinking){
     var lastOfRun = !next || next.who !== m.who || (next.at && m.at && ymd(next.at)!==ymd(m.at));
     var tm = (m.at && lastOfRun) ? '<span class="stime">'+esc(hhmm(m.at))+'</span>' : '';
     var rd = (i===lastMine && readAfter) ? '<span class="stime sread">읽음</span>' : '';
-    h += '<div class="sm'+(right?" r":"")+(same?"":" gap")+'" data-si="'+i+'">';
-    if (!right) h += avaHTML(same?"":p.avatar,"🙂", same?"av hide":"av").replace('class="ava','class="av');
+    var avLast = (cfg.smsTheme==="imessage");
+    var showAv = avLast ? lastOfRun : !same;
+    h += '<div class="sm'+(right?" r":"")+(same?"":" gap")+(lastOfRun?" last":"")+'" data-si="'+i+'">';
+    if (!right) h += avaHTML(showAv?p.avatar:"","🙂", showAv?"av":"av hide").replace('class="ava','class="av');
     h += '<div class="col">'
        + (!right && !same ? '<div class="who2">'+esc(p.disp||m.who)+'</div>' : "")
-       + '<div class="brow"><div class="b">'+esc(m.t)+'</div>'+rd+tm+'</div></div></div>';
+       + '<div class="brow"><div class="b">'+cardText(m.t)+'</div>'+rd+tm+'</div></div></div>';
     prev = m.who;
   });
 
@@ -2136,19 +2185,27 @@ function buildSmsSystem(c, t){
   p.push("");
   p.push("# 형식");
   p.push("한 줄에 하나씩 '이름: 내용' 형식으로만 쓴다. 다른 형식은 쓰지 않는다.");
-  p.push("문자답게 짧고 구어체로, 실제로 폰으로 칠 법하게 쓴다. 한 줄이 길어야 두 문장이다.");
+  p.push("문자답게 짧고 구어체로, 실제로 폰으로 칠 법하게 쓴다. 한 통이 길어야 세 문장이다.");
   p.push("문장을 도중에 끊지 말고 끝까지 맺는다.");
+  p.push("");
+  p.push("# 나눌지 붙일지");
+  p.push("뒤엣말이 앞엣말 없이는 뜻이 안 통하면 반드시 한 통에 붙인다.");
+  p.push("서로 딴 얘기거나, 내 말에서 상대에게 넘어가는 자리면 나눠도 된다.");
+  p.push("개수를 채우려고 억지로 나누지 않는다. 붙여 보낼 말이면 통을 줄인다.");
+  p.push("매번 같은 통 수, 같은 길이로 쓰지 않는다. 한 통만 보내는 턴도 있고 네다섯 통이 이어지는 턴도 있다.");
+  p.push("");
+  p.push("# 공을 넘기는 법");
+  p.push("매번 질문으로 끝내지 않는다. 질문으로 끝내는 것은 세 턴에 한 번이면 족하다. 한 턴에 물음표를 두 개 이상 쓰지 않는다.");
+  p.push("되묻는 대신 궁금할 거리를 흘려두고 설명하지 않거나, 다 말하지 않고 하나를 덜 알려주거나, 아무것도 하지 않고 그냥 끝내도 된다.");
   var others = t.parts.filter(function(x){ return x.key!=="user"; });
   if (others.length >= 2){
     p.push("");
     p.push("# 단톡방이다");
-    p.push("한 번에 4~8줄 쓴다.");
+    p.push("한 번에 여러 사람이 말한다. 통 수는 흐름대로 정한다.");
     p.push("같은 사람이 연달아 여러 번 말해도 된다. 한 사람이 던지면 다른 사람이 받고, 처음 사람이 다시 되받는 식으로 주고받는다.");
     p.push("사람마다 말수가 다르다. 말이 많은 사람은 여러 번, 조용한 사람은 한 마디만, 이번에 아예 말하지 않는 사람이 있어도 된다. 모두에게 똑같이 나눠 주지 않는다.");
     p.push("모든 말에 답이 달릴 필요는 없다. 누군가의 말이 그냥 묻히거나, 하던 얘기가 끊기고 다른 화제로 넘어가도 된다.");
     p.push("실제 단톡방처럼 쓴다. 회의록이나 순서대로 돌아가며 한 마디씩 하는 형식이 되면 안 된다.");
-  } else {
-    p.push("한 번에 2~4줄만 쓴다.");
   }
   if (t.peek){
     p.push((c.userName||"나")+"는 이 문자방에 없다. 참여자들끼리만 주고받는다.");
@@ -2361,6 +2418,7 @@ function altBarHTML(m,i){
        + '<button data-an="'+i+'">›</button></div>';
 }
 
+var keepScroll = 0;
 function paint(err, thinking){
   var c=cur(); if(!c) return;
   var log=getLog(c.id), h="";
@@ -2408,14 +2466,17 @@ function paint(err, thinking){
     });
     h += body + altBarHTML(m,i) + (selIdx===i?actsHTML(i):"");
   }
-  if (thinking) h += '<div class="thinking">'+esc(c.name||"상대")+" 입력 중…</div>";
+  if (thinking){
+    var many = castOf(c).length >= 2;
+    h += '<div class="thinking">'+(many ? "입력 중…" : esc(c.name||"상대")+" 입력 중…")+'</div>';
+  }
   if (err) h += '<div class="err">'+esc(err)+"</div>";
   if (!log.length && !thinking && !err) h += '<div class="empty">먼저 말을 걸어봐.</div>';
   view.innerHTML=h;
 
   Array.prototype.forEach.call(view.querySelectorAll("[data-i]"), function(el){
     var i=+el.getAttribute("data-i");
-    bindHold(el, function(){ selIdx = (selIdx===i) ? -1 : i; paint(); });
+    bindHold(el, function(){ keepScroll = view.scrollTop || 1; selIdx = (selIdx===i) ? -1 : i; paint(); });
     var sx=null;
     el.addEventListener("touchstart", function(e){ sx = e.touches[0].clientX; }, {passive:true});
     el.addEventListener("touchend", function(e){
@@ -2470,7 +2531,9 @@ function paint(err, thinking){
   Array.prototype.forEach.call(view.querySelectorAll("[data-cancel]"), function(el){
     el.onclick=function(){ editIdx=-1; paint(); };
   });
-  if (editIdx<0) view.scrollTop = view.scrollHeight;
+  if (editIdx<0 && selIdx<0 && !keepScroll) view.scrollTop = view.scrollHeight;
+  if (keepScroll) view.scrollTop = keepScroll;
+  keepScroll = 0;
 }
 
 /* ---------- 명령어 ---------- */
@@ -2595,6 +2658,10 @@ function buildSystem(c, turn){
     "보통":"인물은 상대를 만족시킬 의무가 없다. 다정한 인물은 다정하게, 날 선 인물은 날 서게 굴되, 언제나 자기 성격에서 나오는 반응을 하지 상대를 편하게 해주는 반응을 하지 않는다. 상대의 제안을 거절하거나 되물어도 되고, 상대의 말에 담긴 진의를 의심해도 된다. 분위기를 부드럽게 만들려고 하지 않는다.",
     "강":"인물은 상대를 만족시킬 의무가 없다. 상대의 말을 그대로 따르지 않는다. 자라고 하면 지금 잠이 오냐고 되받고, 괜찮다고 하면 정말 괜찮은지 캐묻는다. 인물에게는 자기만의 목적과 불안이 있고, 그것이 상대의 편의와 부딪히면 인물 쪽을 따른다. 상대가 넘어갔다고 여기는 이야기를 다시 꺼내도 되고, 답을 얻을 때까지 물고 늘어져도 된다. 다만 그 집요함은 인물의 성격에서 나와야 하며, 억지로 싸움을 만들지는 않는다."
   };
+  p.push("");
+  p.push("# 누가 먼저 말하나");
+  p.push("매 턴 같은 인물이 먼저 말하지 않는다. 이번 장면에서 먼저 입을 열 이유가 있는 사람이 먼저 말한다. 자리를 주도하는 사람, 방금 지목당한 사람, 참지 못하는 성격인 사람처럼 상황이 정한다.");
+  p.push("이번 장면에 없는 인물은 등장시키지 않는다. 상대가 누군가를 따로 불러냈거나 자리를 옮겼으면, 그 자리에 없는 사람은 말하지 않는다.");
   p.push("");
   p.push("# 나레이션");
   if ((c.narrOn||"켬")==="끔"){
