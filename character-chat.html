@@ -485,7 +485,7 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-07 u";
+var APP_VER = "2026-09-07 v";
 var THEMES = [
   ["light","밝게"], ["mono","무채색"], ["pink","연핑크"], ["sky","연하늘"], ["lemon","연노랑"],
   ["lilac","연보라"], ["night","밤"], ["plum","보라"]
@@ -2828,21 +2828,25 @@ function dayLabel(ms){
   return (d.getMonth()+1)+"월 "+d.getDate()+"일 "+w+"요일";
 }
 /* 모델한테 한 줄만 물어보는 용도 */
-function askLLM(sys, content, cb){
+function askLLM(sys, content, cb, lim){
   var url, headers, body;
+  var cap = lim || 300;
   if (cfg.mode==="openai"){
     var b=(cfg.base||"").replace(/\/+$/,"");
     url = /chat\/completions$/.test(b) ? b : b+"/chat/completions";
     headers={ "Content-Type":"application/json", "Authorization":"Bearer "+cfg.key };
-    body={ model:cfg.model, max_tokens:200,
+    body={ model:cfg.model, max_tokens:cap,
            messages:[{role:"system",content:sys},{role:"user",content:content}] };
+    /* 생각에 예산을 뺏기지 않게 이 요청은 추론을 끈다 */
+    body.reasoning_effort="none";
+    body.extra_body={ google:{ thinking_config:{ thinking_budget:0 } } };
   } else {
     var gb=(cfg.base||"https://generativelanguage.googleapis.com").replace(/\/+$/,"");
     url = gb+"/v1beta/models/"+encodeURIComponent(cfg.model)+":generateContent?key="+encodeURIComponent(cfg.key);
     headers={ "Content-Type":"application/json" };
     body={ systemInstruction:{parts:[{text:sys}]},
            contents:[{role:"user",parts:[{text:content}]}],
-           generationConfig:{ maxOutputTokens:200 } };
+           generationConfig:{ maxOutputTokens:cap, thinkingConfig:{ thinkingBudget:0 } } };
   }
   fetch(url,{method:"POST",headers:headers,body:JSON.stringify(body)})
     .then(function(r){ return r.json(); })
@@ -2952,7 +2956,7 @@ function refreshDigest(c, done){
         }
       }
       if (--left <= 0 && done) done();
-    });
+    }, 400);
   });
 }
 function smsSend(text){
@@ -3541,7 +3545,7 @@ function runSecret(){
       var l=getLog(c.id);
       l.push({ r:"a", t:"[비밀]\n"+v+"\n[/비밀]", secret:true });
       setLog(c.id,l); paint();
-    });
+    }, 1600);
 }
 $("#find").onclick=function(){
   var c=cur(); if(!c) return;
