@@ -57,6 +57,92 @@
     --nar:#8A81A0; --accent:#7C63C4; --trc:#554D68;
     --paper:#F2EDF9; --paper-line:#E2DAEF; --paper-text:#2E2838;
   }
+  /* 딸기토끼 */
+  body[data-theme=berry]{
+    --bg:#fff8fa; --panel:#fffdfe; --field:#fff0f6; --line:#ffcfe0;
+    --text:#5c3346; --muted:#c78aa2; --bub:#fff6f9; --mine:#ffe3ee;
+    --nar:#b8809a; --accent:#ff5c7f; --trc:#7a4c60;
+    --paper:#fffdfe; --paper-line:#ffcfe0; --paper-text:#5c3346;
+  }
+  body[data-theme=berry]{
+    background:linear-gradient(135deg,#fff8fa 0%,#ffeaf1 40%,#ffd6e4 75%,#ffb8d1 100%);
+    background-attachment:fixed;
+  }
+  /* 딸기우유 빛망울 */
+  body[data-theme=berry]::before,
+  body[data-theme=berry]::after{
+    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-repeat:no-repeat;
+    animation-timing-function:ease-in-out;animation-iteration-count:infinite;
+    animation-direction:alternate;
+  }
+  body[data-theme=berry]::before{
+    animation-name:sb-a;animation-duration:11s;
+    background-image:
+      radial-gradient(circle 5px at 12% 22%, rgba(255,255,255,.95), transparent 100%),
+      radial-gradient(circle 7px at 31% 9%,  rgba(255,255,255,.80), transparent 100%),
+      radial-gradient(circle 4px at 47% 34%, rgba(255,255,255,.90), transparent 100%),
+      radial-gradient(circle 6px at 63% 15%, rgba(255,255,255,.85), transparent 100%),
+      radial-gradient(circle 8px at 84% 27%, rgba(255,255,255,.75), transparent 100%),
+      radial-gradient(circle 5px at 92% 48%, rgba(255,255,255,.90), transparent 100%),
+      radial-gradient(circle 6px at 8%  57%, rgba(255,255,255,.85), transparent 100%),
+      radial-gradient(circle 8px at 26% 71%, rgba(255,255,255,.70), transparent 100%),
+      radial-gradient(circle 5px at 44% 88%, rgba(255,255,255,.90), transparent 100%),
+      radial-gradient(circle 7px at 58% 63%, rgba(255,255,255,.80), transparent 100%),
+      radial-gradient(circle 6px at 77% 79%, rgba(255,255,255,.75), transparent 100%),
+      radial-gradient(circle 4px at 95% 91%, rgba(255,255,255,.85), transparent 100%);
+  }
+  body[data-theme=berry]::after{
+    animation-name:sb-b;animation-duration:17s;animation-delay:-6s;
+    background-image:
+      radial-gradient(circle 26px at 17% 14%, rgba(255,190,215,.30), transparent 100%),
+      radial-gradient(circle 34px at 39% 76%, rgba(255,205,225,.26), transparent 100%),
+      radial-gradient(circle 22px at 55% 24%, rgba(255,182,207,.30), transparent 100%),
+      radial-gradient(circle 40px at 81% 61%, rgba(255,210,228,.22), transparent 100%),
+      radial-gradient(circle 28px at 90% 12%, rgba(255,190,215,.26), transparent 100%),
+      radial-gradient(circle 30px at 6%  84%, rgba(255,200,222,.24), transparent 100%),
+      radial-gradient(circle 24px at 66% 93%, rgba(255,182,207,.28), transparent 100%);
+  }
+  @keyframes sb-a{ from{opacity:.35} to{opacity:1} }
+  @keyframes sb-b{ from{opacity:.55} to{opacity:1} }
+  @media (prefers-reduced-motion: reduce){
+    body[data-theme=berry]::before,
+    body[data-theme=berry]::after{ animation:none !important; opacity:.8 }
+  }
+  body[data-theme=berry] #app{position:relative;z-index:1}
+  body[data-theme=berry] #bar,
+  body[data-theme=berry] #dock{background:rgba(255,244,248,.72);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  body[data-theme=berry] #view{background:transparent}
+  /* 말풍선 — 흰 발광에 분홍 잔광 */
+  body[data-theme=berry] .bub{
+    border-radius:18px;border:1px solid #ffe0ea;
+    box-shadow:0 0 0 1px rgba(255,255,255,.9), 0 4px 14px rgba(255,140,180,.16)}
+  body[data-theme=berry] .msg.me .bub{border-color:#ffd0e0}
+  /* 이름은 분홍 알약 뱃지로 */
+  body[data-theme=berry] .msg .who{
+    display:inline-block;margin:0 0 5px 2px;padding:3px 12px;border-radius:11px;
+    background:linear-gradient(135deg,#ff9ab8,#ff6f91);color:#fff;
+    font-size:11.5px;font-weight:800;letter-spacing:.02em;
+    box-shadow:0 3px 8px rgba(255,111,145,.32)}
+  /* 프사에 흰 테두리와 분홍 링 */
+  body[data-theme=berry] .ava{
+    border:3px solid #fff;
+    box-shadow:0 0 0 3px #ffd6e4, 0 4px 10px rgba(255,120,160,.28)}
+  body[data-theme=berry] .card,
+  body[data-theme=berry] .castbox,
+  body[data-theme=berry] .statc,
+  body[data-theme=berry] .mind,
+  body[data-theme=berry] .paper{
+    border-radius:20px;border:1px solid var(--line);
+    box-shadow:0 4px 16px rgba(255,140,180,.14)}
+  body[data-theme=berry] .btn{border-radius:14px}
+  body[data-theme=berry] #inwrap{border-radius:16px;border:1px solid #ffd6e4}
+  body[data-theme=berry] #send{
+    background:linear-gradient(135deg,#ff9ab8,#ff5c7f);color:#fff;
+    box-shadow:0 4px 10px rgba(255,92,127,.38)}
+  body[data-theme=berry] .sec{color:#ff5c7f}
+
   /* 레트로 — 피처폰 액정 */
   body[data-theme=retro]{
     --bg:#c5d1b8; --panel:#d3dbe3; --field:#bcc9ad; --line:#9ba5b5;
@@ -540,13 +626,13 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-08 c";
+var APP_VER = "2026-09-08 d";
 var THEMES = [
   ["light","밝게"], ["mono","무채색"], ["pink","연핑크"], ["sky","연하늘"], ["lemon","연노랑"],
-  ["lilac","연보라"], ["retro","레트로"], ["night","밤"], ["plum","보라"]
+  ["lilac","연보라"], ["berry","딸기토끼"], ["retro","레트로"], ["night","밤"], ["plum","보라"]
 ];
 var THEME_DARK = { night:1, plum:1 };
-var THEME_BG = { light:"#FFFFFF", mono:"#FFFFFF", pink:"#FDF4F3", sky:"#F2F7FC", lemon:"#FCF9EE", lilac:"#F7F4FC", retro:"#c5d1b8",
+var THEME_BG = { light:"#FFFFFF", mono:"#FFFFFF", pink:"#FDF4F3", sky:"#F2F7FC", lemon:"#FCF9EE", lilac:"#F7F4FC", retro:"#c5d1b8", berry:"#fff8fa",
                  night:"#12141C", plum:"#15121E" };
 
 function applyTheme(){
