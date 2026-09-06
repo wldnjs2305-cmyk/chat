@@ -458,7 +458,7 @@
   #cropwrap .tip{color:#fff;opacity:.75;font-size:13px;text-align:center}
 
   /* 문자 화면 */
-  .smswrap{margin:0;min-height:100%;padding:0 0 10px;background:var(--sbg);overflow-x:hidden}
+  .smswrap{margin:0;min-height:100%;padding:0 0 10px;background:var(--sbg)}
   .smswrap{--sbg:var(--bg);--sother:var(--bub);--sotherink:var(--text);--smine:var(--mine);--smineink:var(--text);
     --sname:var(--muted);--stime:var(--muted);--sro:18px;--srm:18px;--stail:0;--savr:50%}
   .smswrap[data-th="kakao"]{--sbg:#b2c7d9;--sother:#fff;--sotherink:#111;--smine:#fae100;--smineink:#1a1a1a;
@@ -703,7 +703,7 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-08 g";
+var APP_VER = "2026-09-08 i";
 var THEMES = [
   ["light","밝게"], ["pink","연핑크"], ["sky","연하늘"],
   ["lilac","연보라"], ["ocean","푸른바다"], ["berry","딸기토끼"], ["homepage","홈페이지"], ["retro","레트로"], ["night","밤"]
