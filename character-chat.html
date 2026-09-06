@@ -117,6 +117,7 @@
   #bar .ttl{flex:1;min-width:0;text-align:center}
   #bar h1{margin:0;font-size:16px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #bar .sub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hb{display:inline-block;padding:0 6px;font-size:18px;line-height:1}
   .iconbtn{flex:0 0 auto;min-width:50px;font-size:17px;border:0;background:transparent;color:var(--accent);font-size:15px;font-family:inherit;padding:8px 4px;cursor:pointer}
   .iconbtn:nth-of-type(2){text-align:right}
   .iconbtn:active{opacity:.5}
@@ -361,7 +362,6 @@
       <button id="cmds">명령어</button>
       <button id="note">노트</button>
       <button id="rooms">대화방</button>
-      <button id="appcfg">⚙ 설정</button>
       <button id="reset">초기화</button>
     </div>
     <div class="line">
@@ -469,7 +469,7 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-07 e";
+var APP_VER = "2026-09-07 f";
 var THEMES = [
   ["light","밝게"], ["mono","무채색"], ["pink","연핑크"], ["sky","연하늘"], ["lemon","연노랑"],
   ["lilac","연보라"], ["night","밤"], ["plum","보라"]
@@ -1227,7 +1227,9 @@ function viewNote(){
 /* ---------- 설정 ---------- */
 function viewCfg(){
   elTitle.textContent="설정"; elSub.textContent="";
-  elLeft.textContent="목록"; elLeft.onclick=function(){ go("list"); };
+  var back = cur();
+  elLeft.textContent = back ? "대화" : "목록";
+  elLeft.onclick = function(){ back ? go("chat", back.id) : go("list"); };
   var h="";
   h += '<div class="sec first">연결</div>';
   h += '<label>API 종류</label><select id="md">'
@@ -2665,7 +2667,12 @@ function viewChat(){
   var rs=roomsOf(c);
   elSub.textContent = rs.length>1 ? roomName(c, c.room) : (c.tagline||"");
   elLeft.textContent="목록"; elLeft.onclick=function(){ go("list"); };
-  elRight.textContent="✎"; elRight.onclick=function(){ go("edit", c.id); };
+  elRight.innerHTML='<span class="hb" data-go="edit">✎</span><span class="hb" data-go="cfg">⚙</span>';
+  elRight.onclick=function(e){
+    var t=e && e.target, k=t && t.getAttribute && t.getAttribute("data-go");
+    if (k==="cfg") return go("cfg");
+    go("edit", c.id);
+  };
   view.className="chat"; dock.style.display="block";
   if (!getLog(c.id).length && c.greeting) setLog(c.id, seedGreeting(c, c.greeting));
   paint();
@@ -3177,7 +3184,6 @@ $("#cmds").onclick=function(){
   elInp.focus();
 };
 $("#rooms").onclick=function(){ var c=cur(); if(c) go("rooms", c.id); };
-$("#appcfg").onclick=function(){ go("cfg"); };
 $("#reset").onclick=function(){
   var c=cur(); if(!c||busy) return;
   if(!confirm("이 캐릭터와의 대화를 처음부터 다시 시작할까?")) return;
