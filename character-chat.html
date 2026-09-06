@@ -795,7 +795,7 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-08 j";
+var APP_VER = "2026-09-08 l";
 var THEMES = [
   ["light","밝게"], ["pink","연핑크"], ["sky","연하늘"],
   ["lilac","연보라"], ["ocean","푸른바다"], ["novel","로판"], ["gray","시원한그레이"], ["berry","딸기토끼"], ["homepage","홈페이지"], ["retro","레트로"], ["night","밤"]
@@ -1593,6 +1593,9 @@ function viewEdit(){
     c.kind = (this.value==="다인챗") ? "다인" : "개인";
     saveChars(); render();
   };
+  if ($("#pers")) $("#pers").onchange=function(){ c.person=this.value; saveChars(); };
+  if ($("#tens")) $("#tens").onchange=function(){ c.tense=this.value; saveChars(); };
+  if ($("#hard")) $("#hard").onchange=function(){ c.hard=this.value; saveChars(); };
   if ($("#defy")) $("#defy").onchange=function(){ c.defy=this.value; saveChars(); };
   if ($("#narr")) $("#narr").onchange=function(){ c.narrOn=this.value; saveChars(); };
   if ($("#sping")) $("#sping").onchange=function(){ c.smsPing=this.value; saveChars(); };
@@ -3409,16 +3412,30 @@ function paint(err, thinking){
       var c2=cur(); if(!c2) return;
       var th=getThreads(c2.id), hit=null;
       for (var i=0;i<th.length;i++) if ((th[i].title||"")===nm){ hit=th[i]; break; }
+      var fresh=false;
       if (!hit){
-        var names=[ (c2.name||"상대") ].concat(castOf(c2).map(function(x){ return x.name; })).filter(Boolean);
-        names.unshift(c2.userName||"나");
-        makeThread(c2, names.slice(0,6));
+        /* 알림에 적힌 이름으로 방을 만든다. 단톡 같으면 인물을 다 넣고 */
+        var group = /단톡|부대|팀|모임|방$/.test(nm);
+        var names = [ c2.userName||"나" ];
+        if (group){
+          names = names.concat([ c2.name ].concat(castOf(c2).map(function(x){ return x.name; })).filter(Boolean));
+        } else {
+          var who = null;
+          castOf(c2).forEach(function(x){ if (!who && nm.indexOf(x.name)>=0) who=x.name; });
+          if (!who && c2.name && nm.indexOf(c2.name)>=0) who=c2.name;
+          names.push(who || c2.name || "상대");
+        }
+        if (!makeThread(c2, names.slice(0,7))) return;
         var th2=getThreads(c2.id);
-        if (th2[0]){ th2[0].title=nm; setThreads(c2.id, th2); }
-        return;
+        for (var j=0;j<th2.length;j++) if (th2[j].id===smsCur){ th2[j].title=nm; setThreads(c2.id, th2); break; }
+        fresh=true;
+        hit=curThread(c2);
       }
-      hit.unread=0; saveThread(c2, hit);
-      smsCur=hit.id; go("sms", c2.id);
+      if (hit){ hit.unread=0; saveThread(c2, hit); smsCur=hit.id; }
+      go("sms", c2.id);
+      /* 알림이 떴다는 건 이미 문자가 와 있다는 뜻이다 */
+      var t2=curThread(c2);
+      if (t2 && (fresh || !t2.log.length)) setTimeout(smsTurn, 60);
     };
   });
   Array.prototype.forEach.call(view.querySelectorAll("[data-i]"), function(el){
@@ -3600,7 +3617,18 @@ function buildSystem(c, turn){
   p.push("행동과 상황 묘사, 속마음은 별표 하나로 감싼다. 대사는 별표 없이 그대로 쓰고 따옴표는 안 붙인다. 지문과 대사는 빈 줄로 나누지 말고 한 덩어리로 이어 쓴다.");
   p.push("지문이 끝나고 대사가 이어질 때 줄을 바꾸지 않는다. 별표를 닫은 뒤 한 칸만 띄우고 대사를 그대로 이어 쓴다. 대사가 끝나고 지문이 이어질 때도 같다. 장면이 바뀔 때만 줄을 바꾼다.");
   p.push("지문은 문장마다 줄을 바꾸지 않는다. 이어지는 서술은 한 문단으로 붙여 쓰고, 장면이나 시점이 바뀔 때만 문단을 나눈다.");
-  p.push("지문은 3인칭 과거형 소설체다. '~합니다' 같은 존댓말 서술은 쓰지 않는다. 소리, 냄새, 빛, 온도 같은 감각을 넣고, 인물의 속마음이나 감춘 의도를 짚어도 된다.");
+  var PERSON = {
+    "1인칭":"지문은 인물이 '나'로 스스로를 가리키는 1인칭이다. 상대는 이름이나 '너', '당신'으로 부른다. 인물이 보고 느낀 것만 쓰고, 인물이 모르는 것은 쓰지 않는다.",
+    "2인칭":"지문은 상대를 '너'라고 부르는 2인칭이다. 인물의 행동은 이름으로 쓰고, 상대가 겪는 일을 '너는 ~했다'처럼 서술한다.",
+    "3인칭":"지문은 인물을 이름이나 '그', '그녀'로 부르는 3인칭이다. 인물의 속마음이나 감춘 의도를 짚어도 된다."
+  };
+  var TENSE = {
+    "과거":"서술은 과거형으로 쓴다. '~했다', '~였다'로 맺는다.",
+    "현재":"서술은 현재형으로 쓴다. '~한다', '~이다'로 맺는다. 지금 눈앞에서 벌어지는 것처럼 쓴다."
+  };
+  p.push("지문은 소설체다. '~합니다' 같은 존댓말 서술은 쓰지 않는다. 소리, 냄새, 빛, 온도 같은 감각을 넣는다.");
+  p.push(PERSON[c.person||"3인칭"] || PERSON["3인칭"]);
+  p.push(TENSE[c.tense||"과거"] || TENSE["과거"]);
   p.push("대사는 실제 회화에서 쓰는 표현만 쓴다. 소설이나 각본에서만 보이는 문어체 표현은 쓰지 않는다. 정중한 인물이라도 말투는 입말이다.");
   p.push("대사에서 감정을 말로 설명하지 않고, 상대의 호칭을 반복해 부르지 않는다. 문장을 일부러 짧게 끊거나 조사를 생략하지 않는다.");
   p.push("꾸미는 말은 한 문장에 하나까지만 쓴다. 행동으로 이미 보여준 것을 다시 설명하지 않는다. 비유는 꼭 필요할 때만 쓴다.");
@@ -3648,6 +3676,14 @@ function buildSystem(c, turn){
     p.push("나레이션으로 하지 않는 것: 인물의 속마음이나 감정을 대신 설명하는 것, 장면의 결론을 내리는 것, 상대의 행동이나 반응을 만들어내는 것, 앞으로 일어날 일을 미리 알리는 것.");
   }
 
+  p.push("");
+  var HARD = {
+    "쉬움":"이야기는 상대에게 순하게 흘러간다. 인물은 상대에게 호의적이고, 갈등이 생겨도 오래 끌지 않고 풀린다. 상대가 시도하는 일은 대체로 통한다.",
+    "보통":"이야기는 상대의 뜻대로만 흘러가지 않는다. 뜻대로 되는 일도 있고 어긋나는 일도 있다. 인물은 마음을 조금씩 열되 한 번에 다 열지 않는다.",
+    "어려움":"이야기는 상대에게 만만하지 않다. 인물은 쉽게 마음을 열지 않고, 시도한 일이 실패하거나 상황이 나빠지는 일이 자주 있다. 상대가 원하는 것을 얻으려면 여러 번 부딪혀야 한다. 다만 상대를 벌주려고 억지로 일을 그르치지는 않는다."
+  };
+  p.push("# 이야기의 난이도");
+  p.push(HARD[c.hard||"보통"] || HARD["보통"]);
   p.push("");
   p.push("# 인물의 태도");
   p.push(DEFY[c.defy||"보통"] || DEFY["보통"]);
