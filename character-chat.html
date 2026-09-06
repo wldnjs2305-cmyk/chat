@@ -426,7 +426,7 @@ var FONTS = {
   "둥근모":'"DungGeunMo","돋움",Dotum,sans-serif'
 };
 var cfg = get("gz.cfg", { mode:"openai", key:"", base:"", model:"gemini-3.7-flash", maxTokens:2600,
-                          theme:"light", fBody:"프리텐다드", fNar:"본명조", fSize:16, smsTheme:"기본", preset:"", viewMode:"bubble", bubW:84, fSms:"테마 따라가기", sSize:15 });
+                          theme:"light", fBody:"프리텐다드", fNar:"본명조", fSize:16, smsTheme:"기본", preset:"", viewMode:"bubble", bubW:84, fSms:"테마 따라가기", sSize:15, think:"auto" });
 if (!cfg.mode) cfg.mode = "openai";
 if (!cfg.theme) cfg.theme = "light";
 if (typeof cfg.preset !== "string") cfg.preset = "";
@@ -434,6 +434,7 @@ cfg.viewMode = "bubble";
 if (!cfg.bubW) cfg.bubW = 84;
 if (!cfg.fSms) cfg.fSms = "테마 따라가기";
 if (!cfg.sSize) cfg.sSize = 15;
+if (!cfg.think) cfg.think = "auto";
 var chars = get("gz.chars", []);
 var presets = get("gz.presets", []);
 function saveCfg(){ put("gz.cfg", cfg); applyTheme(); }
@@ -482,7 +483,7 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-07 o";
+var APP_VER = "2026-09-07 r";
 var THEMES = [
   ["light","밝게"], ["mono","무채색"], ["pink","연핑크"], ["sky","연하늘"], ["lemon","연노랑"],
   ["lilac","연보라"], ["night","밤"], ["plum","보라"]
@@ -970,6 +971,23 @@ function presetOf(c){
   if (sel) return presetById(sel) || (cfg.preset ? presetById(cfg.preset) : null);
   return cfg.preset ? presetById(cfg.preset) : null;
 }
+/* 제미나이 추론 예산. 중계 서버가 그대로 넘겨줘야 먹힌다 */
+var THINK_BUDGET = { off:0, low:512, mid:2048, high:8192 };
+function applyThink(body, isGemini){
+  var k = cfg.think || "auto";
+  if (k === "auto") return body;
+  var n = THINK_BUDGET[k];
+  if (n === undefined) return body;
+  if (isGemini){
+    body.generationConfig = body.generationConfig || {};
+    body.generationConfig.thinkingConfig = { thinkingBudget: n };
+  } else {
+    body.reasoning_effort = (k==="off") ? "none" : (k==="mid" ? "medium" : k);
+    body.extra_body = body.extra_body || {};
+    body.extra_body.google = { thinking_config: { thinking_budget: n } };
+  }
+  return body;
+}
 function genOf(c){
   var ps=presetOf(c), o={ temp:null, topP:null, maxTokens:cfg.maxTokens||2600 };
   if (ps){
@@ -1143,6 +1161,12 @@ function viewEdit(){
        }).join("")
      + '</select>';
   h += '<button class="btn" id="pman">프리셋 관리 ('+presets.length+'개)</button>';
+  var live = presetOf(c);
+  var liveN = live ? blkLen(live, true) : 0;
+  h += '<div class="hint" style="margin-top:8px">지금 걸린 것 · '
+     + (live ? esc(live.name||"이름 없음")+" ("+(live.mode==="replace"?"기본 지침 대신":"기본 지침에 더하기")+", "+liveN.toLocaleString()+"자)"
+             : "없음")
+     + '</div>';
 
   h += '<div class="sec">로어북</div>';
   h += '<button class="btn" id="lore">로어북 열기 ('+((c.lore||[]).length)+'개)</button>';
@@ -1288,6 +1312,11 @@ function viewCfg(){
      + '<div style="display:flex;gap:8px"><input id="k" type="password" value="'+esc(cfg.key)+'" autocapitalize="off" autocorrect="off" spellcheck="false">'
      + '<button class="btn sm" id="kv">보기</button></div>';
   h += '<label>모델</label><input id="m" value="'+esc(cfg.model)+'" autocapitalize="off" spellcheck="false">';
+  h += '<label>추론</label><select id="thk">'
+     + [["auto","자동"],["off","끄기"],["low","낮음"],["mid","보통"],["high","높음"]].map(function(o){
+         return '<option value="'+o[0]+'"'+((cfg.think||"auto")===o[0]?" selected":"")+'>'+o[1]+'</option>';
+       }).join("")
+     + '</select>';
   h += '<label>최대 응답 길이</label><input id="t" value="'+esc(cfg.maxTokens)+'" inputmode="numeric">';
   h += '<button class="btn" id="ping">연결 테스트</button>';
   h += '<div class="hint" id="pingout"></div>';
@@ -1333,6 +1362,7 @@ function viewCfg(){
   h += '<div class="sec">앱</div>';
   h += '<div class="hint">지금 버전 '+esc(APP_VER)+'</div>';
   h += '<button class="btn" id="upd">업데이트 확인</button>';
+  h += '<button class="btn" id="dump">지금 나가는 프롬프트 보기</button>';
   h += '<div class="sec">백업</div>';
   h += '<button class="btn" id="exp">전체 내보내기</button>';
   h += '<label>불러오기</label><textarea id="impbox"></textarea>';
@@ -1343,6 +1373,7 @@ function viewCfg(){
   /* 하나가 없어도 나머지 설정이 멈추지 않게 */
   function on(sel, ev, fn){ var el=$(sel); if (el) el[ev]=fn; }
   on("#md","onchange",function(){ cfg.mode=this.value; saveCfg(); });
+  on("#thk","onchange",function(){ cfg.think=this.value; saveCfg(); });
   on("#th","onchange",function(){ cfg.theme=this.value; saveCfg(); });
   on("#fb","onchange",function(){ cfg.fBody=this.value; saveCfg(); });
   on("#fn","onchange",function(){ cfg.fNar=this.value; saveCfg(); });
@@ -1416,6 +1447,15 @@ function viewCfg(){
     .catch(function(e){ out.textContent = "실패 · "+(e.message||"연결 안 됨"); })
     .then(function(){ btn.disabled=false; });
   };
+  on("#dump","onclick",function(){
+    var c=cur();
+    if (!c) return alert("캐릭터를 하나 열고 나서 눌러줘.");
+    var sys=buildSystem(c, null);
+    var ps=presetOf(c);
+    var head="글자 "+sys.length.toLocaleString()+"자\n프리셋: "+(ps?(ps.name||"이름 없음"):"없음")+"\n\n";
+    copyText(head+sys);
+    alert(head+"복사했어. 메모장에 붙여넣어서 확인해봐.");
+  });
   $("#upd").onclick=function(){
     var u = location.href.split("#")[0].split("?")[0];
     location.replace(u + "?u=" + Date.now());
@@ -2685,6 +2725,7 @@ function smsTurn(){
     if (sgen.temp!==null) body.generationConfig.temperature=sgen.temp;
     if (sgen.topP!==null) body.generationConfig.topP=sgen.topP;
   }
+  applyThink(body, cfg.mode!=="openai");
 
   fetch(url,{method:"POST",headers:headers,body:JSON.stringify(body)})
   .then(function(res){ return res.text().then(function(txt){
@@ -3202,12 +3243,6 @@ function buildSystem(c, turn){
   p.push("상대가 자기 쪽 사정을 말할 때, 인물이 알 리 없는 인물이나 사건이라면 아는 척하지 않는다. 모르면 모른다고 하고 궁금하면 물어본다.");
   p.push("인물이 죽었다거나 세계관의 큰 전제가 뒤집히는 이야기라면, 그때는 곧이곧대로 받아들이지 말고 인물답게 되묻는다.");
 
-  if (psText && ps.mode!=="replace"){
-    p.push("");
-    p.push("# 추가 지침");
-    p.push("아래는 위의 쓰는 법에 더해지는 지침이다. 겹치는 내용이 있으면 아래를 따른다.");
-    p.push(psText);
-  }
 
   var lang=c.lang||"한국어";
   if (lang!=="한국어"){
@@ -3240,6 +3275,12 @@ function buildSystem(c, turn){
     p.push("# 문체 예시");
     p.push("아래 글의 내용이 아니라 문장의 결과 호흡만 따라간다.");
     p.push(smpl);
+  }
+  if (psText && ps.mode!=="replace"){
+    p.push("");
+    p.push("# 무엇보다 우선하는 지침");
+    p.push("아래는 위의 모든 규칙에 더해지는 지침이다. 위와 겹치거나 어긋나는 내용이 있으면 반드시 아래를 따른다.");
+    p.push(psText);
   }
   if (turn){
     p.push("");
@@ -3302,6 +3343,7 @@ function callAPI(c, log, turnInstr){
     if (gen.temp!==null) body.generationConfig.temperature=gen.temp;
     if (gen.topP!==null) body.generationConfig.topP=gen.topP;
   }
+  applyThink(body, cfg.mode!=="openai");
   return fetch(url,{ method:"POST", headers:headers, body:JSON.stringify(body) })
   .then(function(res){
     return res.text().then(function(txt){
