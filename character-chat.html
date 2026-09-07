@@ -165,9 +165,9 @@
   body[data-theme=green] #dock{background:rgba(247,253,243,.88);
     backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
   body[data-theme=green] .bub{border-radius:18px;
-    background:linear-gradient(180deg,#fbfff7 0%,#eefbe3 54%,#d9f5c2 100%);
-    border:1px solid #d3edc2;
-    box-shadow:0 6px 16px rgba(90,150,70,.12), inset 0 1px 0 rgba(255,255,255,.9)}
+    background:linear-gradient(180deg,rgba(255,255,255,.96) 0%,rgba(244,253,236,.92) 54%,rgba(223,246,202,.86) 100%);
+    border:1px solid #dcf0cd;
+    box-shadow:0 0 0 1px rgba(255,255,255,.9), 0 6px 18px rgba(90,150,70,.14)}
   body[data-theme=green] .msg.me .bub{
     background:linear-gradient(180deg,#f7fdec 0%,#e7f8d3 54%,#d3f0b4 100%);
     border-color:#c8e8ab;color:#1c2d16}
@@ -200,11 +200,9 @@
   /* 유리 젤리 말풍선 */
   body[data-theme=ocean] .bub{
     border-radius:22px;
-    background:linear-gradient(180deg, rgba(255,255,255,.80), rgba(216,234,255,.52) 54%, rgba(119,181,250,.24));
-    border:1px solid rgba(255,255,255,.90);
-    box-shadow:0 10px 24px rgba(45,102,184,.15),
-      inset 0 1px 0 rgba(255,255,255,.96),
-      inset 0 -14px 20px rgba(73,144,234,.13);
+    background:linear-gradient(180deg, rgba(255,255,255,.96) 0%, rgba(238,247,255,.92) 54%, rgba(204,228,255,.86) 100%);
+    border:1px solid rgba(255,255,255,.94);
+    box-shadow:0 0 0 1px rgba(255,255,255,.9), 0 8px 20px rgba(45,102,184,.15);
     backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%)}
   body[data-theme=ocean] .msg.me .bub{
     background:linear-gradient(180deg, rgba(255,255,255,.72), rgba(196,222,254,.60) 54%, rgba(96,164,244,.28))}
@@ -466,19 +464,20 @@
     box-shadow:0 4px 14px rgba(0,0,0,.07)}
   .paper.letter{padding:19px 20px 22px}
   .paper.diary{padding:16px 20px 22px}
+  /* 줄 간격은 정수 px 로 고정한다. em 으로 두면 한 줄마다 0.5px 씩 밀려서 아래로 갈수록 어긋난다 */
   .paper .ruled{
-    line-height:1.75;
+    line-height:var(--rlh,25px);
     background-image:repeating-linear-gradient(180deg,
-      transparent 0, transparent calc(1.75em - 1px),
-      var(--paper-rule, rgba(110,115,135,.15)) calc(1.75em - 1px),
-      var(--paper-rule, rgba(110,115,135,.15)) 1.75em);
+      transparent 0, transparent calc(var(--rlh,25px) - 1px),
+      var(--paper-rule, rgba(110,115,135,.15)) calc(var(--rlh,25px) - 1px),
+      var(--paper-rule, rgba(110,115,135,.15)) var(--rlh,25px));
     background-position:0 0;
-    background-repeat:repeat-y;
-    background-size:100% 100%}
-  .paper.letter .lto{font-family:inherit;font-weight:400;line-height:1.75;
-    margin:0 0 .5em;letter-spacing:.01em}
-  .paper.letter .lsign{display:block;text-align:right;line-height:1.75;
-    margin-top:.9em;font-weight:400;letter-spacing:.01em}
+    background-repeat:repeat}
+  .paper .ruled em{line-height:inherit;font-size:1em}
+  .paper.letter .lto{font-family:inherit;font-weight:400;line-height:var(--rlh,25px);
+    margin:0 0 var(--rlh,25px);letter-spacing:.01em}
+  .paper.letter .lsign{display:block;text-align:right;line-height:var(--rlh,25px);
+    margin:var(--rlh,25px) 0 0;font-weight:400;letter-spacing:.01em}
   .paper.diary .dhead{display:flex;align-items:baseline;gap:10px;
     font-family:var(--f-body);font-weight:600;font-size:13px;color:var(--muted);
     padding-bottom:9px;margin-bottom:11px;border-bottom:1.5px solid var(--paper-line)}
@@ -864,6 +863,7 @@ function applyTheme(){
   if (sf) st.setProperty("--f-sms", sf); else st.removeProperty("--f-sms");
   st.setProperty("--sfs", (cfg.sSize||15)+"px");
   st.setProperty("--cfs", (cfg.cSize||14)+"px");
+  st.setProperty("--rlh", Math.round((cfg.cSize||14)*1.75)+"px");
   st.setProperty("--ifs", (cfg.iSize||14)+"px");
 }
 
@@ -2502,11 +2502,11 @@ function cardHTML(kind, body, c){
     if (ll.length && ll[ll.length-1].trim().length<=40 && /(가|이|올림|드림|씀|로부터)\s*[.]?$/.test(ll[ll.length-1].trim())){
       sign = ll.pop().trim();
     }
-    return '<div class="paper letter">'
+    return '<div class="paper letter"><div class="ruled">'
          + (to?'<div class="lto">'+esc(to)+'</div>':"")
-         + '<div class="ruled">'+cardText(ll.join("\n"))+'</div>'
+         + '<div>'+cardText(ll.join("\n"))+'</div>'
          + (sign?'<span class="lsign">'+esc(sign)+'</span>':"")
-         + '</div>';
+         + '</div></div>';
   }
   if (kind==="속마음") return '<div class="mind">'+cardText(body)+'</div>';
   if (kind==="비밀")   return '<div class="mind secret"><div class="pt">비밀</div>'+cardText(body)+'</div>';
