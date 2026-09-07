@@ -683,7 +683,7 @@
   #dock .tools{display:flex;gap:13px;padding:0 2px 8px;overflow-x:auto}
   #dock .tools button{background:transparent;border:0;color:var(--muted);font-size:13px;font-family:inherit;padding:0;white-space:nowrap;cursor:pointer}
   #dock .line{display:flex;gap:8px;align-items:flex-end}
-  #inp{font-family:var(--f-body);
+  #inp{font-family:var(--f-body);font-size:var(--ifs,14px);line-height:1.5;
     flex:1;min-height:44px;max-height:140px;border-radius:22px;padding:11px 42px 11px 16px;min-width:0}
   #inwrap{flex:1;position:relative;display:flex;min-width:0}
   #star{position:absolute;right:8px;bottom:7px;width:30px;height:30px;border-radius:15px;border:0;
@@ -761,7 +761,7 @@ var FONTS = {
   "고정폭":'"Nanum Gothic Coding","Nanum Gothic",monospace'
 };
 var cfg = get("gz.cfg", { mode:"openai", key:"", base:"", model:"gemini-3.7-flash", maxTokens:2600,
-                          theme:"light", fBody:"프리텐다드", fNar:"본명조", fSize:16, smsTheme:"기본", preset:"", viewMode:"bubble", bubW:84, fSms:"테마 따라가기", sSize:15, cSize:14, think:"auto", models:"" });
+                          theme:"light", fBody:"프리텐다드", fNar:"본명조", fSize:16, smsTheme:"기본", preset:"", viewMode:"bubble", bubW:84, fSms:"테마 따라가기", sSize:15, cSize:14, iSize:14, think:"auto", models:"" });
 if (!cfg.mode) cfg.mode = "openai";
 if (!cfg.theme) cfg.theme = "light";
 if (typeof cfg.preset !== "string") cfg.preset = "";
@@ -771,6 +771,7 @@ if (!cfg.fSms) cfg.fSms = "테마 따라가기";
 if (!cfg.sSize) cfg.sSize = 15;
 if (!cfg.think) cfg.think = "auto";
 if (!cfg.cSize) cfg.cSize = 14;
+if (!cfg.iSize) cfg.iSize = 14;
 if (typeof cfg.models !== "string") cfg.models = "";
 var chars = get("gz.chars", []);
 var presets = get("gz.presets", []);
@@ -824,7 +825,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-08 u";
+var APP_VER = "2026-09-08 v";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["nightsea","밤바다"], ["green","그린"], ["berry","핑크"], ["homepage","홈페이지"], ["retro","레트로"], ["night","밤"]
@@ -850,6 +851,7 @@ function applyTheme(){
   if (sf) st.setProperty("--f-sms", sf); else st.removeProperty("--f-sms");
   st.setProperty("--sfs", (cfg.sSize||15)+"px");
   st.setProperty("--cfs", (cfg.cSize||14)+"px");
+  st.setProperty("--ifs", (cfg.iSize||14)+"px");
 }
 
 /* ---------- 도구 ---------- */
@@ -1759,6 +1761,8 @@ function viewCfg(){
      + '<input id="fs" type="range" min="13" max="22" step="1" value="'+(cfg.fSize||16)+'" style="padding:0">';
   h += '<label>문자 글자 크기 · '+(cfg.sSize||15)+'px</label>'
      + '<input id="ss" type="range" min="12" max="20" step="0.5" value="'+(cfg.sSize||15)+'" style="padding:0">';
+  h += '<label>입력창 글자 크기 · '+(cfg.iSize||14)+'px</label>'
+     + '<input id="is" type="range" min="12" max="20" step="0.5" value="'+(cfg.iSize||14)+'" style="padding:0">';
   h += '<label>말풍선 폭 · '+(cfg.bubW||84)+'%</label>'
      + '<input id="bw" type="range" min="60" max="96" step="2" value="'+(cfg.bubW||84)+'" style="padding:0">';
   h += '<div class="sec">프리셋</div>';
@@ -1800,6 +1804,16 @@ function viewCfg(){
     cfg.cSize=+this.value; saveCfg();
     var lb=this.previousElementSibling;
     if (lb) lb.textContent="카드 글자 크기 · "+cfg.cSize+"px";
+  });
+  on("#is","oninput",function(){
+    cfg.iSize=+this.value; saveCfg();
+    var lb=this.previousElementSibling;
+    if (lb) lb.textContent="입력창 글자 크기 · "+cfg.iSize+"px";
+  });
+  on("#is","oninput",function(){
+    cfg.iSize=+this.value; saveCfg();
+    var lb=this.previousElementSibling;
+    if (lb) lb.textContent="입력창 글자 크기 · "+cfg.iSize+"px";
   });
   on("#bw","oninput",function(){
     cfg.bubW=+this.value; saveCfg();
