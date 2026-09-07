@@ -349,7 +349,7 @@
   .phone .pm{background:var(--panel);border-radius:14px;padding:9px 13px;margin-bottom:7px;max-width:86%;
     font-family:var(--f-sms, var(--f-body));font-size:var(--sfs,15px);line-height:1.6}
   .phone .pm.me{background:var(--mine);margin-left:auto}
-  .paper{position:relative;background:var(--paper);border:1px solid var(--paper-line);border-radius:14px;padding:18px 18px 20px;margin:10px 0;font-family:"Noto Serif KR",serif;font-weight:300;color:var(--paper-text);line-height:2;font-size:15.5px;white-space:pre-wrap}
+  .paper{position:relative;background:var(--paper);border:1px solid var(--paper-line);border-radius:14px;padding:18px 18px 20px;margin:10px 0;font-family:var(--f-nar);font-weight:300;color:var(--paper-text);line-height:2;font-size:15.5px;white-space:pre-wrap}
   .paper .pt{font-size:12px;letter-spacing:.08em;color:var(--muted);margin-bottom:10px;font-family:inherit}
   /* 편지 · 일기 — 줄은 본문 칸에만 그어서 글줄과 정확히 맞춘다 */
   .paper.letter, .paper.diary{
@@ -425,7 +425,7 @@
   .mind.secret{border:1px dashed var(--line)}
   .mind.secret .pt{font-size:11.5px;letter-spacing:.06em;color:var(--muted);margin-bottom:7px}
   .mind,.paper,.statc,.narr{font-size:var(--cfs,14px);line-height:1.75}
-  .mind{background:var(--field);border:1px solid var(--line);border-radius:18px;padding:15px 17px;margin:11px 0;font-family:"Noto Serif KR",serif;font-style:italic;font-weight:300;color:var(--nar);line-height:1.95;font-size:15px;white-space:pre-wrap}
+  .mind{background:var(--field);border:1px solid var(--line);border-radius:18px;padding:15px 17px;margin:11px 0;font-family:var(--f-nar);font-style:italic;font-weight:300;color:var(--nar);line-height:1.95;font-size:15px;white-space:pre-wrap}
   .pl{background:var(--field);border-radius:16px;padding:6px 4px;margin:10px 0}
   .pl a{display:block;padding:10px 14px;text-decoration:none;color:inherit;border-bottom:1px solid var(--line)}
   .pl a:last-child{border-bottom:0}
@@ -2454,6 +2454,22 @@ function cardHTML(kind, body, c){
 }
 
 var KINDS = ["문자","일기","편지","속마음","플리","나레","관계","상태","비밀","소문","알림","커뮤"];
+/* 이 카드들은 해당 명령어를 친 턴에만 카드로 그린다. 그냥 대화 중에 나오면 본문으로 흘린다 */
+var CARD_ONLY = {
+  "일기":["/일기"], "편지":["/편지"], "속마음":["/속마음"], "플리":["/플리"],
+  "관계":["/관계","/관계도"], "상태":["/상태","/상태창"], "소문":["/소문"],
+  "커뮤":["/커뮤반응","/커뮤니티","/커뮤"]
+};
+/* 이 답변 바로 앞에 유저가 친 명령어를 찾는다 */
+function askedCmd(log, idx){
+  for (var i=idx-1;i>=0;i--){
+    if (log[i].r==="u"){
+      if (log[i].ooc) return "/ooc";
+      return cmdOf(log[i].t);
+    }
+  }
+  return null;
+}
 
 function pieces(c, text){
   var names = [ (c.name||"").trim() ].concat(castOf(c).map(function(x){ return x.name.trim(); }))
@@ -3606,6 +3622,12 @@ function paint(err, thinking){
       continue;
     }
     var ps = pieces(c, m.t), body = "";
+    var askK = askedCmd(log, i);
+    ps = ps.map(function(p){
+      if (p.card && CARD_ONLY[p.card] && CARD_ONLY[p.card].indexOf(askK) < 0)
+        return { who:null, text:p.text };
+      return p;
+    });
     ps.forEach(function(p){
       if (p.card){
         body += '<div data-i="'+i+'">'+cardHTML(p.card, p.text, c)+'</div>';
