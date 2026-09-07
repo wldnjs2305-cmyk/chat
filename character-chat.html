@@ -39,12 +39,94 @@
   body.dark .sm.r .b{color:#F5F4FA}
 
   /* 밝은 테마들 */
-  body[data-theme=lilac]{
-    --bg:#F7F4FC; --panel:#F7F4FC; --field:#EDE7F6; --line:#E2DAEF;
-    --text:#2E2838; --muted:#8E85A0; --bub:#F0EBF8; --mine:#DCD0F0;
-    --nar:#8A81A0; --accent:#7C63C4; --trc:#554D68;
-    --paper:#F2EDF9; --paper-line:#E2DAEF; --paper-text:#2E2838;
+  /* 밤바다 */
+  body[data-theme=nightsea]{
+    --bg:#0a1020; --panel:#111a2e; --field:#16203a; --line:#26324f;
+    --text:#DDE4F0; --muted:#7f8ca6; --bub:#18233c; --mine:#24406b;
+    --nar:#93a1bb; --accent:#7fb4dd; --trc:#c3cfe2;
+    --paper:#141d33; --paper-line:#26324f; --paper-text:#DDE4F0;
+    background:linear-gradient(180deg,#070c18 0%,#0b1327 42%,#101c36 72%,#16294a 100%);
+    background-attachment:fixed;
   }
+  body[data-theme=nightsea]::before{
+    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+    animation:sb-a 13s ease-in-out infinite alternate;background-repeat:no-repeat;
+    background-image:
+      radial-gradient(circle 1px at 14% 9%,  rgba(255,255,255,.90), transparent 100%),
+      radial-gradient(circle 1px at 31% 17%, rgba(255,255,255,.65), transparent 100%),
+      radial-gradient(circle 1px at 47% 6%,  rgba(255,255,255,.85), transparent 100%),
+      radial-gradient(circle 1px at 62% 21%, rgba(255,255,255,.60), transparent 100%),
+      radial-gradient(circle 1px at 78% 11%, rgba(255,255,255,.80), transparent 100%),
+      radial-gradient(circle 1px at 91% 26%, rgba(255,255,255,.65), transparent 100%),
+      radial-gradient(circle 1px at 22% 31%, rgba(255,255,255,.55), transparent 100%),
+      radial-gradient(circle 1px at 69% 34%, rgba(255,255,255,.60), transparent 100%);
+  }
+  body[data-theme=nightsea]::after{
+    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:
+      radial-gradient(ellipse 140% 22% at 50% 74%, rgba(200,222,245,.17), transparent 70%),
+      radial-gradient(ellipse 120% 16% at 42% 88%, rgba(210,230,250,.14), transparent 72%),
+      radial-gradient(ellipse 150% 14% at 60% 99%, rgba(190,215,242,.12), transparent 74%);
+  }
+  body[data-theme=nightsea] #app{position:relative;z-index:1}
+  body[data-theme=nightsea] #view{background:transparent}
+  body[data-theme=nightsea] #bar,
+  body[data-theme=nightsea] #dock{background:rgba(10,16,32,.72);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  body[data-theme=nightsea] .bub{border-radius:18px;background:rgba(28,42,70,.62);
+    border:1px solid rgba(150,180,215,.16);box-shadow:0 8px 26px rgba(0,0,0,.34);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  body[data-theme=nightsea] .msg.me .bub{background:rgba(40,68,112,.68)}
+  body[data-theme=nightsea] .msg .who{color:#a9bcd6;font-weight:700;font-size:13.5px;margin:0 0 6px 3px}
+  body[data-theme=nightsea] .ava{border:1.5px solid rgba(180,205,235,.30)}
+  body[data-theme=nightsea] .card,
+  body[data-theme=nightsea] .castbox,
+  body[data-theme=nightsea] .statc{border-radius:18px;background:rgba(20,30,52,.70);
+    border:1px solid rgba(150,180,215,.14)}
+  body[data-theme=nightsea] .btn{border-radius:14px;background:rgba(22,32,58,.72)}
+  body[data-theme=nightsea] #inp{border-radius:18px;background:rgba(22,32,58,.72);
+    border:1px solid rgba(150,180,215,.18)}
+  body[data-theme=nightsea] #send{background:#33578c;color:#eaf1fa}
+
+  /* 그린 — 크림소다 */
+  body[data-theme=green]{
+    --bg:#ffffff; --panel:#ffffff; --field:#f0faea; --line:#cfeabd;
+    --text:#22331c; --muted:#7ea272; --bub:#eafadf; --mine:#b9ec8f;
+    --nar:#6f9165; --accent:#4aa63f; --trc:#3e5636;
+    --paper:#f7fdf3; --paper-line:#cfeabd; --paper-text:#22331c;
+    background:linear-gradient(180deg,#ffffff 0%,#fbfff8 34%,#eafbdd 68%,#cdf2ae 100%);
+    background-attachment:fixed;
+  }
+  body[data-theme=green]::before{
+    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+    animation:sb-a 10s ease-in-out infinite alternate;background-repeat:no-repeat;
+    background-image:
+      radial-gradient(circle 3px at 16% 62%, rgba(255,255,255,.95), transparent 100%),
+      radial-gradient(circle 4px at 33% 78%, rgba(255,255,255,.85), transparent 100%),
+      radial-gradient(circle 3px at 52% 68%, rgba(255,255,255,.92), transparent 100%),
+      radial-gradient(circle 5px at 71% 84%, rgba(255,255,255,.80), transparent 100%),
+      radial-gradient(circle 3px at 88% 72%, rgba(255,255,255,.90), transparent 100%),
+      radial-gradient(circle 4px at 24% 92%, rgba(255,255,255,.85), transparent 100%),
+      radial-gradient(circle 3px at 62% 95%, rgba(255,255,255,.90), transparent 100%);
+  }
+  body[data-theme=green] #app{position:relative;z-index:1}
+  body[data-theme=green] #view{background:transparent}
+  body[data-theme=green] #bar{background:rgba(255,255,255,.86);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  body[data-theme=green] #dock{background:rgba(247,253,243,.88);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  body[data-theme=green] .bub{border-radius:18px;background:#eafadf;border:1px solid #cbe9b8;
+    box-shadow:0 3px 10px rgba(90,150,70,.10)}
+  body[data-theme=green] .msg.me .bub{background:#b9ec8f;border-color:#a6df78;color:#1c2d16}
+  body[data-theme=green] .msg .who{color:#3f5c37;font-weight:700;font-size:13.5px;margin:0 0 6px 3px}
+  body[data-theme=green] .ava{border:2px solid #fff;box-shadow:0 3px 9px rgba(90,150,70,.22)}
+  body[data-theme=green] .card,
+  body[data-theme=green] .castbox,
+  body[data-theme=green] .statc{border-radius:18px;border:1px solid #cfeabd}
+  body[data-theme=green] .btn{border-radius:14px}
+  body[data-theme=green] #inp{border-radius:18px;border:1px solid #cfeabd;background:#fff}
+  body[data-theme=green] #send{background:#8fdc63;color:#1c2d16}
+
   body[data-theme=ocean]{
     background:linear-gradient(170deg,#f4faff 0%,#e4f0ff 34%,#cde3fb 68%,#aecff5 100%);
     background-attachment:fixed}
@@ -269,12 +351,6 @@
   body[data-theme=retro] .bub em{
     font-family:"DungGeunMo","돋움",Dotum,sans-serif;font-style:normal;
     opacity:.72;font-weight:400}
-  body[data-theme=pink]{
-    --bg:#FDF4F3; --panel:#FDF4F3; --field:#F8E8E7; --line:#F1DCDB;
-    --text:#38292C; --muted:#A28A8E; --bub:#F9EBEA; --mine:#F4D4DB;
-    --nar:#9C8489; --accent:#B0627A; --trc:#6B4E55;
-    --paper:#FBF1EC; --paper-line:#EEDCD5; --paper-text:#38292C;
-  }
   /* 어두운 테마들 — body.dark 뒤에 와야 덮어쓴다 */
   body[data-theme=night]{
     --bg:#12141C; --panel:#171A24; --field:#1E222E; --line:#2A2F3D;
@@ -748,13 +824,13 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-08 s";
+var APP_VER = "2026-09-08 u";
 var THEMES = [
-  ["light","밝게"], ["pink","연핑크"], ["sky","연하늘"],
-  ["lilac","연보라"], ["ocean","푸른바다"], ["nightsea","밤바다"], ["green","그린"], ["berry","딸기토끼"], ["homepage","홈페이지"], ["retro","레트로"], ["night","밤"]
+  ["light","밝게"],
+  ["ocean","스카이"], ["nightsea","밤바다"], ["green","그린"], ["berry","핑크"], ["homepage","홈페이지"], ["retro","레트로"], ["night","밤"]
 ];
 var THEME_DARK = { night:1, nightsea:1 };
-var THEME_BG = { light:"#FFFFFF", pink:"#FDF4F3", sky:"#F2F7FC", lilac:"#F7F4FC", ocean:"#eef6ff", nightsea:"#0a1020", green:"#ffffff", retro:"#c5d1b8", berry:"#fff8fa", homepage:"#ffffff",
+var THEME_BG = { light:"#FFFFFF", ocean:"#eef6ff", nightsea:"#0a1020", green:"#ffffff", retro:"#c5d1b8", berry:"#fff8fa", homepage:"#ffffff",
                  night:"#12141C" };
 
 function applyTheme(){
