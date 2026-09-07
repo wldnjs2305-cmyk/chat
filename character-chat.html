@@ -104,7 +104,7 @@
     backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%)}
   /* 달빛 받은 물결처럼 — 위는 밝고 아래로 가라앉는다 */
   /* 캐릭터 — 달빛 받은 물결. 밝게 */
-  body[data-theme=nightsea] .bub{border-radius:22px;
+  body[data-theme=nightsea] .bub{border-radius:var(--brad,17px);
     background:linear-gradient(180deg,rgba(196,228,255,.62) 0%,rgba(132,184,238,.60) 52%,rgba(92,146,212,.62) 100%);
     border:1px solid rgba(228,242,255,.55);
     box-shadow:0 12px 30px rgba(2,10,26,.34),
@@ -164,7 +164,7 @@
     backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
   body[data-theme=green] #dock{background:rgba(247,253,243,.88);
     backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-  body[data-theme=green] .bub{border-radius:18px;
+  body[data-theme=green] .bub{border-radius:var(--brad,17px);
     background:linear-gradient(180deg,rgba(255,255,255,.99) 0%,rgba(252,255,249,.97) 62%,rgba(240,252,231,.94) 100%);
     border:1px solid #dcf0cd;
     box-shadow:0 0 0 1px rgba(255,255,255,.9), 0 6px 18px rgba(90,150,70,.14)}
@@ -199,7 +199,7 @@
     backdrop-filter:blur(16px) saturate(150%);-webkit-backdrop-filter:blur(16px) saturate(150%)}
   /* 유리 젤리 말풍선 */
   body[data-theme=ocean] .bub{
-    border-radius:22px;
+    border-radius:var(--brad,17px);
     background:linear-gradient(180deg, rgba(255,255,255,.99) 0%, rgba(251,253,255,.97) 62%, rgba(233,244,255,.94) 100%);
     border:1px solid rgba(255,255,255,.94);
     box-shadow:0 0 0 1px rgba(255,255,255,.9), 0 8px 20px rgba(45,102,184,.15);
@@ -249,7 +249,7 @@
   body[data-theme=berry] #view{background:transparent}
   /* 말풍선 — 흰 발광에 분홍 잔광 */
   body[data-theme=berry] .bub{
-    border-radius:18px;border:1px solid #ffe0ea;
+    border-radius:var(--brad,17px);border:1px solid #ffe0ea;
     background:linear-gradient(180deg,rgba(255,255,255,.99) 0%,rgba(255,252,253,.97) 62%,rgba(255,241,247,.94) 100%);
     box-shadow:0 0 0 1px rgba(255,255,255,.9), 0 6px 18px rgba(255,140,180,.16)}
   body[data-theme=berry] .msg.me .bub{border-color:#fbe0eb;
@@ -417,7 +417,7 @@
   .msg .col{min-width:0;max-width:var(--bw,84%)}
   .msg.me .col{max-width:calc(var(--bw,84%) - 6%)}
   .who{font-size:13.5px;font-weight:600;margin:2px 0 6px 2px}
-  .bub{padding:var(--bpv,9px) var(--bph,13px);border-radius:18px;background:var(--bub);white-space:pre-wrap;word-break:break-all;line-break:strict;font-family:var(--f-body);font-size:var(--fs);line-height:1.85;letter-spacing:-.004em;cursor:pointer}
+  .bub{padding:var(--bpv,9px) var(--bph,13px);border-radius:var(--brad,17px);background:var(--bub);white-space:pre-wrap;word-break:break-all;line-break:strict;font-family:var(--f-body);font-size:var(--fs);line-height:1.85;letter-spacing:-.004em;cursor:pointer}
   .msg.me .bub{background:var(--mine)}
   .bub em{font-family:var(--f-nar);font-style:italic;font-weight:300;color:var(--nar);font-size:calc(var(--fs) - 0.5px);line-height:1.9}
   mark{background:rgba(255,214,0,.42);color:inherit;border-radius:3px;padding:0 1px}
@@ -868,6 +868,7 @@ function applyTheme(){
   var bp = (cfg.bPad==null ? 9 : cfg.bPad);
   st.setProperty("--bpv", bp+"px");
   st.setProperty("--bph", (bp+4)+"px");
+  st.setProperty("--brad", Math.min(18, bp+8)+"px");
   st.setProperty("--mgap", (cfg.mGap==null ? 14 : cfg.mGap)+"px");
   st.setProperty("--ifs", (cfg.iSize||14)+"px");
 }
