@@ -365,7 +365,7 @@
   .msg .col{min-width:0;max-width:var(--bw,84%)}
   .msg.me .col{max-width:calc(var(--bw,84%) - 6%)}
   .who{font-size:13.5px;font-weight:600;margin:2px 0 6px 2px}
-  .bub{padding:13px 16px;border-radius:18px;background:var(--bub);white-space:pre-wrap;word-break:break-word;font-family:var(--f-body);font-size:var(--fs);line-height:1.85;letter-spacing:-.004em;cursor:pointer}
+  .bub{padding:13px 16px;border-radius:18px;background:var(--bub);white-space:pre-wrap;word-break:break-all;line-break:strict;font-family:var(--f-body);font-size:var(--fs);line-height:1.85;letter-spacing:-.004em;cursor:pointer}
   .msg.me .bub{background:var(--mine)}
   .bub em{font-family:var(--f-nar);font-style:italic;font-weight:300;color:var(--nar);font-size:calc(var(--fs) - 0.5px);line-height:1.9}
   mark{background:rgba(255,214,0,.42);color:inherit;border-radius:3px;padding:0 1px}
@@ -720,7 +720,7 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-08 p";
+var APP_VER = "2026-09-08 q";
 var THEMES = [
   ["light","밝게"], ["pink","연핑크"], ["sky","연하늘"],
   ["lilac","연보라"], ["ocean","푸른바다"], ["berry","딸기토끼"], ["homepage","홈페이지"], ["retro","레트로"], ["night","밤"]
@@ -3532,7 +3532,7 @@ var CMDS = {
   "/일기":"이번 턴에는 인물이 쓴 일기만 보여준다. 첫 줄에 [일기] 를 쓰고 본문을 1인칭으로 쓴 뒤 [/일기] 로 닫는다. 12~18줄로 쓴다. 그날 있었던 일과 그때 든 생각을 같이 적되, 감정을 설명하지 말고 장면과 말로 드러낸다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
   "/편지":"이번 턴에는 인물이 쓴 편지만 보여준다. 첫 줄에 [편지] 를 쓰고 본문을 쓴 뒤 [/편지] 로 닫는다. 10~16줄로 쓴다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
   "/속마음":"이번 턴에는 인물의 지금 속마음만 보여준다. 첫 줄에 [속마음] 을 쓰고 1인칭으로 솔직하게 쓴 뒤 [/속마음] 으로 닫는다. 8~12줄로 쓴다. 겉으로 한 말과 다른 부분, 스스로도 인정하기 싫은 부분까지 들어가되 늘어지지 않게 쓴다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
-  "/플리":"이번 턴에는 노래 세 곡만 고른다. 첫 줄에 [플리] 를 쓰고, 아래 순서대로 한 줄에 하나씩 '제목 - 가수 :: 이유' 형식으로 쓴 뒤 [/플리] 로 닫는다. 첫 곡은 지금 상황에 어울려서 듣고 있는 곡, 둘째 곡은 상대를 생각하며 들었던 곡, 셋째 곡은 평소에 자주 듣던 곡이다. 이유는 한 문장으로 쓴다. 실제로 존재하는 곡만 쓰고, 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다."
+  "/플리":"이번 턴에는 노래 세 곡만 고른다. 첫 줄에 [플리] 를 쓰고, 아래 순서대로 한 줄에 하나씩 '제목 - 가수 :: 이유' 형식으로 쓴 뒤 [/플리] 로 닫는다. 첫 곡은 지금 상황에 어울려서 듣고 있는 곡, 둘째 곡은 상대를 생각하며 들었던 곡, 셋째 곡은 평소에 자주 듣던 곡이다. 이유는 한 문장으로 쓴다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.\n곡을 고르는 기준은 이렇다. 이 인물이 평소에 좋아할 만한 장르와 분위기로 고른다. 지금 장면이 슬프다고 슬픈 곡을 고르는 것이 아니라, 이 사람이라면 이런 걸 듣겠다 싶은 쪽으로 고른다. 성격, 자란 환경, 나이, 하는 일이 취향을 정한다.\n인물 설정에 음악 취향이 적혀 있으면 무엇보다 그것을 따른다.\n나이가 있거나 옛 시절 이야기를 자주 하는 인물이면 그 시절 곡이 섞여도 좋다. 세계관에 시대가 정해져 있으면 그 시대보다 나중에 나온 곡은 쓰지 않는다.\n세 곡을 전부 누구나 아는 대표곡으로 채우지 않는다. 한 곡 정도는 알려진 곡이어도 좋지만, 나머지는 덜 알려졌더라도 그 인물의 취향이 드러나는 곡으로 고른다.\n실제로 존재하는 곡만 쓴다. 제목이나 가수가 확실하지 않으면 지어내지 말고 확실히 아는 곡으로 바꾼다."
 };
 var CMD_SAY = {
   "/전환":"(장면을 넘기자)",
