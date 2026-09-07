@@ -720,7 +720,7 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-08 o";
+var APP_VER = "2026-09-08 p";
 var THEMES = [
   ["light","밝게"], ["pink","연핑크"], ["sky","연하늘"],
   ["lilac","연보라"], ["ocean","푸른바다"], ["berry","딸기토끼"], ["homepage","홈페이지"], ["retro","레트로"], ["night","밤"]
@@ -1413,6 +1413,18 @@ function viewEdit(){
   h += '<label>발음 표기</label><select data-k="romaji">'
      + '<option value="on"'+(c.romaji?" selected":"")+'>켜기</option>'
      + '<option value="off"'+(c.romaji?"":" selected")+'>끄기</option></select>';
+  h += '<label>인칭</label><select id="pers">'
+     + ['1인칭','2인칭','3인칭'].map(function(o){
+         return '<option'+((c.person||"3인칭")===o?" selected":"")+'>'+o+'</option>'; }).join("")
+     + '</select>';
+  h += '<label>시제</label><select id="tens">'
+     + ['과거','현재'].map(function(o){
+         return '<option'+((c.tense||"과거")===o?" selected":"")+'>'+o+'</option>'; }).join("")
+     + '</select>';
+  h += '<label>난이도</label><select id="hard">'
+     + ['쉬움','보통','어려움'].map(function(o){
+         return '<option'+((c.hard||"보통")===o?" selected":"")+'>'+o+'</option>'; }).join("")
+     + '</select>';
   h += '<label>순응 억제</label><select id="defy">'
      + ['약','보통','강'].map(function(o){
          return '<option'+((c.defy||"보통")===o?" selected":"")+'>'+o+'</option>'; }).join("")
@@ -1529,6 +1541,9 @@ function viewEdit(){
     c.kind = (this.value==="다인챗") ? "다인" : "개인";
     saveChars(); render();
   };
+  if ($("#pers")) $("#pers").onchange=function(){ c.person=this.value; saveChars(); };
+  if ($("#tens")) $("#tens").onchange=function(){ c.tense=this.value; saveChars(); };
+  if ($("#hard")) $("#hard").onchange=function(){ c.hard=this.value; saveChars(); };
   if ($("#pers")) $("#pers").onchange=function(){ c.person=this.value; saveChars(); };
   if ($("#tens")) $("#tens").onchange=function(){ c.tense=this.value; saveChars(); };
   if ($("#hard")) $("#hard").onchange=function(){ c.hard=this.value; saveChars(); };
