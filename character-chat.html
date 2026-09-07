@@ -45,111 +45,6 @@
     --nar:#8A81A0; --accent:#7C63C4; --trc:#554D68;
     --paper:#F2EDF9; --paper-line:#E2DAEF; --paper-text:#2E2838;
   }
-  /* 로판 — 크림과 금박 */
-  body[data-theme=novel]{
-    --bg:#e8f1fb; --panel:#fffaf4; --field:#f7eede; --line:#d8c39a;
-    --text:#171412; --muted:#8a6b39; --bub:#fff4e4; --mine:#f4efe4;
-    --nar:#8f6640; --accent:#8a6b39; --trc:#5c4a2e;
-    --paper:#fffaf4; --paper-line:#d8c39a; --paper-text:#171412;
-  }
-  body[data-theme=novel]{
-    background:linear-gradient(180deg,#f1f8ff 0%,#dcefff 46%,#cfe4f8 100%);
-    background-attachment:fixed;
-    font-family:"Gowun Batang",serif}
-  body[data-theme=novel]::before{
-    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.42;
-    background:
-      linear-gradient(90deg, rgba(255,255,255,.30) 0 1px, transparent 1px 70px),
-      linear-gradient(rgba(255,255,255,.24) 0 1px, transparent 1px 70px)}
-  body[data-theme=novel]::after{
-    content:'';position:fixed;inset:22px;z-index:0;pointer-events:none;
-    border:1px solid rgba(255,255,255,.35);
-    box-shadow:inset 0 0 0 1px rgba(184,154,97,.22);
-    background:
-      radial-gradient(circle 3px at 9% 12%,  rgba(255,246,221,.95), transparent 100%),
-      radial-gradient(circle 2px at 88% 15%, rgba(255,246,221,.90), transparent 100%),
-      radial-gradient(circle 3px at 13% 78%, rgba(255,246,221,.90), transparent 100%),
-      radial-gradient(circle 2px at 91% 84%, rgba(255,246,221,.95), transparent 100%),
-      radial-gradient(circle 2px at 5%  46%, rgba(255,246,221,.85), transparent 100%),
-      radial-gradient(circle 3px at 95% 55%, rgba(255,246,221,.85), transparent 100%)}
-  body[data-theme=novel] #app{position:relative;z-index:1}
-  body[data-theme=novel] #view{background:transparent}
-  body[data-theme=novel] #bar, body[data-theme=novel] #dock{
-    background:rgba(255,250,244,.62);
-    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-  body[data-theme=novel] .bub{
-    border-radius:16px 16px 16px 4px;
-    background:linear-gradient(135deg, rgba(255,244,228,.97), rgba(245,224,197,.95) 55%, rgba(220,190,145,.90));
-    border:1px solid rgba(184,154,97,.52);
-    box-shadow:0 12px 26px rgba(22,24,36,.16), inset 0 1px 0 rgba(255,255,255,.36)}
-  body[data-theme=novel] .msg.me .bub{
-    border-radius:16px 16px 4px 16px;
-    background:linear-gradient(135deg, rgba(255,246,231,.96), rgba(224,224,220,.94) 48%, rgba(184,154,97,.82));
-    border-color:rgba(138,107,57,.55)}
-  body[data-theme=novel] .msg .who{color:#5c4a2e;font-weight:700;font-size:13px;letter-spacing:.03em}
-  body[data-theme=novel] .ava{border:2px solid rgba(255,250,244,.92);
-    box-shadow:0 0 0 1px rgba(184,154,97,.55), 0 4px 12px rgba(22,24,36,.20)}
-  body[data-theme=novel] .card, body[data-theme=novel] .castbox,
-  body[data-theme=novel] .statc{border-radius:12px;border:1px solid rgba(184,154,97,.45);
-    background:rgba(255,250,244,.86)}
-  body[data-theme=novel] .btn{border-radius:12px;border:1px solid rgba(184,154,97,.45)}
-  body[data-theme=novel] #inp{border-radius:14px;border:1px solid rgba(184,154,97,.55);
-    background:rgba(255,250,244,.90)}
-  body[data-theme=novel] #send{
-    background:linear-gradient(135deg,#fff1dc,#b89a61);color:#171412;
-    border:1px solid rgba(138,107,57,.55)}
-  body[data-theme=novel] .bub em{color:#8f6640}
-
-  /* 시원한 그레이 — 맑은 유리 */
-  body[data-theme=gray]{
-    --bg:#eef1f3; --panel:#f7f9fa; --field:#e6eaed; --line:#d3d9dd;
-    --text:#222222; --muted:#4e5f61; --bub:#ffffff; --mine:#f2f5f7;
-    --nar:#6f6f6f; --accent:#4e5f61; --trc:#4e5f61;
-    --paper:#f7f9fa; --paper-line:#d3d9dd; --paper-text:#222222;
-  }
-  body[data-theme=gray]{
-    background:linear-gradient(165deg,#f6f8f9 0%,#e9eef1 45%,#dbe3e7 100%);
-    background-attachment:fixed}
-  body[data-theme=gray]::before{
-    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-    background:
-      radial-gradient(circle at 22% 12%, rgba(255,255,255,.55), transparent 34%),
-      radial-gradient(circle at 82% 78%, rgba(255,255,255,.40), transparent 36%)}
-  body[data-theme=gray] #app{position:relative;z-index:1}
-  body[data-theme=gray] #view{background:transparent}
-  body[data-theme=gray] #bar, body[data-theme=gray] #dock{
-    background:rgba(255,255,255,.34);
-    backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}
-  body[data-theme=gray] .bub{
-    border-radius:16px;
-    background:rgba(255,255,255,.42);
-    border:1.5px solid rgba(255,255,255,.86);
-    box-shadow:0 8px 32px rgba(31,38,135,.06);
-    backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px)}
-  body[data-theme=gray] .msg.me .bub{background:rgba(255,255,255,.26)}
-  body[data-theme=gray] .bub em{color:#6f6f6f}
-  body[data-theme=gray] .msg .who{color:#222;font-weight:700;font-size:13.5px;margin:0 0 6px 3px}
-  body[data-theme=gray] .ava{border:1.5px solid rgba(255,255,255,.9);
-    box-shadow:0 3px 10px rgba(31,38,135,.10)}
-  body[data-theme=gray] .card, body[data-theme=gray] .castbox,
-  body[data-theme=gray] .statc{
-    border-radius:16px;background:rgba(255,255,255,.40);
-    border:1.5px solid rgba(255,255,255,.76);
-    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-  body[data-theme=gray] .btn{border-radius:16px;border:1.5px solid rgba(255,255,255,.76);
-    background:rgba(255,255,255,.34)}
-  body[data-theme=gray] #inp{border-radius:16px;border:1.5px solid rgba(255,255,255,.76);
-    background:rgba(255,255,255,.40)}
-  body[data-theme=gray] #send{background:rgba(255,255,255,.42);
-    border:1.5px solid rgba(255,255,255,.8);color:#222}
-
-  /* 푸른바다 — 유리 젤리 */
-  body[data-theme=ocean]{
-    --bg:#eef6ff; --panel:#f7fbff; --field:#e3eefc; --line:#c3ddf7;
-    --text:#1f4f96; --muted:#7aa3d4; --bub:#f4f9ff; --mine:#dceafd;
-    --nar:#5b86bd; --accent:#246fc9; --trc:#3d68a0;
-    --paper:#f6faff; --paper-line:#c3ddf7; --paper-text:#1f4f96;
-  }
   body[data-theme=ocean]{
     background:linear-gradient(170deg,#f4faff 0%,#e4f0ff 34%,#cde3fb 68%,#aecff5 100%);
     background-attachment:fixed}
@@ -489,6 +384,8 @@
   .acts{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
   .acts button{background:var(--field);border:1px solid var(--line);color:var(--text);font-family:inherit;font-size:13px;padding:7px 12px;border-radius:10px;cursor:pointer}
   .acts button.del{color:#D06060}
+  .sacts{justify-content:flex-start;margin-top:6px}
+  .sm.r .sacts{justify-content:flex-end}
   .editbox{width:100%;min-height:120px;margin-top:4px}
   .thinking{color:var(--muted);font-size:14px;padding:2px 2px 20px 50px}
   .err{background:#FBE9EF;border:1px solid #EFC3D2;color:#8A3552;padding:11px 14px;border-radius:12px;font-size:13px;margin-bottom:18px;white-space:pre-wrap}
@@ -583,8 +480,8 @@
   body.dark .smswrap[data-th="imessage"]{--sbg:#000;--sother:#26262a;--sotherink:#fff;--sname:#8e8e93}
   body.dark .smswrap[data-th="line"]{--sbg:#000;--sother:#2b2b2e;--sotherink:#e8e8ea;--smine:#7ee08a;--smineink:#0b0b0c;--sname:#8a8a90}
 
-  .smsbar{display:flex;align-items:center;gap:10px;padding:14px 14px 12px;
-    border-bottom:1px solid rgba(128,128,128,.22);position:sticky;top:0;background:var(--sbg);z-index:2}
+  .smsbar{display:flex;align-items:center;gap:11px;padding:12px 14px;
+    border-bottom:1px solid rgba(128,128,128,.22);position:sticky;top:0;background:var(--sbg);z-index:5}
   .smsbar .nm{flex:1;min-width:0;font-weight:600;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
   .smsbar .sub{font-size:12px;color:var(--sname);font-weight:400}
   .smsbar button{border:0;background:transparent;color:var(--sname);font-size:15px;padding:4px 6px;cursor:pointer}
@@ -634,10 +531,36 @@
   .smswrap[data-th="imessage"][data-dm="1"] .sm .av{display:none}
   .smswrap[data-th="kakao"] .sm .av,
   .smswrap[data-th="line"] .sm .av{width:35px;height:35px}
+  /* 문자탭에서는 입력창도 그 메신저처럼 */
+  #pic{display:none;position:absolute;right:44px;bottom:9px;border:0;background:transparent;
+    font-size:19px;padding:2px;cursor:pointer;opacity:.85}
+  body[data-sms] #pic{display:block}
+  body[data-sms] #star{display:none}
+  .sm .b img.shot{display:block;max-width:190px;border-radius:12px;margin:-2px -3px}
+  body[data-sms="imessage"] #dock{background:#fff;border-top:1px solid #e4e4e8}
+  body[data-sms="imessage"] #inp{border-radius:20px;border:1px solid #d9d9de;background:#fff;color:#111}
+  body[data-sms="imessage"] #send{background:#0b84fe;color:#fff;border-radius:50%}
+  body[data-sms="imessage"] #dock .tools button{color:#8a8a90}
+  body[data-sms="kakao"] #dock{background:#fff;border-top:1px solid #e2e2e2}
+  body[data-sms="kakao"] #inp{border-radius:18px;border:1px solid #e2e2e2;background:#fff;color:#111}
+  body[data-sms="kakao"] #send{background:#fae100;color:#3a2f00;border-radius:14px}
+  body[data-sms="kakao"] #dock .tools button{color:#8b8b8b}
+  body[data-sms="line"] #dock{background:#fff;border-top:1px solid #e3e6e8}
+  body[data-sms="line"] #inp{border-radius:20px;border:1px solid #dfe3e6;background:#fff;color:#111}
+  body[data-sms="line"] #send{background:#06c755;color:#fff;border-radius:50%}
+  body[data-sms="line"] #dock .tools button{color:#84939c}
+  body[data-sms="retro"] #dock{background:#d3dbe3;border-top:2px solid #9ba5b5}
+  body[data-sms="retro"] #inp{border-radius:3px;border:2px solid #9ba5b5;background:#c5d1b8;color:#2b3a1f;
+    font-family:"DungGeunMo","돋움",Dotum,sans-serif}
+  body[data-sms="retro"] #send{background:#1d2c88;color:#fff;border-radius:4px}
+  body.dark body[data-sms] #dock{}
   .brow{display:flex;align-items:flex-end;gap:5px}
   .sm.r .brow{flex-direction:row-reverse}
   .stime{flex:0 0 auto;font-size:10.5px;color:var(--stime,var(--muted));padding-bottom:3px;white-space:nowrap}
   .sread{opacity:.85}
+  .kread{color:#f7d40a;font-weight:700;font-size:11.5px}
+  .smswrap[data-th="imessage"] .sday i{display:block;font-size:12.5px;font-weight:600}
+  .smswrap[data-th="imessage"] .sday i span{font-weight:400;color:var(--stime);margin-left:4px}
   .sday{text-align:center;margin:16px 0 12px}
   .sday i{display:inline-block;font-style:normal;font-size:11.5px;line-height:1.6;
     padding:5px 13px;border-radius:12px;
@@ -692,7 +615,8 @@
     </div>
     <div class="line">
       <div id="inwrap"><textarea id="inp" rows="1" placeholder="메시지"></textarea>
-      <button id="star" title="지문">✳</button></div>
+      <button id="star" title="지문">✳</button>
+      <button id="pic" title="사진">🖼</button></div>
       <button id="send">↑</button>
     </div>
   </div>
@@ -795,13 +719,13 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-08 l";
+var APP_VER = "2026-09-08 m";
 var THEMES = [
   ["light","밝게"], ["pink","연핑크"], ["sky","연하늘"],
-  ["lilac","연보라"], ["ocean","푸른바다"], ["novel","로판"], ["gray","시원한그레이"], ["berry","딸기토끼"], ["homepage","홈페이지"], ["retro","레트로"], ["night","밤"]
+  ["lilac","연보라"], ["ocean","푸른바다"], ["glass","투명"], ["berry","딸기토끼"], ["homepage","홈페이지"], ["retro","레트로"], ["night","밤"]
 ];
-var THEME_DARK = { night:1 };
-var THEME_BG = { light:"#FFFFFF", pink:"#FDF4F3", sky:"#F2F7FC", lilac:"#F7F4FC", ocean:"#eef6ff", novel:"#e8f1fb", gray:"#eef1f3", retro:"#c5d1b8", berry:"#fff8fa", homepage:"#ffffff",
+var THEME_DARK = { night:1, glass:1 };
+var THEME_BG = { light:"#FFFFFF", pink:"#FDF4F3", sky:"#F2F7FC", lilac:"#F7F4FC", ocean:"#eef6ff", glass:"#0B0B10", retro:"#c5d1b8", berry:"#fff8fa", homepage:"#ffffff",
                  night:"#12141C" };
 
 function applyTheme(){
@@ -844,10 +768,15 @@ function joinFlow(s){
               .filter(Boolean).join(" ");
   }).filter(Boolean).join("\n\n");
 }
+function quoteMark(t){
+  t = t.replace(/(&quot;[^&\n]*?&quot;|"[^"\n]*?"|“[^”\n]*?”)/g,'<span class="q2">$1</span>');
+  return t.replace(/('[^'\n]{1,80}'|‘[^’\n]{1,80}’)/g,'<span class="q1">$1</span>');
+}
 function fmt(s){
   var t = esc(joinFlow(s)).replace(/\n{3,}/g,"\n\n").trim();
   t = t.replace(/([(（][^)）\n]*[)）])/g,'<span class="tr">$1</span>');
   t = t.replace(/\*{1,3}([^*]+?)\*{1,3}/g,'<em>$1</em>');
+  t = quoteMark(t);
   return hilite(t.replace(/\*/g,""));
 }
 /* 지문(별표 안)과 대사를 조각으로 나눈다 */
@@ -1335,10 +1264,15 @@ function genOf(c){
 var screen="list", curId=null, busy=false, selIdx=-1, editIdx=-1, regenAlt=false;
 var findQ="";
 var psBack="cfg", curPs=null, curBlk=0, curSm=0, smWho="", smOwner=-1, cfgFromChat=false, curGre=0, grWho="";
-function go(s,id){ screen=s; if(id!==undefined) curId=id; selIdx=-1; editIdx=-1; render(); }
+function go(s,id){
+  screen=s; if(id!==undefined) curId=id; selIdx=-1; editIdx=-1;
+  render();
+  if (s!=="chat" && s!=="sms" && view) view.scrollTop = 0;
+}
 function cur(){ for (var i=0;i<chars.length;i++) if (chars[i].id===curId) return chars[i]; return null; }
 function render(){
   view.className=""; dock.style.display="none";
+  document.body.removeAttribute("data-sms");
   elLeft.textContent=""; elRight.textContent="";
   elLeft.onclick=null; elRight.onclick=null;
   if (screen==="list") return viewList();
@@ -2746,8 +2680,7 @@ function viewSmsPick(){
     return ps.map(function(x){ return '<option value="'+esc(x.name)+'">'+esc(x.disp)+"</option>"; }).join("")
          + (extra||"");
   };
-  var h = '<div class="hint" style="margin-bottom:12px">맨 위가 폰 주인이야. 오른쪽 말풍선으로 뜨고 저장명도 이 사람 기준으로 붙어. 셋 이상이면 단톡방이 돼.</div>';
-  h += '<label>폰 주인 · 보내는 사람</label><select id="s1">'+opt()+'</select>';
+  var h = '<div class="hint" style="margin-bottom:12px">셋 이상이면 단톡방이 돼.</div>';
   for (var i=2;i<=pickN;i++){
     h += '<label>'+(i===2?"받는 사람":"참여자 "+(i-1))+'</label>'
        + '<select id="s'+i+'">'
@@ -2768,7 +2701,7 @@ function viewSmsPick(){
   }
   $("#more").onclick=function(){ if (pickN<7){ pickN++; render(); } };
   $("#sgo").onclick=function(){
-    var names=[$("#s1").value], seen={};
+    var names=[c.userName||"나"], seen={};
     seen[names[0]]=1;
     for (var k=2;k<=pickN;k++){
       var el=$("#s"+k); if(!el) continue;
@@ -2796,6 +2729,7 @@ function viewSms(){
   elLeft.textContent=""; elLeft.onclick=null;
   elRight.textContent=""; elRight.onclick=null;
   view.className="chat sms"; dock.style.display = t.peek ? "none" : "block";
+  document.body.setAttribute("data-sms", cfg.smsTheme||"기본");
   paintSms();
 }
 
@@ -2807,7 +2741,7 @@ function paintSms(err, thinking){
 
   var h = '<div class="smswrap" data-th="'+esc(cfg.smsTheme||"기본")+'" data-dm="'+(t.parts.length<=2?"1":"0")+'">';
   h += '<div class="smsbar">'+avaHTML(other.avatar,"💬","sm")
-     + '<div class="nm" id="smsnm">'+esc(t.title)+'<div class="sub">'+(t.peek?"엿보는 중":"문자")+'</div></div>'
+     + '<div class="nm" id="smsnm">'+esc(t.title)+(t.peek?'<div class="sub">엿보는 중</div>':"")+'</div>'
      + '<button id="smscog">⚙</button><button id="smsx">✕</button></div>';
   h += '<div class="smsbody">';
 
@@ -2822,7 +2756,10 @@ function paintSms(err, thinking){
     if (m.at){
       var d = ymd(m.at);
       if (d !== prevDay){
-        h += '<div class="sday"><i>'+esc(dayLabel(m.at))+'</i></div>';
+        var lastAt=0;
+        for (var z2=t.log.length-1; z2>=0; z2--) if (t.log[z2].at){ lastAt=t.log[z2].at; break; }
+        var lab=dayLabel(m.at, lastAt);
+        h += '<div class="sday"><i>'+(/^</.test(lab)?lab:esc(lab))+'</i></div>';
         prevDay = d; prev = null;
       }
     }
@@ -2836,14 +2773,27 @@ function paintSms(err, thinking){
     var next = t.log[i+1];
     var lastOfRun = !next || next.who !== m.who || (next.at && m.at && ymd(next.at)!==ymd(m.at));
     var tm = (m.at && lastOfRun) ? '<span class="stime">'+esc(hhmm(m.at))+'</span>' : '';
-    var rd = (i===lastMine && readAfter) ? '<span class="stime sread">읽음</span>' : '';
+    var thm = cfg.smsTheme||"기본";
+    var rd = "";
+    if (i===lastMine){
+      if (thm==="kakao") rd = readAfter ? "" : '<span class="stime kread">1</span>';
+      else if (thm==="imessage") rd = "";
+      else if (readAfter) rd = '<span class="stime sread">읽음</span>';
+    }
     var avLast = (cfg.smsTheme==="imessage");
     var showAv = avLast ? lastOfRun : !same;
     h += '<div class="sm'+(right?" r":"")+(same?"":" gap")+(lastOfRun?" last":"")+'" data-si="'+i+'">';
     if (!right) h += avaHTML(showAv?p.avatar:"","🙂", showAv?"av":"av hide").replace('class="ava','class="av');
     h += '<div class="col">'
        + (!right && !same ? '<div class="who2">'+esc(p.disp||m.who)+'</div>' : "")
-       + '<div class="brow"><div class="b">'+cardText(m.t)+'</div>'+rd+tm+'</div></div></div>';
+       + '<div class="brow"><div class="b">'
+       + (m.img ? '<img class="shot" src="'+esc(m.img)+'">' : cardText(m.t))
+       + '</div>'+rd+tm+'</div>'
+       + (smsSel===i ? '<div class="acts sacts"><button data-scp="'+i+'">복사</button>'
+            + '<button data-sed="'+i+'">수정</button>'
+            + '<button class="del" data-sdel="'+i+'">삭제</button>'
+            + '<button class="del" data-scut="'+i+'">여기부터 지우기</button></div>' : "")
+       + '</div></div>';
     prev = m.who;
   });
 
@@ -2951,12 +2901,39 @@ function paintSms(err, thinking){
   Array.prototype.forEach.call(view.querySelectorAll("[data-si]"), function(el){
     bindHold(el, function(){
       var i=+el.getAttribute("data-si");
-      smsMenu(i);
+      smsSel = (smsSel===i) ? -1 : i;
+      smsKeep = view.scrollTop || 1;
+      paintSms();
     });
   });
-  view.scrollTop = view.scrollHeight;
+  Array.prototype.forEach.call(view.querySelectorAll("[data-scp]"), function(el){
+    el.onclick=function(){ var t2=curThread(c); copyText(t2.log[+el.getAttribute("data-scp")].t); smsSel=-1; paintSms(); };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-sed]"), function(el){
+    el.onclick=function(){
+      var i=+el.getAttribute("data-sed"), t2=curThread(c);
+      var v=prompt("수정", t2.log[i].t);
+      if (v!==null){ t2.log[i].t=v; saveThread(c,t2); }
+      smsSel=-1; paintSms();
+    };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-sdel]"), function(el){
+    el.onclick=function(){
+      var i=+el.getAttribute("data-sdel"), t2=curThread(c);
+      t2.log.splice(i,1); saveThread(c,t2); smsSel=-1; paintSms();
+    };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-scut]"), function(el){
+    el.onclick=function(){
+      var i=+el.getAttribute("data-scut"), t2=curThread(c);
+      if (!confirm("여기부터 뒤로 전부 지울까?")) return;
+      t2.log.splice(i); saveThread(c,t2); smsSel=-1; paintSms();
+    };
+  });
+  if (smsKeep){ view.scrollTop = smsKeep; smsKeep = 0; }
+  else view.scrollTop = view.scrollHeight;
 }
-
+var smsSel=-1, smsKeep=0;
 function smsMenu(i){
   var c=cur(), t=curThread(c); if(!t) return;
   var m=t.log[i]; if(!m) return;
@@ -2975,6 +2952,7 @@ function smsMenu(i){
 function buildSmsSystem(c, t){
   var p=[], cs=castOf(c);
   p.push("문자 메시지만 쓴다. 지문, 묘사, 설명, 별표는 한 줄도 쓰지 않는다.");
+  p.push("상대가 사진을 보냈으면 그 사진을 본 사람처럼 반응한다. 사진에 무엇이 있는지 짚고 그에 맞게 답한다.");
   p.push("");
   p.push("# 인물");
   p.push((c.name||"") + " — " + (c.tagline||"") + " " + (c.prompt||""));
@@ -3073,7 +3051,10 @@ function smsTurn(){
   if(!cfg.key){ paintSms("API 키가 없어. 설정에서 넣어줘."); return; }
   busy=true; paintSms(null,true);
 
-  var transcript = t.log.map(function(m){ return m.who+": "+m.t; }).join("\n");
+  var transcript = t.log.map(function(m){ return m.who+": "+(m.img ? "(사진을 보냈다)" : m.t); }).join("\n");
+  /* 마지막 사진 한 장만 실어 보낸다. 여러 장이면 너무 무겁다 */
+  var shot = null;
+  for (var q=t.log.length-1; q>=0; q--) if (t.log[q].img){ shot=t.log[q].img; break; }
   var ask = t.peek ? "이어서 문자를 써줘." : "이어서 문자를 써줘.";
   var content = (transcript ? "지금까지 문자:\n"+transcript+"\n\n" : "") + ask;
   var sys = buildSmsSystem(c, t);
@@ -3085,14 +3066,22 @@ function smsTurn(){
     var b=(cfg.base||"").replace(/\/+$/,"");
     url = /chat\/completions$/.test(b) ? b : b+"/chat/completions";
     headers={ "Content-Type":"application/json", "Authorization":"Bearer "+cfg.key };
-    body={ model:cfg.model, max_tokens:lim, messages:[{role:"system",content:sys},{role:"user",content:content}] };
+    var umsg = shot
+      ? { role:"user", content:[{type:"text",text:content},{type:"image_url",image_url:{url:shot}}] }
+      : { role:"user", content:content };
+    body={ model:cfg.model, max_tokens:lim, messages:[{role:"system",content:sys}, umsg] };
     if (sgen.temp!==null) body.temperature=sgen.temp;
     if (sgen.topP!==null) body.top_p=sgen.topP;
   } else {
     var gb=(cfg.base||"https://generativelanguage.googleapis.com").replace(/\/+$/,"");
     url = gb+"/v1beta/models/"+encodeURIComponent(cfg.model)+":generateContent?key="+encodeURIComponent(cfg.key);
     headers={ "Content-Type":"application/json" };
-    body={ systemInstruction:{parts:[{text:sys}]}, contents:[{role:"user",parts:[{text:content}]}],
+    var gparts=[{text:content}];
+    if (shot){
+      var mm=String(shot).match(/^data:([^;]+);base64,(.*)$/);
+      if (mm) gparts.push({ inlineData:{ mimeType:mm[1], data:mm[2] } });
+    }
+    body={ systemInstruction:{parts:[{text:sys}]}, contents:[{role:"user",parts:gparts}],
            generationConfig:{ maxOutputTokens:lim } };
     if (sgen.temp!==null) body.generationConfig.temperature=sgen.temp;
     if (sgen.topP!==null) body.generationConfig.topP=sgen.topP;
@@ -3168,9 +3157,26 @@ function hhmm(ms){
   return ap+" "+hh+":"+two(d.getMinutes());
 }
 function ymd(ms){ var d=new Date(ms); return d.getFullYear()+"-"+two(d.getMonth()+1)+"-"+two(d.getDate()); }
-function dayLabel(ms){
+function dayStart(ms){ var d=new Date(ms); d.setHours(0,0,0,0); return d.getTime(); }
+/* 날짜 줄은 테마마다 다르다. base 는 이 방의 마지막 메시지 날 */
+function dayLabel(ms, base){
   var d=new Date(ms), w=["일","월","화","수","목","금","토"][d.getDay()];
-  return (d.getMonth()+1)+"월 "+d.getDate()+"일 "+w+"요일";
+  var y=d.getFullYear(), mo=d.getMonth()+1, da=d.getDate();
+  var th=cfg.smsTheme||"기본";
+  var sameYear = new Date(base||ms).getFullYear()===y;
+  if (th==="kakao") return y+"년 "+mo+"월 "+da+"일 "+w+"요일";
+  if (th==="line")  return (sameYear ? "" : y+". ")+mo+". "+da+". ("+w+")";
+  if (th==="imessage"){
+    var diff=Math.round((dayStart(base||ms)-dayStart(ms))/86400000);
+    var head;
+    if (diff<=0) head="오늘";
+    else if (diff===1) head="어제";
+    else if (diff===2) head="그저께";
+    else if (diff<=6) head=w+"요일";
+    else head=(sameYear ? "" : y+"년 ")+mo+"월 "+da+"일 ("+w+")";
+    return '<b>'+esc(head)+'</b> <span>'+esc(hhmm(ms))+'</span>';
+  }
+  return mo+"월 "+da+"일 "+w+"요일";
 }
 /* 모델한테 한 줄만 물어보는 용도 */
 function askLLM(sys, content, cb, lim){
@@ -3326,6 +3332,7 @@ function viewChat(){
     go("edit", c.id);
   };
   view.className="chat"; dock.style.display="block";
+  document.body.removeAttribute("data-sms");
   if (!getLog(c.id).length){
     var g0 = c.startG || greetingsOf(c)[0] || c.greeting;
     c.startG = "";
@@ -3870,6 +3877,15 @@ bindHold(elSend, function(){
   setLog(c.id,l);
   stacked=true; selIdx=-1; paint(); paintSendBtn();
 });
+
+$("#pic").onclick=function(){
+  var c=cur(); if(!c||busy||screen!=="sms") return;
+  pickPhoto(function(d){
+    var t=curThread(c); if(!t) return;
+    t.log.push({ who:(c.userName||"나"), t:"[사진]", mine:true, img:d, at:stampAt(t) });
+    saveThread(c, t); smsSel=-1; paintSms(); smsTurn();
+  });
+};
 
 elSend.onclick=function(){
   if (sendHeld){ sendHeld=false; return; }
