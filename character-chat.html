@@ -25,7 +25,7 @@
     color-scheme:light;
     --bg:#FFFFFF; --panel:#FFFFFF; --field:#F4F3F7; --line:#E7E5EC;
     --text:#191820; --muted:#8B8896; --bub:#EFEEF2; --mine:#E3DFF6;
-    --nar:#8A8796; --accent:#6F5FC4; --trc:#4C4857;
+    --nar:#736F80; --accent:#6F5FC4; --trc:#4C4857;
     --paper:#FCFBF8; --paper-line:#E2DFD6; --paper-text:#2F2C27;
     --paper-rule:rgba(110,115,135,.15);
   }
@@ -33,7 +33,7 @@
     color-scheme:dark;
     --bg:#0C0C11; --panel:#131318; --field:#1C1C23; --line:#292932;
     --text:#F2F1F6; --muted:#8B8896; --bub:#292930; --mine:#3F3AA8;
-    --nar:#9B98A6; --accent:#8B84F0; --trc:#CAC7DA;
+    --nar:#ADAABA; --accent:#8B84F0; --trc:#CAC7DA;
     --paper:#1A1A22; --paper-line:#2E2E3A; --paper-text:#DEDCE6;
     --paper-rule:rgba(190,195,220,.13);
   }
@@ -41,118 +41,11 @@
   body.dark .sm.r .b{color:#F5F4FA}
 
   /* 밝은 테마들 */
-  /* 밤바다 — 위는 별 뜬 밤하늘, 가운데 수평선, 아래는 달빛 어린 바다 */
-  body[data-theme=nightsea]{
-    --bg:#070d1e; --panel:#16294a; --field:#1d3357; --line:#3a5075;
-    --text:#EDF3FB; --muted:#9DB1CE; --bub:#22395f; --mine:#31537f;
-    --nar:#B6C8E2; --accent:#93CBEE; --trc:#D4E1F0;
-    --paper:#16233d; --paper-line:#2d3f60; --paper-text:#E4EBF6;
-    --paper-rule:rgba(185,210,240,.16);
-    background:
-      linear-gradient(180deg,
-        #050a1a 0%,
-        #081633 20%,
-        #0f2a55 38%,
-        #1b4478 47%,
-        #22568f 50%,
-        #143869 53%,
-        #0d2851 66%,
-        #091d3d 82%,
-        #061428 100%);
-    background-attachment:fixed;
-  }
-  /* 별과 달 */
-  body[data-theme=nightsea]::before{
-    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-    animation:sb-a 13s ease-in-out infinite alternate;background-repeat:no-repeat;
-    background-image:
-      radial-gradient(circle 30px at 76% 13%, rgba(255,253,240,.95), rgba(255,250,225,.42) 55%, rgba(200,220,255,.10) 78%, transparent 100%),
-      radial-gradient(circle 1.4px at 14% 8%,  rgba(255,255,255,.95), transparent 100%),
-      radial-gradient(circle 1px   at 31% 15%, rgba(255,255,255,.70), transparent 100%),
-      radial-gradient(circle 1.4px at 47% 5%,  rgba(255,255,255,.90), transparent 100%),
-      radial-gradient(circle 1px   at 60% 19%, rgba(255,255,255,.62), transparent 100%),
-      radial-gradient(circle 1.2px at 88% 24%, rgba(255,255,255,.80), transparent 100%),
-      radial-gradient(circle 1px   at 22% 27%, rgba(255,255,255,.58), transparent 100%),
-      radial-gradient(circle 1.4px at 8%  18%, rgba(255,255,255,.72), transparent 100%),
-      radial-gradient(circle 1px   at 40% 30%, rgba(255,255,255,.55), transparent 100%),
-      radial-gradient(circle 1.2px at 66% 33%, rgba(255,255,255,.60), transparent 100%),
-      radial-gradient(circle 1px   at 95% 7%,  rgba(255,255,255,.68), transparent 100%);
-  }
-  /* 수평선 빛 · 달빛 반사 · 물비늘 */
-  body[data-theme=nightsea]::after{
-    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
-    animation:ns-w 9s ease-in-out infinite alternate;
-    background-repeat:no-repeat;
-    background-image:
-      radial-gradient(ellipse 130% 4% at 50% 50%, rgba(190,222,255,.42), transparent 72%),
-      radial-gradient(ellipse 7% 30% at 76% 70%, rgba(255,250,225,.20), transparent 74%),
-      radial-gradient(ellipse 90% 1.6% at 74% 58%, rgba(235,245,255,.24), transparent 70%),
-      radial-gradient(ellipse 70% 1.4% at 66% 66%, rgba(215,235,255,.20), transparent 72%),
-      radial-gradient(ellipse 110% 1.8% at 50% 76%, rgba(195,225,255,.18), transparent 74%),
-      radial-gradient(ellipse 80% 1.4% at 34% 86%, rgba(205,230,255,.15), transparent 74%),
-      radial-gradient(ellipse 120% 2% at 58% 95%, rgba(185,215,250,.13), transparent 76%);
-  }
-  @keyframes ns-w{ from{opacity:.62} to{opacity:1} }
-  @media (prefers-reduced-motion: reduce){
-    body[data-theme=nightsea]::before,
-    body[data-theme=nightsea]::after{ animation:none !important }
-  }
-  body[data-theme=nightsea] #app{position:relative;z-index:1}
-  body[data-theme=nightsea] #view{background:transparent}
-  body[data-theme=nightsea] #bar,
-  body[data-theme=nightsea] #dock{background:rgba(8,20,44,.60);
-    backdrop-filter:blur(16px) saturate(140%);-webkit-backdrop-filter:blur(16px) saturate(140%)}
-  /* 달빛 받은 물결처럼 — 위는 밝고 아래로 가라앉는다 */
-  /* 캐릭터 — 달빛 받은 물결. 밝게 */
-  body[data-theme=nightsea] .bub{border-radius:var(--brad,17px);
-    background:linear-gradient(180deg,rgba(196,228,255,.62) 0%,rgba(132,184,238,.60) 52%,rgba(92,146,212,.62) 100%);
-    border:1px solid rgba(228,242,255,.55);
-    box-shadow:0 12px 30px rgba(2,10,26,.34),
-      inset 0 1px 0 rgba(255,255,255,.55),
-      inset 0 -18px 26px rgba(40,90,160,.16);
-    backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%);
-    color:#0C2038}
-  /* 나 — 얕은 바다 청록 */
-  body[data-theme=nightsea] .msg.me .bub{
-    background:linear-gradient(180deg,rgba(150,232,228,.58) 0%,rgba(86,182,192,.58) 52%,rgba(52,138,158,.62) 100%);
-    border-color:rgba(196,244,240,.52)}
-  body[data-theme=nightsea] .msg.me .bub{color:#062B33}
-  body[data-theme=nightsea] .bub em{color:#2E4E75}
-  body[data-theme=nightsea] .msg.me .bub em{color:#155059}
-  body[data-theme=nightsea] .bub .tr{color:#3A5A80}
-  body[data-theme=nightsea] .msg.me .bub .tr{color:#1E5C67}
-  body[data-theme=nightsea] .bub .q1,
-  body[data-theme=nightsea] .bub .q2{color:inherit}
-  /* 문서 모드에서는 말풍선이 없으니 글자색을 되돌린다 */
-  body[data-theme=nightsea][data-view=doc] .bub,
-  body[data-theme=nightsea][data-view=doc] .msg.me .bub{color:var(--text)}
-  body[data-theme=nightsea][data-view=doc] .bub em{color:var(--nar)}
-  body[data-theme=nightsea][data-view=doc] .bub .tr{color:var(--trc)}
-  body[data-theme=nightsea] .msg .who{color:#BBD2EC;font-weight:700;font-size:13.5px;margin:0 0 6px 3px}
-  body[data-theme=nightsea] .ava{border:2px solid rgba(210,232,255,.45);
-    box-shadow:0 3px 12px rgba(2,10,26,.45)}
-  body[data-theme=nightsea] .card,
-  body[data-theme=nightsea] .castbox,
-  body[data-theme=nightsea] .statc,
-  body[data-theme=nightsea] .mind,
-  body[data-theme=nightsea] .pl{border-radius:22px;
-    background:linear-gradient(180deg,rgba(46,80,132,.42),rgba(20,42,80,.52));
-    border:1px solid rgba(190,220,255,.24);
-    box-shadow:0 10px 26px rgba(2,10,26,.30);
-    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
-  body[data-theme=nightsea] .btn{border-radius:16px;background:rgba(30,56,100,.62)}
-  body[data-theme=nightsea] #inp{border-radius:22px;background:rgba(30,56,100,.58);
-    border:1px solid rgba(180,212,250,.28)}
-  body[data-theme=nightsea] #send{
-    background:linear-gradient(135deg,#8ec6ee,#2f6ca8);color:#f2f8ff;
-    box-shadow:0 4px 12px rgba(20,60,110,.45)}
-  body[data-theme=nightsea] .sec{color:#93CBEE}
-
   /* 그린 — 크림소다 */
   body[data-theme=green]{
     --bg:#ffffff; --panel:#ffffff; --field:#f0faea; --line:#cfeabd;
     --text:#22331c; --muted:#7ea272; --bub:#eafadf; --mine:#b9ec8f;
-    --nar:#8E8F94; --accent:#4aa63f; --trc:#7f8186;
+    --nar:#767A7E; --accent:#4aa63f; --trc:#6f7377;
     --paper:#f7fdf3; --paper-line:#cfeabd; --paper-text:#22331c;
     --paper-rule:rgba(90,150,70,.17);
     background:linear-gradient(180deg,#ffffff 0%,#fbfff8 34%,#eafbdd 68%,#cdf2ae 100%);
@@ -166,10 +59,9 @@
     backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
   body[data-theme=green] .bub{border-radius:var(--brad,17px);
     background:#fbfef8;
-    border:1px solid #dcf0cd;
-    box-shadow:0 0 0 1px rgba(255,255,255,.9), 0 6px 18px rgba(90,150,70,.14)}
-  body[data-theme=green] .msg.me .bub{
-    background:#eefadf;border-color:#d5edbe;color:#1c2d16}
+    border:0;
+    box-shadow:0 4px 14px rgba(90,150,70,.12)}
+  body[data-theme=green] .msg.me .bub{background:#eefadf;color:#1c2d16}
   body[data-theme=green] .msg .who{color:#3f5c37;font-weight:700;font-size:13.5px;margin:0 0 6px 3px}
   body[data-theme=green] .ava{border:2px solid #fff;box-shadow:0 3px 9px rgba(90,150,70,.22)}
   body[data-theme=green] .card,
@@ -200,11 +92,10 @@
   body[data-theme=ocean] .bub{
     border-radius:var(--brad,17px);
     background:#fbfdff;
-    border:1px solid rgba(255,255,255,.94);
-    box-shadow:0 0 0 1px rgba(255,255,255,.9), 0 8px 20px rgba(45,102,184,.15);
+    border:0;
+    box-shadow:0 5px 16px rgba(45,102,184,.13);
     backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%)}
-  body[data-theme=ocean] .msg.me .bub{
-    background:#eef5fe;border-color:#dbe8fa;color:#17304f}
+  body[data-theme=ocean] .msg.me .bub{background:#eef5fe;color:#17304f}
   body[data-theme=ocean] .msg .who{
     color:#1b3355;font-weight:700;font-size:13.5px;margin:0 0 6px 3px}
   body[data-theme=ocean] .ava{border:2px solid rgba(255,255,255,.95);
@@ -230,7 +121,7 @@
   body[data-theme=berry]{
     --bg:#fff8fa; --panel:#fffdfe; --field:#fff0f6; --line:#ffcfe0;
     --text:#5c3346; --muted:#c78aa2; --bub:#fff6f9; --mine:#ffe3ee;
-    --nar:#96919C; --accent:#ff5c7f; --trc:#8b8592;
+    --nar:#7E7986; --accent:#ff5c7f; --trc:#7a747f;
     --paper:#fffdfe; --paper-line:#ffcfe0; --paper-text:#5c3346;
     --paper-rule:rgba(255,140,180,.20);
   }
@@ -247,11 +138,10 @@
   body[data-theme=berry] #view{background:transparent}
   /* 말풍선 — 흰 발광에 분홍 잔광 */
   body[data-theme=berry] .bub{
-    border-radius:var(--brad,17px);border:1px solid #ffe0ea;
+    border-radius:var(--brad,17px);border:0;
     background:#fffbfd;
-    box-shadow:0 0 0 1px rgba(255,255,255,.9), 0 6px 18px rgba(255,140,180,.16)}
-  body[data-theme=berry] .msg.me .bub{border-color:#fbe0eb;
-    background:#fdf0f6;color:#4a2836}
+    box-shadow:0 4px 14px rgba(255,140,180,.13)}
+  body[data-theme=berry] .msg.me .bub{background:#fdf0f6;color:#4a2836}
   /* 이름은 분홍 알약 뱃지로 */
   body[data-theme=berry] .msg .who{
     color:#3a2b33;font-weight:700;font-size:13.5px;margin:0 0 6px 3px}
@@ -415,8 +305,16 @@
   .msg .col{min-width:0;max-width:var(--bw,84%)}
   .msg.me .col{max-width:calc(var(--bw,84%) - 6%)}
   .who{font-size:13.5px;font-weight:600;margin:2px 0 6px 2px}
-  .bub{padding:var(--bpv,9px) var(--bph,13px);border-radius:var(--brad,17px);background:var(--bub);white-space:pre-wrap;word-break:break-all;line-break:strict;font-family:var(--f-body);font-size:var(--fs);line-height:1.85;letter-spacing:-.004em;cursor:pointer}
+  .bub{position:relative;padding:var(--bpv,9px) var(--bph,13px);border-radius:var(--brad,17px);background:var(--bub);white-space:pre-wrap;word-break:break-all;line-break:strict;font-family:var(--f-body);font-size:var(--fs);line-height:1.85;letter-spacing:-.004em;cursor:pointer}
   .msg.me .bub{background:var(--mine)}
+  /* 꼬리 — 말풍선과 같은 배경·테두리를 쓴 작은 마름모를 뒤에 깔아 삐죽 내민다 */
+  .msg .bub::before{
+    content:'';position:absolute;top:12px;width:13px;height:13px;
+    background:inherit;border:inherit;border-radius:2px;
+    transform:rotate(45deg);z-index:-1;pointer-events:none}
+  .msg .bub::before{left:-5px}
+  .msg.me .bub::before{left:auto;right:-5px}
+  body[data-view=doc] .msg .bub::before{display:none}
   .bub em{font-family:var(--f-nar);font-style:italic;font-weight:300;color:var(--nar);font-size:calc(var(--fs) - 0.5px);line-height:1.9}
   mark{background:rgba(255,214,0,.42);color:inherit;border-radius:3px;padding:0 1px}
   body.dark mark{background:rgba(255,214,0,.28)}
@@ -839,10 +737,10 @@ function setLog(id,l){
 var APP_VER = "2026-09-08 v2";
 var THEMES = [
   ["light","밝게"],
-  ["ocean","스카이"], ["nightsea","밤바다"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["night","밤"]
+  ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["night","밤"]
 ];
-var THEME_DARK = { night:1, nightsea:1 };
-var THEME_BG = { light:"#FFFFFF", ocean:"#eef6ff", nightsea:"#070d1e", green:"#ffffff", retro:"#c5d1b8", berry:"#fff8fa",
+var THEME_DARK = { night:1 };
+var THEME_BG = { light:"#FFFFFF", ocean:"#eef6ff", green:"#ffffff", retro:"#c5d1b8", berry:"#fff8fa",
                  night:"#12141C" };
 
 function applyTheme(){
