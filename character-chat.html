@@ -205,8 +205,8 @@
     box-shadow:0 0 0 1px rgba(255,255,255,.9), 0 8px 20px rgba(45,102,184,.15);
     backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%)}
   body[data-theme=ocean] .msg.me .bub{
-    background:linear-gradient(180deg,#eef5fe 0%,#e2edfc 54%,#d3e3fa 100%);
-    border-color:#c8daf4;color:#17304f}
+    background:linear-gradient(180deg,#f7fbff 0%,#f0f7fe 54%,#e7f1fd 100%);
+    border-color:#deeafa;color:#17304f}
   body[data-theme=ocean] .msg .who{
     color:#1b3355;font-weight:700;font-size:13.5px;margin:0 0 6px 3px}
   body[data-theme=ocean] .ava{border:2px solid rgba(255,255,255,.95);
@@ -252,8 +252,8 @@
     border-radius:18px;border:1px solid #ffe0ea;
     background:linear-gradient(180deg,rgba(255,255,255,.99) 0%,rgba(255,252,253,.97) 62%,rgba(255,241,247,.94) 100%);
     box-shadow:0 0 0 1px rgba(255,255,255,.9), 0 6px 18px rgba(255,140,180,.16)}
-  body[data-theme=berry] .msg.me .bub{border-color:#f7c6da;
-    background:linear-gradient(180deg,#fdeef4 0%,#fbe3ed 54%,#f8d6e4 100%);color:#4a2836}
+  body[data-theme=berry] .msg.me .bub{border-color:#fbe0eb;
+    background:linear-gradient(180deg,#fff7fa 0%,#fef2f6 54%,#fdebf2 100%);color:#4a2836}
   /* 이름은 분홍 알약 뱃지로 */
   body[data-theme=berry] .msg .who{
     color:#3a2b33;font-weight:700;font-size:13.5px;margin:0 0 6px 3px}
@@ -412,12 +412,12 @@
   .castbox{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:12px}
 
   /* 대화 */
-  .msg{margin-bottom:20px;display:flex;gap:9px;align-items:flex-start}
+  .msg{margin-bottom:var(--mgap,20px);display:flex;gap:9px;align-items:flex-start}
   .msg.me{justify-content:flex-end}
   .msg .col{min-width:0;max-width:var(--bw,84%)}
   .msg.me .col{max-width:calc(var(--bw,84%) - 6%)}
   .who{font-size:13.5px;font-weight:600;margin:2px 0 6px 2px}
-  .bub{padding:13px 16px;border-radius:18px;background:var(--bub);white-space:pre-wrap;word-break:break-all;line-break:strict;font-family:var(--f-body);font-size:var(--fs);line-height:1.85;letter-spacing:-.004em;cursor:pointer}
+  .bub{padding:var(--bpv,13px) var(--bph,16px);border-radius:18px;background:var(--bub);white-space:pre-wrap;word-break:break-all;line-break:strict;font-family:var(--f-body);font-size:var(--fs);line-height:1.85;letter-spacing:-.004em;cursor:pointer}
   .msg.me .bub{background:var(--mine)}
   .bub em{font-family:var(--f-nar);font-style:italic;font-weight:300;color:var(--nar);font-size:calc(var(--fs) - 0.5px);line-height:1.9}
   mark{background:rgba(255,214,0,.42);color:inherit;border-radius:3px;padding:0 1px}
@@ -865,6 +865,10 @@ function applyTheme(){
   st.setProperty("--sfs", (cfg.sSize||15)+"px");
   st.setProperty("--cfs", (cfg.cSize||14)+"px");
   st.setProperty("--rlh", Math.round((cfg.cSize||14)*1.75)+"px");
+  var bp = (cfg.bPad==null ? 13 : cfg.bPad);
+  st.setProperty("--bpv", bp+"px");
+  st.setProperty("--bph", (bp+3)+"px");
+  st.setProperty("--mgap", (cfg.mGap==null ? 20 : cfg.mGap)+"px");
   st.setProperty("--ifs", (cfg.iSize||14)+"px");
 }
 
@@ -1791,7 +1795,11 @@ function viewCfg(){
   h += '<label>입력창 글자 크기 · '+(cfg.iSize||14)+'px</label>'
      + '<input id="is" type="range" min="10" max="20" step="0.5" value="'+(cfg.iSize||14)+'" style="padding:0">';
   h += '<label>말풍선 폭 · '+(cfg.bubW||84)+'%</label>'
-     + '<input id="bw" type="range" min="60" max="96" step="2" value="'+(cfg.bubW||84)+'" style="padding:0">';
+     + '<input id="bw" type="range" min="50" max="96" step="2" value="'+(cfg.bubW||84)+'" style="padding:0">';
+  h += '<label>말풍선 여백 · '+(cfg.bPad==null?13:cfg.bPad)+'px</label>'
+     + '<input id="bp" type="range" min="4" max="22" step="1" value="'+(cfg.bPad==null?13:cfg.bPad)+'" style="padding:0">';
+  h += '<label>말풍선 간격 · '+(cfg.mGap==null?20:cfg.mGap)+'px</label>'
+     + '<input id="mg" type="range" min="4" max="40" step="2" value="'+(cfg.mGap==null?20:cfg.mGap)+'" style="padding:0">';
   h += '<div class="sec">프리셋</div>';
   h += '<label>기본 프리셋</label><select id="gps">'
      + '<option value=""'+(cfg.preset?"":" selected")+'>안 씀</option>'
@@ -1836,6 +1844,16 @@ function viewCfg(){
     cfg.iSize=+this.value; saveCfg();
     var lb=this.previousElementSibling;
     if (lb) lb.textContent="입력창 글자 크기 · "+cfg.iSize+"px";
+  });
+  on("#bp","oninput",function(){
+    cfg.bPad=+this.value; saveCfg();
+    var lb=this.previousElementSibling;
+    if (lb) lb.textContent="말풍선 여백 · "+cfg.bPad+"px";
+  });
+  on("#mg","oninput",function(){
+    cfg.mGap=+this.value; saveCfg();
+    var lb=this.previousElementSibling;
+    if (lb) lb.textContent="말풍선 간격 · "+cfg.mGap+"px";
   });
   on("#bw","oninput",function(){
     cfg.bubW=+this.value; saveCfg();
