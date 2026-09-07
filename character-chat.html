@@ -532,8 +532,9 @@
   .smswrap[data-th="kakao"] .sm .av,
   .smswrap[data-th="line"] .sm .av{width:35px;height:35px}
   /* 문자탭에서는 입력창도 그 메신저처럼 */
-  #pic{display:none;position:absolute;right:44px;bottom:9px;border:0;background:transparent;
-    font-size:19px;padding:2px;cursor:pointer;opacity:.85}
+  #pic{display:none;flex:0 0 auto;width:36px;height:36px;border:0;background:transparent;
+    color:var(--muted);font-size:26px;line-height:1;padding:0;cursor:pointer;align-self:flex-end;
+    margin-bottom:3px}
   body[data-sms] #pic{display:block}
   body[data-sms] #star{display:none}
   .sm .b img.shot{display:block;max-width:190px;border-radius:12px;margin:-2px -3px}
@@ -614,9 +615,9 @@
       <button id="reset">초기화</button>
     </div>
     <div class="line">
+      <button id="pic" title="사진">+</button>
       <div id="inwrap"><textarea id="inp" rows="1" placeholder="메시지"></textarea>
-      <button id="star" title="지문">✳</button>
-      <button id="pic" title="사진">🖼</button></div>
+      <button id="star" title="지문">✳</button></div>
       <button id="send">↑</button>
     </div>
   </div>
@@ -719,13 +720,13 @@ function roomName(c, rid){
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
 function getLog(id){ return get(logKey(id), []); }
 function setLog(id,l){ put(logKey(id), l); }
-var APP_VER = "2026-09-08 m";
+var APP_VER = "2026-09-08 o";
 var THEMES = [
   ["light","밝게"], ["pink","연핑크"], ["sky","연하늘"],
-  ["lilac","연보라"], ["ocean","푸른바다"], ["glass","투명"], ["berry","딸기토끼"], ["homepage","홈페이지"], ["retro","레트로"], ["night","밤"]
+  ["lilac","연보라"], ["ocean","푸른바다"], ["berry","딸기토끼"], ["homepage","홈페이지"], ["retro","레트로"], ["night","밤"]
 ];
-var THEME_DARK = { night:1, glass:1 };
-var THEME_BG = { light:"#FFFFFF", pink:"#FDF4F3", sky:"#F2F7FC", lilac:"#F7F4FC", ocean:"#eef6ff", glass:"#0B0B10", retro:"#c5d1b8", berry:"#fff8fa", homepage:"#ffffff",
+var THEME_DARK = { night:1 };
+var THEME_BG = { light:"#FFFFFF", pink:"#FDF4F3", sky:"#F2F7FC", lilac:"#F7F4FC", ocean:"#eef6ff", retro:"#c5d1b8", berry:"#fff8fa", homepage:"#ffffff",
                  night:"#12141C" };
 
 function applyTheme(){
@@ -1273,6 +1274,7 @@ function cur(){ for (var i=0;i<chars.length;i++) if (chars[i].id===curId) return
 function render(){
   view.className=""; dock.style.display="none";
   document.body.removeAttribute("data-sms");
+  var tl2=document.querySelector("#dock .tools"); if(tl2) tl2.style.display="";
   elLeft.textContent=""; elRight.textContent="";
   elLeft.onclick=null; elRight.onclick=null;
   if (screen==="list") return viewList();
@@ -1396,9 +1398,9 @@ function viewEdit(){
   h += '<button class="btn" id="greadd">+ 인트로 추가</button>';
 
   h += '<div class="sec">나</div>';
+  h += photoBlock("내 프로필 사진","userAvatar",c.userAvatar);
   h += field("내 이름","userName",c.userName);
   h += field("내 표시 이름","userDisplay",c.userDisplay);
-  h += photoBlock("내 프로필 사진","userAvatar",c.userAvatar);
   h += field("내 캐릭터 프롬프트","userPrompt",c.userPrompt,140);
 
   h += '<div class="sec">응답</div>';
@@ -1580,14 +1582,12 @@ function viewCfg(){
      + '<option value="openai"'+(cfg.mode==="openai"?" selected":"")+'>직접 입력 · OpenAI 호환</option>'
      + '<option value="gemini"'+(cfg.mode==="gemini"?" selected":"")+'>구글 직접 · Gemini</option></select>';
   h += '<label>API 주소</label><input id="b" value="'+esc(cfg.base)+'" autocapitalize="off" spellcheck="false">';
-  h += '<div class="hint">OpenAI 호환이면 /v1 까지만. 구글 직접이면 비워둬.</div>';
   h += '<label>API 키</label>'
      + '<div style="display:flex;gap:8px"><input id="k" type="password" value="'+esc(cfg.key)+'" autocapitalize="off" autocorrect="off" spellcheck="false">'
      + '<button class="btn sm" id="kv">보기</button></div>';
   h += '<label>모델</label><input id="m" value="'+esc(cfg.model)+'" autocapitalize="off" spellcheck="false">';
   h += '<label>모델 목록</label>'
-     + '<textarea id="mlist" style="min-height:110px" placeholder="프로&#10;젬마 | https://내앱.vercel.app/v1 | sk-키&#10;라우터젬마 | https://openrouter.ai/api/v1 | sk-or-키 | google/gemma-3-27b-it" autocapitalize="off" spellcheck="false">'+esc(cfg.models||"")+'</textarea>';
-  h += '<div class="hint">한 줄에 하나. 이름만 적으면 모델 이름으로 쓰고 주소·키는 그대로 둬. 세로줄로 나눠서 주소, 키, 진짜 모델 이름까지 붙일 수 있어.</div>';
+     + '<textarea id="mlist" style="min-height:110px" autocapitalize="off" spellcheck="false">'+esc(cfg.models||"")+'</textarea>';
   h += '<label>추론</label><select id="thk">'
      + [["auto","자동"],["off","끄기"],["low","낮음"],["mid","보통"],["high","높음"]].map(function(o){
          return '<option value="'+o[0]+'"'+((cfg.think||"auto")===o[0]?" selected":"")+'>'+o[1]+'</option>';
@@ -2044,8 +2044,7 @@ function viewPresets(){
   elLeft.textContent = psBack==="edit" ? "캐릭터" : "설정";
   elLeft.onclick=function(){ go(psBack, curId); };
 
-  var h='<div class="hint" style="margin-bottom:10px">쓰는 법 지침을 묶어둔 거야. json 파일도 되고 그냥 글만 적힌 txt도 돼. 프리셋 안에 여러 지침이 들어 있으면 하나로 합쳐서 읽어.</div>';
-  if (!presets.length) h += '<div class="empty">아직 프리셋이 없어.<br>파일을 올리거나 직접 만들어봐.</div>';
+  if (!presets.length) h += '<div class="empty">아직 프리셋이 없습니다.</div>';
   presets.forEach(function(p){
     var tag = (cfg.preset===p.id ? "기본 · " : "") + (p.mode==="replace" ? "기본 지침 대신" : "기본 지침에 더하기");
     var bs=presetBlocks(p), onN=0;
@@ -2056,7 +2055,7 @@ function viewPresets(){
        + '<div class="ds">'+esc(tag+" · "+peek)+'</div></div></div>';
   });
   h += '<button class="btn primary" id="pfile">파일에서 올리기</button>';
-  h += '<label>붙여넣어서 올리기</label><textarea id="ppaste" placeholder="프리셋 json이나 지침 글을 그대로 붙여넣어"></textarea>';
+  h += '<label>붙여넣어서 올리기</label><textarea id="ppaste"></textarea>';
   h += '<button class="btn" id="ppgo">붙여넣은 걸로 만들기</button>';
   h += '<button class="btn" id="pnew">빈 프리셋 만들기</button>';
   view.innerHTML=h;
@@ -2092,10 +2091,8 @@ function viewPresetEdit(){
   h += '<label>쓰는 방식</label><select data-p="mode">'
      + '<option value="add"'+(p.mode==="replace"?"":" selected")+'>기본 지침에 더하기</option>'
      + '<option value="replace"'+(p.mode==="replace"?" selected":"")+'>기본 지침 대신 쓰기</option></select>';
-  h += '<div class="hint">더하기는 원래 쓰는 법 뒤에 붙고, 대신 쓰기는 쓰는 법을 통째로 갈아끼워. 캐릭터 설정, 로어북, 길이 설정은 어느 쪽이든 그대로 들어가.</div>';
 
   h += '<div class="sec">지침 블록</div>';
-  h += '<div class="hint">켠 것만 보내져. 안 쓰는 건 꺼두면 그만큼 토큰이 덜 들어. 장르처럼 하나만 골라야 하는 건 하나만 켜.</div>';
   h += '<div class="hint" style="margin-top:8px">켜짐 '+onN+' / '+bs.length+'개 · 보내는 글자 '+on.toLocaleString()+'자 (전체 '+all.toLocaleString()+'자)</div>';
   if (on > 12000) h += '<div class="hint" style="color:#D06060">켜둔 양이 꽤 많아. 매 요청마다 이만큼 다 나가니까 필요 없는 블록은 꺼두는 게 좋아.</div>';
   if (!bs.length) h += '<div class="empty">블록이 없어.<br>아래에서 하나 추가해봐.</div>';
@@ -2112,7 +2109,6 @@ function viewPresetEdit(){
   h += '<button class="btn" id="badd">블록 추가</button>';
 
   h += '<div class="sec">생성 옵션</div>';
-  h += '<div class="hint">비워두면 설정에 넣어둔 값을 그대로 써.</div>';
   h += '<label>온도</label><input data-p="temp" inputmode="decimal" value="'+esc(p.temp)+'" placeholder="예: 0.9">';
   h += '<label>top_p</label><input data-p="topP" inputmode="decimal" value="'+esc(p.topP)+'" placeholder="예: 0.95">';
   h += '<label>최대 응답 길이</label><input data-p="maxTokens" inputmode="numeric" value="'+esc(p.maxTokens)+'" placeholder="예: 2600">';
@@ -2673,14 +2669,14 @@ function viewSmsList(){
 var pickN = 3;
 function viewSmsPick(){
   var c=cur(); if(!c) return go("list");
-  elTitle.textContent="새 문자"; elSub.textContent="누가 누구랑?";
+  elTitle.textContent="새 문자"; elSub.textContent="";
   elLeft.textContent="취소"; elLeft.onclick=function(){ pickN=3; go("smslist", c.id); };
   var ps = peopleOf(c);
   var opt = function(extra){
     return ps.map(function(x){ return '<option value="'+esc(x.name)+'">'+esc(x.disp)+"</option>"; }).join("")
          + (extra||"");
   };
-  var h = '<div class="hint" style="margin-bottom:12px">셋 이상이면 단톡방이 돼.</div>';
+  var h = '';
   for (var i=2;i<=pickN;i++){
     h += '<label>'+(i===2?"받는 사람":"참여자 "+(i-1))+'</label>'
        + '<select id="s'+i+'">'
@@ -2730,6 +2726,7 @@ function viewSms(){
   elRight.textContent=""; elRight.onclick=null;
   view.className="chat sms"; dock.style.display = t.peek ? "none" : "block";
   document.body.setAttribute("data-sms", cfg.smsTheme||"기본");
+  var tl=document.querySelector("#dock .tools"); if(tl) tl.style.display="none";
   paintSms();
 }
 
@@ -2800,7 +2797,7 @@ function paintSms(err, thinking){
   if (thinking) h += '<div class="hint" style="padding:8px 4px">쓰는 중…</div>';
   if (err) h += '<div class="err" style="margin:10px 2px">'+esc(err)+'</div>';
   if (!t.log.length && !thinking && !err)
-    h += '<div class="empty">'+(t.peek?"더 보기를 눌러봐.":"먼저 보내거나 더 보기를 눌러봐.")+'</div>';
+
   h += '</div>';
   if (t.peek || !t.log.length) h += '<button class="smsmore" id="smsmore">더 보기</button>';
   h += '</div>';
@@ -3333,6 +3330,7 @@ function viewChat(){
   };
   view.className="chat"; dock.style.display="block";
   document.body.removeAttribute("data-sms");
+  var tl2=document.querySelector("#dock .tools"); if(tl2) tl2.style.display="";
   if (!getLog(c.id).length){
     var g0 = c.startG || greetingsOf(c)[0] || c.greeting;
     c.startG = "";
