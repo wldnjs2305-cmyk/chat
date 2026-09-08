@@ -748,13 +748,18 @@ var HANDS = {
 var HAND_KEYS = ["\ub2e8\uc815","\ubaa8\ubc94","\uc5b4\ub978","\uc57c\ubb34","\uc120\uc0dd","\uc7a5\ub09c","\ub610\ubc15","\ub2e4\uc815","\ubb34\ub09c","\uba4b\ub0c4","\uc090\ub531","\ucc28\ubd84","\uae5c\ucc0d","\uc11c\ud230","\uc218\uc218"];
 /* 모델이 못 고르면 캐릭터 이름에서 뽑아 쓴다. 그래야 인물마다 달라진다 */
 function handFallback(c){
-  var t = String((c && (c.id||"")) + (c && c.name||"")), n = 0;
-  for (var i=0;i<t.length;i++) n = (n*31 + t.charCodeAt(i)) >>> 0;
+  var t = String((c && (c.name||c.id||"")) || "");
+  if (!t) return HAND_KEYS[0];
+  var n = 0;
+  for (var i=0;i<t.length;i++) n = (n*131 + t.charCodeAt(i)) >>> 0;
   return HAND_KEYS[n % HAND_KEYS.length];
 }
 function handOf(c){
-  /* v8 에서 잘못 배정된 것은 한 번 비우고 다시 고르게 한다 */
-  if (c && c.hand && !c.handV9){ c.hand = null; c.handAsking = false; c.handV9 = 1; }
+  /* 예전에 잘못 배정된 것은 한 번 비우고 다시 고르게 한다 */
+  if (c && c.hand && !c.handV9){
+    c.hand = null; c.handAsking = false; c.handV9 = 1;
+    try { saveChars(); } catch(e){}
+  }
   return (c && HANDS[c.hand]) || HANDS[handFallback(c||{})];
 }
 var FONTS = {
@@ -839,7 +844,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-08 v11";
+var APP_VER = "2026-09-08 v12";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["night","밤"]
@@ -2709,7 +2714,7 @@ function pieces(c, text){
     var L = lines[i], m;
     if ((m = L.match(openRe))){ flush(); curKind = m[1]; continue; }
     if (closeRe.test(L)){ flush(); curKind = null; continue; }
-    m = L.match(/^\s*\[([^\]\n]{1,20})\]\s*(.*)$/);
+    m = L.match(/^\s*\[([^\]\n]{1,60})\]\s*(.*)$/);
     if (m && KINDS.indexOf(m[1].trim()) < 0){
       flush(); curKind = null; curWho = m[1].trim();
       if (m[2].trim()) buf.push(m[2]);
@@ -3887,6 +3892,7 @@ function viewChat(){
     c.startG = "";
     if (g0) setLog(c.id, seedGreeting(c, g0));
   }
+  syncHand(c);
   paint();
   paintModelBtn();
   refreshDigest(c);
