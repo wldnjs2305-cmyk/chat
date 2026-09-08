@@ -231,13 +231,17 @@
     background:transparent;padding:0;border:0;border-radius:0;box-shadow:none;line-height:1.95}
   body[data-view=novel] .bub::before, body[data-view=script] .bub::before{display:none}
   body[data-view=novel] .msg.me .bub, body[data-view=script] .msg.me .bub{
-    background:transparent;border:0;box-shadow:none;color:var(--muted);
-    border-left:2px solid var(--line);padding-left:12px}
+    background:transparent;box-shadow:none;color:var(--text);
+    border:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    border-radius:0;padding:18px 2px;margin:6px 0}
+  body[data-view=novel] .msg.me, body[data-view=script] .msg.me{margin-bottom:26px}
   /* 소설 — 지문은 연한 회색 정자체, 대사는 진하게 */
   .nov{white-space:pre-wrap;word-break:break-word;
     font-family:var(--f-body);font-size:var(--fs);line-height:1.95;letter-spacing:-.004em}
   .nov em{font-family:inherit;font-style:normal;font-weight:400;color:var(--nar)}
-  .nov .q2{color:var(--text);font-weight:500}
+  .nov .nn{color:var(--nar)}
+  .nov .ns{color:var(--text);font-weight:500}
+  .nov .ns .q2{color:inherit;font-weight:inherit}
   .nov .q2 + .tr{display:block;margin-top:1px}
   /* 대본 — 대사마다 이름표 */
   .dturn{margin-bottom:22px}
@@ -841,8 +845,12 @@ function quoteMark(t){
     return part.replace(/('[^'\n]{1,80}'|‘[^’\n]{1,80}’)/g,'<span class="q1">$1</span>');
   }).join("");
 }
+/* 말풍선·대본에서는 대사 따옴표를 지운다 */
+function dropQuotes(s){
+  return String(s||"").replace(/[\u201c\u201d"]/g, "");
+}
 function fmt(s){
-  var t = esc(joinFlow(s)).replace(/\n{3,}/g,"\n\n").trim();
+  var t = esc(joinFlow(dropQuotes(s))).replace(/\n{3,}/g,"\n\n").trim();
   t = t.replace(/([(（][^)）\n]*[)）])/g,'<span class="tr">$1</span>');
   t = t.replace(/\*{1,3}([^*]+?)\*{1,3}/g,'<em>$1</em>');
   t = quoteMark(t);
@@ -872,17 +880,32 @@ function fmtIn(s){
   t=t.replace(/([(（][^)）\n]*[)）])/g,'<span class="tr">$1</span>');
   return t.replace(/\*/g,"");
 }
-/* 소설 — 한 덩어리로 흐르고, 지문만 회색 */
+/* 대사에 따옴표를 씌운다. 이미 있으면 그대로 둔다 */
+function quoteSay(txt){
+  var t = String(txt||"").trim();
+  if (!t) return t;
+  if (/^["“'‘「『]/.test(t)) return t;
+  return "\u201c" + t + "\u201d";
+}
+/* 소설 — 한 덩어리로 흐르고, 지문만 회색, 대사에는 따옴표 */
 function novelHTML(raw, i){
-  var t = fmt(raw);
-  if (!t) return "";
-  return '<div class="nov" data-i="'+i+'">'+t+'</div>';
+  var segs = docSegs(stripJunk(raw)), out = "";
+  segs.forEach(function(sg, k){
+    var body = sg.nar ? sg.t : quoteSay(sg.t);
+    var tx = esc(flow(body));
+    tx = tx.replace(/([(（][^)）\n]*[)）])/g,'<span class="tr">$1</span>');
+    tx = hilite(quoteMark(tx));
+    out += (sg.nar ? '<span class="nn">' : '<span class="ns">') + tx + '</span>';
+    if (k < segs.length-1) out += " ";
+  });
+  if (!out) return "";
+  return '<div class="nov" data-i="'+i+'">'+out+'</div>';
 }
 /* 대본 — 지문과 대사를 나누고 대사에만 이름표 */
 function scriptHTML(nm, raw, i){
   var segs = docSegs(stripJunk(raw)), out = "";
   segs.forEach(function(sg){
-    var tx = esc(flow(sg.t));
+    var tx = esc(flow(sg.nar ? sg.t : dropQuotes(sg.t)));
     tx = tx.replace(/([(（][^)）\n]*[)）])/g,'<span class="tr">$1</span>');
     tx = hilite(quoteMark(tx));
     if (sg.nar) out += '<div class="snar">'+tx+'</div>';
@@ -2408,13 +2431,13 @@ function cardHTML(kind, body, c){
       var b0 = body2[0].match(/^제목\s*[:：]\s*(.*)$/);
       if (b0){ ttl=b0[1].trim(); body2.shift(); }
     }
-    var sKey = /디시|dc/i.test(site) ? "디시"
-             : /에타|에브리|everytime/i.test(site) ? "에타"
-             : /카페|cafe|다음|네이버/i.test(site) ? "카페" : site;
+    var sKey = /디시|dc|갤러리/i.test(site) ? "디시"
+             : /에타|에브리|everytime|대나무/i.test(site) ? "에타"
+             : /카페|cafe|다음|네이버/i.test(site) ? "카페" : "기타";
     var info = infoRaw;
     if (!info){
       var bits=[];
-      if (!meta.who) meta.who = sKey==="디시" ? "ㅇㅇ(118.235)" : (sKey==="에타" ? "익명" : "");
+      if (!meta.who) meta.who = sKey==="디시" ? "ㅇㅇ(118.235)" : (sKey==="기타" ? "" : "익명");
       if (meta.who) bits.push(meta.who);
       bits.push(meta.when || "방금 전");
       if (meta.hit) bits.push(meta.hit);
@@ -2432,8 +2455,11 @@ function cardHTML(kind, body, c){
       out += '<div class="chead">댓글 '+cm.length+'</div>';
       cm.forEach(function(x){
         var tx = esc(x.t||"").replace(/^(@\S+)/,'<span class="cre">$1</span>');
-        out += '<div class="crow'+(x.re?" re":"")+'"><div class="cwho">'+esc(x.who||"ㅇㅇ")
-             + (x.up ? '<span class="cup'+(/^-/.test(x.up)?" dn":"")+'">'+esc(x.up).replace(/^-/,"")+'</span>' : "")
+        /* 추천수는 디시에만 */
+        var upHTML = (sKey==="디시" && x.up)
+          ? '<span class="cup'+(/^-/.test(x.up)?" dn":"")+'">'+esc(x.up).replace(/^-/,"")+'</span>' : "";
+        out += '<div class="crow'+(x.re?" re":"")+'"><div class="cwho">'+esc(x.who||"익명")
+             + upHTML
              + '</div><div class="ctx">'+tx+'</div></div>';
       });
     }
@@ -3913,7 +3939,8 @@ var CMDS = {
   "/관계도":"이번 턴에는 관계도만 보여준다. 첫 줄에 [관계] 를 쓰고 [/관계] 로 닫는다. 그 안에 한 줄에 하나씩 '누가 누구를: 어떻게 보는지' 형식으로 쓴다. 상대와 나의 관계뿐 아니라 인물들끼리의 관계도 함께 쓴다. 겉으로 드러난 관계와 실제 거리감이 다르면 그 차이를 적는다. 지문이나 대사는 한 줄도 쓰지 않는다.",
   "/관계":"이번 턴에는 관계도만 보여준다. 첫 줄에 [관계] 를 쓰고 [/관계] 로 닫는다. 그 안에 한 줄에 하나씩 '누가 누구를: 어떻게 보는지' 형식으로 쓴다. 상대와 나의 관계뿐 아니라 인물들끼리의 관계도 함께 쓴다. 겉으로 드러난 관계와 실제 거리감이 다르면 그 차이를 적는다. 지문이나 대사는 한 줄도 쓰지 않는다.",
   "/소문":"이번 턴에는 지금 세계관에 도는 소문만 보여준다. 첫 줄에 [소문] 을 쓰고 [/소문] 로 닫는다. 그 안에 한 줄에 하나씩 '항목: 내용' 형식으로 쓴다. 무슨 소문인지, 누가 퍼뜨렸는지, 어디서 도는지, 실제와 얼마나 다른지를 적는다. 소문은 조금씩 틀리거나 부풀려져 있다. 지문이나 대사는 한 줄도 쓰지 않는다.",
-  "/커뮤반응":"이번 턴에는 인터넷 커뮤니티 글 하나와 그 댓글만 보여준다. 첫 줄에 [커뮤] 를 쓰고 [/커뮤] 로 닫는다. 그 안은 아래 형식을 한 글자도 바꾸지 말고 그대로 지킨다. 라벨 이름을 다른 말로 바꾸지 않고, 여러 항목을 한 줄에 몰아쓰지 않는다. 한 줄에 한 항목씩만 쓴다.\n사이트: 디시 또는 에타 또는 다음카페 중 하나. 유저가 어디인지 말했으면 그곳으로 하고, 말하지 않았으면 지금 상황과 이 이야깃거리가 실제로 돌 만한 곳을 골라 쓴다\n말머리: 게시판 이름\n제목: 글 제목\n정보: 글쓴이 · 몇 분 전 · 조회 수 · 댓글 수\n본문:\n(본문 여러 줄)\n댓글:\n(닉네임 | 내용 | 추천수 형식으로 한 줄에 하나씩, 대여섯 줄)\n댓글 여섯 개 안팎은 반드시 넣는다. 댓글이 없는 글은 쓰지 않는다.\n대댓글은 줄 맨 앞에 ㄴ 를 붙이고 이어서 '닉네임 | @상대닉 내용 | 추천수' 로 쓴다.\n괄호나 꺾쇠, 따옴표로 태그 비슷한 것을 만들지 않는다.\n\n사이트마다 말투와 닉네임이 다르다. 디시는 'ㅇㅇ(223.39)' 처럼 아이피 뒷자리를 닉네임으로 쓰고, 비아냥과 저격이 오가며 말이 험하다. 대댓글은 '@ㅇㅇ(118.235)' 로 시작한다. 에타는 '익명1', '익명2' 처럼 번호를 쓰고, 학교 이야기가 많으며 순하고 짧다. 카페는 익명에 반말이지만 디시보다 덜 험하고 글이 조금 길며 정보나 후기가 섞인다.\n어느 사이트인지 지정받지 않았으면 지금 상황에 어울리는 곳을 고른다.\n추천수는 두 자리 안쪽으로 하고, 비추면 앞에 빼기를 붙인다.\n지문이나 대사는 한 줄도 쓰지 않는다.",
+  "/\uCEE4\uBB34\uBC18\uC751":"이번 턴에는 인터넷 커뮤니티 글 하나와 그 댓글만 보여준다. 첫 줄에 [커뮤] 를 쓰고 [/커뮤] 로 닫는다. 그 안은 아래 형식을 한 글자도 바꾸지 말고 그대로 지킨다. 라벨 이름을 다른 말로 바꾸지 않고, 여러 항목을 한 줄에 몰아쓰지 않는다. 한 줄에 한 항목씩만 쓴다.\n사이트: 이 이야기 속 사람들이 실제로 드나들 만한 곳 이름\n말머리: 게시판 이름\n제목: 글 제목\n정보: 글쓴이 · 몇 분 전 · 조회 수 · 댓글 수\n본문:\n(본문 여러 줄)\n댓글:\n(닉네임 | 내용 | 추천수 형식으로 한 줄에 하나씩, 대여섯 줄)\n댓글 여섯 개 안팎은 반드시 넣는다. 댓글이 없는 글은 쓰지 않는다.\n대댓글은 줄 맨 앞에 ㄴ 를 붙이고 이어서 '닉네임 | @상대닉 내용 | 추천수' 로 쓴다.\n괄호나 꺾쇠, 따옴표로 태그 비슷한 것을 만들지 않는다.\n사이트는 지금 이 세계관에 실제로 있을 법한 곳으로 정한다. 유저가 어디인지 말했으면 그곳으로 한다. 현대 한국이면 디시, 에타, 다음카페 같은 곳이다. 군대나 학교, 회사, 길드처럼 사람들이 모여 있는 조직이 세계관에 있으면 그 이름을 붙인 내부 게시판으로 한다. 부대 이름이 페르녹스면 '페르녹스 익명 게시판', 학교 이름이 청화고면 '청화고 대나무숲' 같은 식이다. 조직 이름은 대화와 설정에 이미 나온 것을 그대로 쓴다. 없으면 그 세계에 어울리게 짓는다.\n닉네임 방식도 그곳에 맞춘다. 디시면 'ㅇㅇ(118.235)' 처럼 아이피 뒷자리를 붙이고, 에타나 대나무숲이면 '익명1', '익명2' 처럼 쓴다. 군부대 게시판이면 '이등병', '말년병장' 처럼 그곳 사람들이 쓸 만한 이름으로 한다.\n추천수는 디시일 때만 쓴다. 디시가 아니면 '닉네임 | 내용' 까지만 쓰고 추천수 칸을 아예 비운다.",
+
   "/상태창":"이번 턴에는 지금 상태만 보여준다. 첫 줄에 [상태] 를 쓰고 [/상태] 로 닫는다. 그 안에 한 줄에 하나씩 '항목: 내용' 형식으로 쓴다. 인물마다 지금 있는 곳, 입고 있는 것, 몸 상태, 겉으로 보이는 감정을 적는다. 속마음이나 앞으로 벌어질 일은 쓰지 않는다. 지문이나 대사도 쓰지 않는다.",
   "/상태":"이번 턴에는 지금 상태만 보여준다. 첫 줄에 [상태] 를 쓰고 [/상태] 로 닫는다. 그 안에 한 줄에 하나씩 '항목: 내용' 형식으로 쓴다. 인물마다 지금 있는 곳, 입고 있는 것, 몸 상태, 겉으로 보이는 감정을 적는다. 속마음이나 앞으로 벌어질 일은 쓰지 않는다. 지문이나 대사도 쓰지 않는다.",
   "/모브":"이번 턴에 지금 상황에 어울리는 새 인물을 한 명 등장시킨다. 그 인물의 이름을 정하고, 말할 때 줄 맨 앞에 대괄호로 그 이름을 적는다. 설정에 없는 단역이어도 된다.",
@@ -4456,16 +4483,29 @@ render();
   var vv = window.visualViewport;
   if (!vv) return;
   var st = document.body.style;
+  var app = document.getElementById("app");
   function sync(){
     var gap = (window.innerHeight || 0) - (vv.height + vv.offsetTop);
     var open = gap > 90;
     st.setProperty("--sab", open ? "0" : "1");
     st.setProperty("--dockb", open ? "0px" : "9px");
-    if (open) document.body.setAttribute("data-kb","1");
-    else document.body.removeAttribute("data-kb");
+    if (open){
+      document.body.setAttribute("data-kb","1");
+      /* 사파리는 키보드가 떠도 화면 높이를 안 줄인다. 실제 보이는 만큼만 쓰게 직접 잡아준다 */
+      if (app){
+        app.style.position = "fixed";
+        app.style.left = "0"; app.style.right = "0";
+        app.style.top = Math.round(vv.offsetTop) + "px";
+        app.style.height = Math.round(vv.height) + "px";
+      }
+    } else {
+      document.body.removeAttribute("data-kb");
+      if (app){ app.style.position=""; app.style.left=""; app.style.right=""; app.style.top=""; app.style.height=""; }
+    }
   }
   vv.addEventListener("resize", sync);
   vv.addEventListener("scroll", sync);
+  window.addEventListener("orientationchange", function(){ setTimeout(sync, 250); });
   sync();
 })();
 })();
