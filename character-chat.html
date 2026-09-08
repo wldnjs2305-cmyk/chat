@@ -4469,7 +4469,7 @@ function callAPI(c, log, turnInstr){
     if (gen.topP!==null) body.generationConfig.topP=gen.topP;
   }
   applyThink(body, cfg.mode!=="openai");
-  return fetch(url,{ method:"POST", headers:headers, body:JSON.stringify(body) })
+  return fetchJSON(url,{ method:"POST", headers:headers, body:JSON.stringify(body) }, 120000)
   .then(function(res){
     return res.text().then(function(txt){
       var data=null; try{ data=JSON.parse(txt); }catch(e){}
@@ -4494,11 +4494,12 @@ function callAPI(c, log, turnInstr){
 }
 
 /* 인물에 어울리는 손글씨를 한 번만 정한다 */
-function syncHand(c, cb){
-  if (c.hand || !cfg.key) return cb();
+function syncHand(c){
+  if (!c || c.hand || c.handAsking || !cfg.key) return;
+  c.handAsking = true;
   var desc = [c.name, c.display, c.persona, c.prompt, c.summary]
     .filter(Boolean).join("\n").slice(0, 1800);
-  if (!desc){ c.hand = "펜"; saveChars(); return cb(); }
+  if (!desc){ c.hand = "펜"; saveChars(); return; }
   var sys = "아래 인물에게 어울리는 손글씨를 하나 고른다. 아래 일곱 중 하나만 그대로 답하고 다른 말은 쓰지 않는다.\n"
     + "펜 - 얇고 반듯한 볼펜 글씨. 무난한 사람\n"
     + "붓 - 굵고 거친 붓펜. 힘 있고 험한 사람, 무인, 조직, 군인\n"
@@ -4507,11 +4508,18 @@ function syncHand(c, cb){
     + "소녀 - 작고 동그란 글씨. 여리고 조심스러운 사람\n"
     + "정갈 - 곱고 단정한 붓글씨. 차분하고 우아한 사람\n"
     + "정자 - 각 잡힌 정자체. 격식 차리고 딱딱한 사람";
-  askLLM(sys, desc, function(out){
-    var k = String(out||"").replace(/[^가-힣]/g,"").slice(0,2);
+  var settled = false;
+  function done(k){
+    if (settled) return; settled = true;
     c.hand = HANDS[k] ? k : "펜";
-    saveChars(); cb();
-  }, 12);
+    c.handAsking = false;
+    try { saveChars(); } catch(e){}
+    if (screen==="chat" && cur() && cur().id===c.id) paint();
+  }
+  setTimeout(function(){ done("펜"); }, 12000);
+  askLLM(sys, desc, function(out){
+    done(String(out||"").replace(/[^가-힣]/g,"").slice(0,2));
+  }, 16);
 }
 function turn(){
   var c=cur(); if(!c||busy) return;
@@ -4541,12 +4549,14 @@ function turn(){
       break;
     }
   }
-  syncHand(c, function(){ turnGo(c, lg, ti); });
+  turnGo(c, lg, ti);
 }
 function turnGo(c, lg, ti){
   callAPI(c,lg,ti).then(function(text){
     var l=getLog(c.id); l.push({r:"a",t:text}); setLog(c.id,l);
     busy=false; elSend.disabled=false; paint();
+    /* 손글씨는 답이 다 온 뒤에, 손글씨 카드가 실제로 나왔을 때만 정한다 */
+    if (/\[\s*(?:편지|일기|속마음)\s*\]/.test(text)) syncHand(c);
   }).catch(function(e){
     busy=false; elSend.disabled=false;
     paint(e.message||"연결에 실패했어.");
