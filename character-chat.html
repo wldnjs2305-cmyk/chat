@@ -488,28 +488,6 @@
   .statc{font-family:"Do Hyeon",sans-serif}
   .pl{font-family:"Gothic A1",sans-serif}
   .mind.secret{font-family:"Nanum Gothic Coding","Nanum Gothic",monospace;font-style:normal}
-  /* 공고 */
-  .notice{background:var(--paper);border:3px double var(--paper-line);border-radius:4px;
-    margin:10px 0;padding:20px 18px;color:var(--paper-text);font-size:var(--cfs,14px)}
-  .notice .npub{text-align:center;font-family:"Gothic A1",sans-serif;font-size:.8em;
-    letter-spacing:.08em;color:var(--muted);margin-bottom:10px}
-  .notice .ntit{text-align:center;font-family:"Black Han Sans",sans-serif;
-    font-size:1.5em;line-height:1.35;letter-spacing:-.02em;margin-bottom:16px;word-break:keep-all;text-wrap:balance}
-  .notice .nrows{border-top:1.5px solid var(--paper-line);border-bottom:1.5px solid var(--paper-line);
-    padding:12px 0;font-family:"Gothic A1",sans-serif}
-  .notice .nrow{display:flex;gap:12px;padding:5px 0;line-height:1.6;align-items:flex-start}
-  .notice .nk{flex:0 0 88px;font-weight:700;color:var(--muted);font-size:.92em;word-break:keep-all}
-  .notice .nv{flex:1;min-width:0;white-space:pre-wrap;word-break:keep-all}
-  @media (max-width:520px){
-    .notice .nrow{display:block;padding:7px 0}
-    .notice .nk{margin-bottom:2px;font-size:.84em;letter-spacing:.03em}
-  }
-  .notice .nem{text-align:center;font-family:"Black Han Sans",sans-serif;
-    font-size:1.25em;line-height:1.45;margin:15px 0 4px;letter-spacing:-.01em;
-    word-break:keep-all;white-space:pre-wrap;text-wrap:balance}
-  .notice .nft{text-align:center;font-family:"Gothic A1",sans-serif;font-size:.85em;
-    color:var(--muted);line-height:1.7;margin-top:10px;white-space:pre-wrap;word-break:keep-all;text-wrap:balance}
-  .notice .nbody{font-family:"Gothic A1",sans-serif;line-height:1.75;white-space:pre-wrap;word-break:keep-all;margin-top:12px}
   .comm .csite{font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:8px;letter-spacing:.02em}
   .comm[data-site="디시"] .ctag{background:#3b4a63;color:#e8eef7}
   .comm[data-site="카페"] .ctag{background:#e6f0dd;color:#41662c}
@@ -2547,48 +2525,6 @@ function cardHTML(kind, body, c){
       });
     }
     return oi + '</div></div>';
-  }
-  if (kind==="공고"){
-    var pub="", ntit="", rows=[], nem="", nft="", nbody=[], nmode=0;
-    String(body||"").split("\n").forEach(function(L){
-      var t=L.trim().replace(/^[-•*]\s*/,""); if(!t) return;
-      var m;
-      if ((m=t.match(/^(?:발행|발행처|기관|주최|출처)\s*[:：]\s*(.*)$/))){ pub=m[1].trim(); return; }
-      if ((m=t.match(/^제목\s*[:：]\s*(.*)$/))){ ntit=m[1].trim(); return; }
-      if ((m=t.match(/^(?:강조|사례금|현상금|보상)\s*[:：]\s*(.*)$/))){ nem=m[1].trim(); return; }
-      if ((m=t.match(/^(?:꼬리말|안내|비고|연락처|문의)\s*[:：]\s*(.*)$/))){
-        nft = nft ? nft+"\n"+m[1].trim() : m[1].trim(); return; }
-      if ((m=t.match(/^항목\s*[:：]\s*([^|｜]+)[|｜]\s*([\s\S]*)$/))){
-        rows.push({ k:m[1].trim(), v:m[2].trim() }); return; }
-      if (/^본문\s*[:：]?\s*$/.test(t)){ nmode=1; return; }
-      if (nmode===0 && (m=t.match(/^([^:：\n]{1,16})\s*[:：]\s*([\s\S]+)$/))){
-        rows.push({ k:m[1].trim(), v:m[2].trim() }); return; }
-      if (rows.length && !nmode){ rows[rows.length-1].v += "\n" + t; return; }
-      nbody.push(t);
-    });
-    if (!ntit && !rows.length && !nbody.length) return "";
-    /* 숫자+화폐단위+서술어가 줄바꿈으로 찢기지 않게 묶어준다 ("1억 / 원 지급" 방지) */
-    function nbsp(s){
-      return String(s)
-        .replace(/([0-9０-９]|[억만천백조])\s+(원|만원|억원|달러|엔|위안)(?![가-힣])/g, "$1\u00A0$2")
-        .replace(/(원|만원|억원|달러|엔|위안)\s+(지급|지원|제공|수여|보상|포상)/g, "$1\u00A0$2")
-        .replace(/([0-9０-９])\s+(명|건|개|회|시간|일|년|개월|주)(?![가-힣])/g, "$1\u00A0$2");
-    }
-    var on = '<div class="notice">';
-    if (pub)  on += '<div class="npub">'+esc(pub)+'</div>';
-    if (ntit) on += '<div class="ntit">'+esc(nbsp(ntit))+'</div>';
-    if (rows.length){
-      on += '<div class="nrows">';
-      rows.forEach(function(r){
-        on += '<div class="nrow"><div class="nk">'+esc(r.k)+'</div>'
-            + '<div class="nv">'+esc(r.v)+'</div></div>';
-      });
-      on += '</div>';
-    }
-    if (nbody.length) on += '<div class="nbody">'+esc(nbody.join("\n"))+'</div>';
-    if (nem) on += '<div class="nem">'+esc(nbsp(nem))+'</div>';
-    if (nft) on += '<div class="nft">'+esc(nbsp(nft))+'</div>';
-    return on + '</div>';
   }
   if (kind==="커뮤"){
     var site="", tag="", ttl="", body2=[], cm=[], mode=0;
