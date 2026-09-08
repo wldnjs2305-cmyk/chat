@@ -429,6 +429,28 @@
   .comm .crow.re .cwho{opacity:.85}
   .comm .cre{color:var(--accent);font-weight:600}
   .comm .ctx{white-space:pre-wrap;word-break:break-all}
+  /* 인스타 */
+  .insta{background:var(--field);border:1px solid var(--line);border-radius:16px;
+    margin:10px 0;overflow:hidden;font-size:var(--cfs,14px)}
+  .insta .ihd{display:flex;align-items:center;gap:9px;padding:11px 13px}
+  .insta .iav{width:30px;height:30px;border-radius:50%;flex:0 0 auto;
+    background:linear-gradient(135deg,#f9ce34,#ee2a7b 55%,#6228d7);
+    display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700}
+  .insta .iid{font-weight:700;font-size:.95em;letter-spacing:-.01em}
+  .insta .iph{border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    background:var(--bub);min-height:120px;display:flex;align-items:center;justify-content:center;
+    padding:26px 20px;text-align:center;color:var(--muted);font-size:.86em;line-height:1.6}
+  .insta .ibd{padding:11px 13px 13px}
+  .insta .ilk{font-weight:700;font-size:.9em;margin-bottom:7px}
+  .insta .icap{line-height:1.6}
+  .insta .icap b{font-weight:700;margin-right:5px}
+  .insta .itag{color:var(--accent)}
+  .insta .ihead{margin-top:11px;padding-top:10px;border-top:1px solid var(--line);
+    font-size:.8em;color:var(--muted)}
+  .insta .irow{display:flex;gap:7px;padding:7px 0;line-height:1.55}
+  .insta .irow b{font-weight:700;flex:0 0 auto}
+  .insta .irow.re{padding-left:18px}
+  .insta .ilike{margin-left:auto;color:var(--muted);font-size:.8em;white-space:nowrap}
   .comm .csite{font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:8px;letter-spacing:.02em}
   .comm[data-site="디시"] .ctag{background:#3b4a63;color:#e8eef7}
   .comm[data-site="카페"] .ctag{background:#e6f0dd;color:#41662c}
@@ -2400,52 +2422,105 @@ function todayLabel(){
 }
 function cardHTML(kind, body, c){
   if (kind==="문자") return smsMini(body, c);
+  if (kind==="인스타"){
+    var acc="", cap="", like="", shot="", ic=[], imode=0;
+    String(body||"").split("\n").forEach(function(L){
+      var t=L.trim(); if(!t) return;
+      var m;
+      if (imode<2){
+        if ((m=t.match(/^(?:계정|아이디|닉네임|작성자)\s*[:：]\s*(.*)$/))){ acc=m[1].trim(); return; }
+        if ((m=t.match(/^(?:사진|이미지|그림)\s*[:：]\s*(.*)$/))){ shot=m[1].trim(); return; }
+        if ((m=t.match(/^(?:좋아요|하트|likes?)\s*[:：]?\s*([\d,]+)/i))){ like=m[1]; return; }
+        if ((m=t.match(/^(?:본문|캡션|글)\s*[:：]\s*(.*)$/))){ cap=m[1].trim(); return; }
+      }
+      if (/^(?:본문|캡션|글)\s*[:：]?\s*$/.test(t)){ imode=1; return; }
+      if (/^(?:댓글|덧글|리플)\s*[:：]?\s*[\[(]?\s*\d*\s*[\])]?\s*(?:개)?\s*$/.test(t)){ imode=2; return; }
+      if (imode===2){
+        var re3=false, x=t.replace(/^[-•*\s]+/,"").trim();
+        if (/^(?:[ㄴ└↳>»])\s*/.test(x)){ re3=true; x=x.replace(/^(?:[ㄴ└↳>»])\s*/,""); }
+        if (/^@/.test(x)) re3=true;
+        var mm3 = x.match(/^([^|｜:：]{1,30})\s*[|｜:：]\s*([\s\S]*?)(?:\s*[|｜]\s*([\d,]+))?$/);
+        if (mm3) ic.push({ who:mm3[1].trim(), t:(mm3[2]||"").trim(), up:(mm3[3]||"").trim(), re:re3 });
+        else ic.push({ who:"", t:x, up:"", re:re3 });
+        return;
+      }
+      if (cap) cap += " " + t; else cap = t;
+    });
+    if (!acc) acc = (c && c.name) ? String(c.name).replace(/\s+/g,"").toLowerCase() : "user";
+    function tagify(x){ return esc(x).replace(/(#[^\s#]+)/g,'<span class="itag">$1</span>'); }
+    var oi = '<div class="insta">'
+      + '<div class="ihd"><div class="iav">'+esc(acc.charAt(0).toUpperCase())+'</div>'
+      + '<div class="iid">'+esc(acc)+'</div></div>'
+      + '<div class="iph">'+(shot ? esc(shot) : "사진")+'</div>'
+      + '<div class="ibd">'
+      + (like ? '<div class="ilk">좋아요 '+esc(like)+'개</div>' : "")
+      + (cap ? '<div class="icap"><b>'+esc(acc)+'</b>'+tagify(cap)+'</div>' : "");
+    if (ic.length){
+      oi += '<div class="ihead">댓글 '+ic.length+'개</div>';
+      ic.forEach(function(x){
+        oi += '<div class="irow'+(x.re?" re":"")+'"><b>'+esc(x.who||"익명")+'</b>'
+            + '<span>'+tagify(x.t||"")+'</span>'
+            + (x.up ? '<span class="ilike">♥ '+esc(x.up)+'</span>' : "")
+            + '</div>';
+      });
+    }
+    return oi + '</div></div>';
+  }
   if (kind==="커뮤"){
     var site="", tag="", ttl="", body2=[], cm=[], mode=0;
     var meta={ who:"", when:"", hit:"", cmt:"", up:"" }, infoRaw="";
     function setMeta(k,v){ if(v && !meta[k]) meta[k]=v; }
-    String(body||"").split("\n").forEach(function(L){
+    /* 여러 라벨이 한 줄에 몰려 있으면 라벨 앞에서 줄을 끊는다 */
+    var LAB = "사이트|커뮤|커뮤니티|말머리|게시판|갤러리|카테고리|분류|제목|정보|글쓴이|작성자|닉네임|아이디|시간|작성일|등록일|날짜|조회|조회수|추천|추천수|본문|내용|댓글|덧글|리플|답글";
+    /* 라벨 쪼개기는 댓글 앞부분에만 쓴다. 댓글 안에서는 '작성자:' 가 닉네임일 수 있다 */
+    var whole = String(body||"");
+    var cutRe = /(?:^|\n|\s)(?:댓글|덧글|리플|답글)\s*[:：]?\s*[\[(]?\s*\d*\s*[\])]?\s*(?:개)?/;
+    var cut = whole.search(cutRe);
+    var head = cut < 0 ? whole : whole.slice(0, cut);
+    var tail = cut < 0 ? ""    : whole.slice(cut);
+    head = head.replace(new RegExp("(?!^)\\s*(?=(?:"+LAB+")\\s*[:：])","g"), "\n");
+    tail = tail.replace(/^\s+/, "").replace(/\s+-\s+/g, "\n");
+    var pre = head + (tail ? "\n" + tail : "");
+    function clean(v){ return String(v||"").replace(/[\s|｜·,]+$/,"").trim(); }
+    function oneComment(x){
+      var t = String(x||"").replace(/^[-•*\s]+/,"").trim(), re = false;
+      if (/^(?:[ㄴ└↳>»]|re\s*[:：])\s*/i.test(t)){ re = true; t = t.replace(/^(?:[ㄴ└↳>»]|re\s*[:：])\s*/i,""); }
+      if (/^@/.test(t)) re = true;
+      var m1 = t.match(/^([^|｜]{1,40})[|｜]\s*([\s\S]*?)(?:[|｜]\s*([+\-]?\d+))?$/);
+      if (m1) return { who:clean(m1[1]), t:(m1[2]||"").trim(), up:(m1[3]||"").trim(), re:re };
+      var m2 = t.match(/^([^:：\n]{1,24})\s*[:：]\s*([\s\S]+)$/);
+      if (m2) return { who:clean(m2[1]), t:m2[2].trim(), up:"", re:re };
+      var m3 = t.match(/^(\S{1,24}\([\d.]+\)|익명\s*\d*|ㅇㅇ)\s+([\s\S]+)$/);
+      if (m3) return { who:m3[1].trim(), t:m3[2].trim(), up:"", re:re };
+      return { who:"", t:t, up:"", re:re };
+    }
+    pre.split("\n").forEach(function(L){
       var t=L.trim(); if(!t) return;
       t = t.replace(/^[-•*]\s*/,"");
       var m;
       if (mode<2){
-        if ((m=t.match(/^(?:사이트|커뮤|커뮤니티)\s*[:：]\s*(.*)$/))){ site=m[1].trim(); return; }
-        if ((m=t.match(/^(?:말머리|게시판|갤러리|카테고리|분류)\s*[:：]\s*(.*)$/))){ tag=m[1].trim(); return; }
-        if ((m=t.match(/^제목\s*[:：]\s*(.*)$/))){ ttl=m[1].trim(); return; }
-        if ((m=t.match(/^정보\s*[:：]\s*(.*)$/))){ infoRaw=m[1].trim(); return; }
-        if ((m=t.match(/^(?:글쓴이|작성자|닉네임|아이디)\s*[:：]\s*(.*)$/))){ setMeta("who",m[1].trim()); return; }
-        if ((m=t.match(/^(?:시간|작성일|날짜)\s*[:：]\s*(.*)$/))){ setMeta("when",m[1].trim()); return; }
+        if ((m=t.match(/^(?:사이트|커뮤|커뮤니티)\s*[:：]\s*(.*)$/))){ site=clean(m[1]); return; }
+        if ((m=t.match(/^(?:말머리|게시판|갤러리|카테고리|분류)\s*[:：]\s*(.*)$/))){ tag=clean(m[1]); return; }
+        if ((m=t.match(/^제목\s*[:：]\s*(.*)$/))){ ttl=clean(m[1]); return; }
+        if ((m=t.match(/^정보\s*[:：]\s*(.*)$/))){ infoRaw=clean(m[1]); return; }
+        if ((m=t.match(/^(?:글쓴이|작성자|닉네임|아이디)\s*[:：]\s*(.*)$/))){ setMeta("who",clean(m[1])); return; }
+        if ((m=t.match(/^(?:시간|작성일|등록일|날짜)\s*[:：]\s*(.*)$/))){ setMeta("when",clean(m[1])); return; }
         if ((m=t.match(/^(?:조회|조회수)\s*[:：]?\s*([\d,]+)/))){ setMeta("hit","조회 "+m[1]); return; }
         if ((m=t.match(/^(?:추천|추천수)\s*[:：]?\s*([+\-]?[\d,]+)/))){ setMeta("up","추천 "+m[1]); return; }
       }
-      if (/^본문\s*[:：]?\s*$/.test(t)){ mode=1; return; }
-      if (/^(?:댓글|덧글|리플|답글)\s*[:：]?\s*\d*\s*(?:개)?\s*$/.test(t)){ mode=2; return; }
-      /* 댓글이 한 줄에 몰려 있으면 ' - ' 로 쪼갠다 */
-      var mc = t.match(/^(?:댓글|덧글|리플|답글)\s*[:：]\s*(.+)$/);
+      if (/^(?:본문|내용)\s*[:：]?\s*$/.test(t)){ mode=1; return; }
+      var mc = t.match(/^(?:댓글|덧글|리플|답글)\s*[:：]?\s*[\[(]?\s*\d*\s*[\])]?\s*(?:개)?\s*(.*)$/);
       if (mc){
         mode = 2;
-        mc[1].split(/\s+-\s+|\s*·\s*(?=\S+\s*[:：])/).forEach(function(one){
-          var o = one.replace(/^[-•*\s]+/,"").trim(); if(!o) return;
-          var re2 = false;
-          if (/^(?:[ㄴ└↳>»])\s*/.test(o)){ re2=true; o=o.replace(/^(?:[ㄴ└↳>»])\s*/,""); }
-          if (/^@/.test(o)) re2 = true;
-          var mm2 = o.match(/^([^|｜:：]{1,24})\s*[|｜:：]\s*([\s\S]+?)(?:\s*[|｜]\s*([+\-]?\d+))?$/);
-          if (mm2) cm.push({ who:mm2[1].trim(), t:mm2[2].trim(), up:(mm2[3]||"").trim(), re:re2 });
-          else cm.push({ who:"", t:o, up:"", re:re2 });
+        if (!mc[1].trim()) return;
+        mc[1].split(/\s+-\s+|\n/).forEach(function(one){
+          var o = one.trim(); if(!o) return;
+          cm.push(oneComment(o));
         });
         return;
       }
       if (mode===2){
-        var re = false;
-        if (/^(?:[ㄴ└↳>»]|re\s*[:：])\s*/i.test(t)){ re = true; t = t.replace(/^(?:[ㄴ└↳>»]|re\s*[:：])\s*/i,""); }
-        if (/^@/.test(t)) re = true;
-        var mm=t.match(/^([^|｜]{1,40})[|｜]\s*([\s\S]*?)(?:[|｜]\s*([+\-]?\d+))?$/);
-        if (mm) cm.push({ who:mm[1].trim(), t:(mm[2]||"").trim(), up:(mm[3]||"").trim(), re:re });
-        else {
-          var m2=t.match(/^(\S{1,24}\([\d.]+\)|익명\s*\d*|ㅇㅇ)\s+([\s\S]+)$/);
-          if (m2) cm.push({ who:m2[1].trim(), t:m2[2].trim(), up:"", re:re });
-          else cm.push({ who:"", t:t, up:"", re:re });
-        }
+        cm.push(oneComment(t));
         return;
       }
       body2.push(t);
@@ -2454,6 +2529,10 @@ function cardHTML(kind, body, c){
     if (!ttl && body2.length){
       var b0 = body2[0].match(/^제목\s*[:：]\s*(.*)$/);
       if (b0){ ttl=b0[1].trim(); body2.shift(); }
+    }
+    if (!tag && /[>›»]/.test(site)){
+      var sp = site.split(/\s*[>›»]\s*/);
+      site = sp[0].trim(); tag = (sp[1]||"").trim();
     }
     var sKey = /디시|dc|갤러리/i.test(site) ? "디시"
              : /에타|에브리|everytime|대나무/i.test(site) ? "에타"
@@ -2586,12 +2665,12 @@ function cardHTML(kind, body, c){
   return "";
 }
 
-var KINDS = ["일기","편지","속마음","플리","나레","관계","상태","비밀","소문","커뮤","주문","결제"];
+var KINDS = ["일기","편지","속마음","플리","나레","관계","상태","비밀","소문","커뮤","인스타","주문","결제"];
 /* 이 카드들은 해당 명령어를 친 턴에만 카드로 그린다. 그냥 대화 중에 나오면 본문으로 흘린다 */
 var CARD_ONLY = {
   "일기":["/일기"], "편지":["/편지"], "속마음":["/속마음"], "플리":["/플리"],
   "관계":["/관계","/관계도"], "상태":["/상태","/상태창"], "소문":["/소문"],
-  "커뮤":["/커뮤반응","/커뮤니티","/커뮤"],
+  "커뮤":["/커뮤반응","/커뮤니티","/커뮤"], "인스타":["/인스타","/인별","/insta"],
   "주문":["/쇼핑","/주문","/주문내역"], "결제":["/결제","/결제내역"]
 };
 /* 이 답변 바로 앞에 유저가 친 명령어를 찾는다 */
@@ -2638,15 +2717,20 @@ function pieces(c, text){
   }
   flush();
 
-  // [커뮤] 대신 [게시판이름] 으로 열었어도 커뮤 글로 알아본다
+  // 태그가 없어도 게시글처럼 생겼으면 커뮤 글로 알아본다
+  function looksComm(b){
+    var hasHead = /(?:^|\n)\s*(?:사이트|말머리|게시판|갤러리|제목)\s*[:：]/.test(b)
+               || /^\s*(?:사이트|말머리|게시판|갤러리|제목)\s*[:：]/.test(b);
+    var hasCmt  = /(?:댓글|덧글|리플)\s*[:：\[(]?\s*\d*/.test(b);
+    return hasHead && hasCmt;
+  }
   res = res.map(function(seg){
-    if (seg.card || !seg.who) return seg;
+    if (seg.card) return seg;
     var body = seg.text || "";
-    if (/^\s*(?:제목|말머리|게시판|글쓴이|작성자)\s*[:：]/m.test(body) &&
-        /(?:^|\n)\s*(?:댓글|덧글|리플)\s*[:：]?/.test(body)){
-      return { card:"커뮤", text:"사이트: "+seg.who+"\n"+body };
-    }
-    return seg;
+    if (!looksComm(body)) return seg;
+    if (seg.who && !/(?:^|\n)\s*사이트\s*[:：]/.test(body))
+      body = "사이트: "+seg.who+"\n"+body;
+    return { card:"커뮤", text:body };
   });
   // 태그를 빼먹었어도 곡 목록처럼 생겼으면 플리로 본다
   var out = [];
@@ -4002,9 +4086,27 @@ CMDS["/커뮤니티"] = CMDS["/커뮤"] = CMDS["/커뮤반응"];
 CMDS["/주문"] = CMDS["/주문내역"] = CMDS["/쇼핑"];
 CMDS["/결제"] = CMDS["/결제내역"];
 CMD_SAY["/커뮤니티"] = CMD_SAY["/커뮤"] = CMD_SAY["/커뮤반응"];
+CMDS["/인스타"] = CMDS["/인별"] = CMDS["/insta"] =
+  "이번 턴에는 SNS 게시물 하나와 그 댓글만 보여준다. 첫 줄은 [인스타] 이고 마지막 줄은 [/인스타] 다. 대괄호 안에 다른 말을 넣지 않는다.\n"
++ "아래처럼 쓴다.\n"
++ "[인스타]\n"
++ "계정: jiwon.film\n"
++ "사진: 해질녘 초원, 멀리 말 두 마리와 게르 한 채\n"
++ "좋아요: 1,204\n"
++ "본문: 초원 3일차. 여기선 해가 두 시간에 걸쳐 진다 #몽골 #필름\n"
++ "댓글:\n"
++ "minjae_k | 이거 실화냐 색감 미쳤다\n"
++ "hyeon.02 | 언제 돌아와요\n"
++ "ㄴ jiwon.film | @hyeon.02 다음 주에\n"
++ "[/인스타]\n"
++ "계정 이름은 이 인물이 쓸 법한 아이디로 짓는다. 사진 칸에는 사진에 무엇이 찍혔는지 한 줄로 적는다. 설명이 아니라 눈에 보이는 것만 적는다.\n"
++ "본문은 이 인물이 실제로 SNS에 쓸 만한 길이와 말투로 쓴다. 대개 한두 줄이다. 해시태그는 어울리면 몇 개 붙인다.\n"
++ "댓글은 네다섯 개 넣는다. 설정에 있는 인물과 모르는 계정을 섞는다. 아는 사람만 달거나 모르는 사람만 달지 않는다. 대댓글은 줄 맨 앞에 ㄴ 를 붙인다.\n"
++ "유저가 누구 계정인지 말하지 않았으면 이 인물의 계정으로 한다.";
+CMD_SAY["/인스타"] = CMD_SAY["/인별"] = CMD_SAY["/insta"] = "(뭐 올렸어)";
 /* 카드만 뽑는 명령어 — 이 턴은 길이 제한을 걸지 않는다 */
 var CARD_CMDS = { "/일기":1,"/편지":1,"/속마음":1,"/플리":1,"/관계":1,"/관계도":1,
-                  "/상태":1,"/상태창":1,"/소문":1,"/커뮤반응":1,"/커뮤니티":1,"/커뮤":1 };
+                  "/상태":1,"/상태창":1,"/소문":1,"/커뮤반응":1,"/커뮤니티":1,"/커뮤":1,"/인스타":1,"/인별":1,"/insta":1 };
 var cmdTurn = false;
 function cmdOf(t){
   var k = String(t||"").trim().split(/\s+/)[0];
@@ -4438,7 +4540,7 @@ $("#undo").onclick=function(){
 $("#note").onclick=function(){ if(cur()) go("note"); };
 on("#smsbtn","onclick",function(){ if(cur()) go("smslist"); });
 $("#cmds").onclick=function(){
-    var k = prompt("/일기   /속마음   /편지   /플리\n/관계도   /상태창   /소문   /커뮤반응\n/쇼핑   /결제내역\n/비밀   /전환   /모브   /ooc   @:", "");
+    var k = prompt("/일기   /속마음   /편지   /플리\n/관계도   /상태창   /소문   /커뮤반응   /인스타\n/쇼핑   /결제내역\n/비밀   /전환   /모브   /ooc   @:", "");
   if (!k) return;
   elInp.value = k.trim()+" ";
   elInp.focus();
