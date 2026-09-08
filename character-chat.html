@@ -13,7 +13,7 @@
 <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMTgwIDE4MCI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9IiNGM0VGRkEiLz4KPHRleHQgeD0iOTAiIHk9IjkyIiBmb250LXNpemU9IjEwNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9ImNlbnRyYWwiPiYjMTI4MTQwOzwvdGV4dD4KPC9zdmc+">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@400;600&family=Nanum+Gothic&family=Nanum+Myeongjo&family=Gowun+Dodum&family=Gowun+Batang&family=Song+Myung&family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Gaegu&family=Hi+Melody&family=Black+Han+Sans&family=Gothic+A1:wght@400;700&family=Do+Hyeon&family=Gamja+Flower&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@400;600&family=Nanum+Gothic&family=Nanum+Myeongjo&family=Gowun+Dodum&family=Gowun+Batang&family=Song+Myung&family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Gaegu&family=Hi+Melody&family=Black+Han+Sans&family=Gothic+A1:wght@400;700&family=Do+Hyeon&family=Gamja+Flower&family=Caveat:wght@400;600&family=Yomogi&display=swap">
 <style>
   @font-face{font-family:"RIDIBatang";font-display:swap;
     src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/RIDIBatang.woff") format("woff")}
@@ -729,29 +729,50 @@ function get(k,d){
 }
 /* 편지·일기 손글씨. style 속성에 들어가므로 작은따옴표를 쓴다 */
 var HANDS = {
-  "\ub2e8\uc815":"'HandPol',cursive",
-  "\ubaa8\ubc94":"'HandMyo',cursive",
-  "\uc5b4\ub978":"'HandOks',cursive",
-  "\uc57c\ubb34":"'HandJel',cursive",
-  "\uc120\uc0dd":"'HandKcc',cursive",
-  "\uc7a5\ub09c":"'HandTng',cursive",
-  "\ub610\ubc15":"'HandJng',cursive",
-  "\ub2e4\uc815":"'HandSng',cursive",
-  "\ubb34\ub09c":"'HandYun',cursive",
-  "\uba4b\ub0c4":"'HandNrm',cursive",
-  "\uc090\ub531":"'HandSim',cursive",
-  "\ucc28\ubd84":"'HandSnw',cursive",
-  "\uae5c\ucc0d":"'HandSeh',cursive",
-  "\uc11c\ud230":"'HandRam',cursive",
-  "\uc218\uc218":"'HandDng',cursive"
+  "\ub2e8\uc815":"'HandPol','Caveat','Yomogi',cursive",
+  "\ubaa8\ubc94":"'HandMyo','Caveat','Yomogi',cursive",
+  "\uc5b4\ub978":"'HandOks','Caveat','Yomogi',cursive",
+  "\uc57c\ubb34":"'HandJel','Caveat','Yomogi',cursive",
+  "\uc120\uc0dd":"'HandKcc','Caveat','Yomogi',cursive",
+  "\uc7a5\ub09c":"'HandTng','Caveat','Yomogi',cursive",
+  "\ub610\ubc15":"'HandJng','Caveat','Yomogi',cursive",
+  "\ub2e4\uc815":"'HandSng','Caveat','Yomogi',cursive",
+  "\ubb34\ub09c":"'HandYun','Caveat','Yomogi',cursive",
+  "\uba4b\ub0c4":"'HandNrm','Caveat','Yomogi',cursive",
+  "\uc090\ub531":"'HandSim','Caveat','Yomogi',cursive",
+  "\ucc28\ubd84":"'HandSnw','Caveat','Yomogi',cursive",
+  "\uae5c\ucc0d":"'HandSeh','Caveat','Yomogi',cursive",
+  "\uc11c\ud230":"'HandRam','Caveat','Yomogi',cursive",
+  "\uc218\uc218":"'HandDng','Caveat','Yomogi',cursive"
 };
 var HAND_KEYS = ["\ub2e8\uc815","\ubaa8\ubc94","\uc5b4\ub978","\uc57c\ubb34","\uc120\uc0dd","\uc7a5\ub09c","\ub610\ubc15","\ub2e4\uc815","\ubb34\ub09c","\uba4b\ub0c4","\uc090\ub531","\ucc28\ubd84","\uae5c\ucc0d","\uc11c\ud230","\uc218\uc218"];
 /* 모델이 못 고르면 캐릭터 이름에서 뽑아 쓴다. 그래야 인물마다 달라진다 */
+/* 모델이 못 고르면 설정에 적힌 말을 보고 고른다 */
+var HAND_RULES = [
+  ["\uc11c\ud230", /야생|길들|말을 못|글자를 모르|문맹|짐승|들개|유기|버려진|어린 짐승/],
+  ["\uae4c\uce69", /초등|아이|어린이|소년소녀|막내|꼬마|열살|아기|유치/],
+  ["\ub2e8\uc815", /군인|장교|대위|중위|병장|경찰|형사|요원|정보원|국정원|수사|검사|군대|부대|사관|특수부대|경호/],
+  ["\uc120\uc0dd", /교사|선생|교수|훈장|스승|박사|학장|원장/],
+  ["\ubaa8\ubc94", /학생|고등|중학|대학생|모범생|반장|공부|성적|수석|우등/],
+  ["\uc57c\ubb34", /비서|사무|회계|관리|간호|약사|의사|연구|기록|서기/],
+  ["\ub2e4\uc815", /다정|자상|따뜻|온화|배려|보살|아버지|어머니|형|누나|오빠|언니/],
+  ["\uc5b4\ub978", /회장|사장|가주|두목|보스|대표|어르신|노인|중년|가문|후계|재벌|귀족|왕/],
+  ["\uc0d0\ub51d", /무뚝뚝|시큰둥|퉁명|건조|무심|귀찮|반항|불량|껄렁/],
+  ["\uc7a5\ub09c", /장난|짓궂|능글|까불|천방지축|말썽|사고뭉치|개구/],
+  ["\ucc28\ubd84", /차분|과묵|말수|조용|침착|냉정|무표정|감정을 드러내지/],
+  ["\uba4b\ub0c4", /화려|꾸미|패션|모델|배우|아이돌|연예|미용|디자이/],
+  ["\ub610\ubc15", /신중|느리|성실|꼼꼼|우직|고지식|정직/],
+  ["\uc218\uc218", /소탈|털털|무던|평범|서민|농부|어부|기술자|정비|목수/]
+];
 function handFallback(c){
-  var t = String((c && (c.name||c.id||"")) || "");
-  if (!t) return HAND_KEYS[0];
+  var t = [c&&c.name, c&&c.tagline, c&&c.prompt, c&&c.beh, c&&c.world]
+            .filter(Boolean).join(" ");
+  for (var i=0;i<HAND_RULES.length;i++)
+    if (HAND_RULES[i][1].test(t)) return HAND_RULES[i][0];
+  var nm = String((c && (c.name||c.id||"")) || "");
+  if (!nm) return "\ubb34\ub09c";
   var n = 0;
-  for (var i=0;i<t.length;i++) n = (n*131 + t.charCodeAt(i)) >>> 0;
+  for (var j=0;j<nm.length;j++) n = (n*131 + nm.charCodeAt(j)) >>> 0;
   return HAND_KEYS[n % HAND_KEYS.length];
 }
 function handOf(c){
@@ -844,7 +865,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-08 v12";
+var APP_VER = "2026-09-08 v13";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["night","밤"]
@@ -4467,10 +4488,16 @@ function syncHand(c){
     + "수수 - 꾸밈없이 수수한 글씨. 무던하고 털털한 사람\n"
     + "\n종족이나 겉모습이 아니라 그 인물이 살아온 방식을 보고 고른다. 사람이 아니어도 배우고 자랐으면 반듯하게 쓰고, 사람이어도 배운 적 없으면 서툴게 쓴다. "
     + "나이, 받은 교육, 하는 일, 성격이 글씨를 정한다.";
-  setTimeout(function(){ done(""); }, 14000);
-  askLLM(sys, desc, function(out){
-    done(String(out||"").replace(/[^가-힣]/g,"").slice(0,2));
-  }, 16, true);
+  setTimeout(function(){ done(""); }, 20000);
+  function ask(again){
+    askLLM(sys, desc, function(out){
+      var k = String(out||"").replace(/[^가-힣]/g,"").slice(0,2);
+      if (HANDS[k]) return done(k);
+      if (!again) return ask(true);   /* 한 번은 다시 물어본다 */
+      done("");
+    }, 16, true);
+  }
+  ask(false);
 }
 function turn(){
   var c=cur(); if(!c||busy) return;
