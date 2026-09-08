@@ -239,6 +239,8 @@
   .nov{white-space:pre-wrap;word-break:break-word;
     font-family:var(--f-body);font-size:var(--fs);line-height:1.95;letter-spacing:-.004em}
   .nov em{font-family:inherit;font-style:normal;font-weight:400;color:var(--nar)}
+  .nov .np{margin:0 0 1.05em}
+  .nov .np:last-child{margin-bottom:0}
   .nov .nn{color:var(--nar)}
   .nov .ns{color:var(--text);font-weight:500}
   .nov .ns .q2{color:inherit;font-weight:inherit}
@@ -797,7 +799,8 @@ function applyTheme(){
   st.setProperty("--sfs", (cfg.sSize||15)+"px");
   st.setProperty("--cfs", (cfg.cSize||14)+"px");
   st.setProperty("--rlh", Math.round((cfg.cSize||14)*1.75)+"px");
-  var bp = (cfg.bPad==null ? 9 : cfg.bPad);
+  cfg.bubW = 74; cfg.bPad = 9; cfg.mGap = 14;
+  var bp = 9;
   st.setProperty("--bpv", bp+"px");
   st.setProperty("--bph", (bp+4)+"px");
   st.setProperty("--brad", Math.min(18, bp+8)+"px");
@@ -845,9 +848,16 @@ function quoteMark(t){
     return part.replace(/('[^'\n]{1,80}'|‘[^’\n]{1,80}’)/g,'<span class="q1">$1</span>');
   }).join("");
 }
-/* 말풍선·대본에서는 대사 따옴표를 지운다 */
+/* 말풍선에서는 대사 조각을 통째로 감싼 따옴표만 벗긴다. 지문 안쪽 따옴표는 놔둔다 */
 function dropQuotes(s){
-  return String(s||"").replace(/[\u201c\u201d"]/g, "");
+  return String(s||"").split(/(\*{1,3}[\s\S]+?\*{1,3})/).map(function(part,i){
+    if (i % 2) return part;
+    return part.split(/\n{2,}/).map(function(blk){
+      var t = blk.trim();
+      var m = t.match(/^[\u201c"]([\s\S]*)[\u201d"]$/);
+      return m ? blk.replace(t, m[1]) : blk;
+    }).join("\n\n");
+  }).join("");
 }
 function fmt(s){
   var t = esc(joinFlow(dropQuotes(s))).replace(/\n{3,}/g,"\n\n").trim();
@@ -889,14 +899,21 @@ function quoteSay(txt){
 }
 /* 소설 — 한 덩어리로 흐르고, 지문만 회색, 대사에는 따옴표 */
 function novelHTML(raw, i){
-  var segs = docSegs(stripJunk(raw)), out = "";
-  segs.forEach(function(sg, k){
-    var body = sg.nar ? sg.t : quoteSay(sg.t);
-    var tx = esc(flow(body));
-    tx = tx.replace(/([(（][^)）\n]*[)）])/g,'<span class="tr">$1</span>');
-    tx = hilite(quoteMark(tx));
-    out += (sg.nar ? '<span class="nn">' : '<span class="ns">') + tx + '</span>';
-    if (k < segs.length-1) out += " ";
+  /* 원문의 문단 나눔을 그대로 살린다 */
+  var pars = String(stripJunk(raw)).replace(/\r/g,"").split(/\n{2,}/), out = "";
+  pars.forEach(function(par){
+    par = par.split("\n").map(function(x){ return x.trim(); }).filter(Boolean).join(" ");
+    if (!par) return;
+    var segs = docSegs(par), inner = "";
+    segs.forEach(function(sg, k){
+      var body = sg.nar ? sg.t : quoteSay(sg.t);
+      var tx = esc(body);
+      tx = tx.replace(/([(（][^)）\n]*[)）])/g,'<span class="tr">$1</span>');
+      tx = hilite(quoteMark(tx));
+      inner += (sg.nar ? '<span class="nn">' : '<span class="ns">') + tx + '</span>';
+      if (k < segs.length-1) inner += " ";
+    });
+    if (inner) out += '<p class="np">'+inner+'</p>';
   });
   if (!out) return "";
   return '<div class="nov" data-i="'+i+'">'+out+'</div>';
@@ -905,7 +922,7 @@ function novelHTML(raw, i){
 function scriptHTML(nm, raw, i){
   var segs = docSegs(stripJunk(raw)), out = "";
   segs.forEach(function(sg){
-    var tx = esc(flow(sg.nar ? sg.t : dropQuotes(sg.t)));
+    var tx = esc(flow(sg.nar ? sg.t : quoteSay(sg.t)));
     tx = tx.replace(/([(（][^)）\n]*[)）])/g,'<span class="tr">$1</span>');
     tx = hilite(quoteMark(tx));
     if (sg.nar) out += '<div class="snar">'+tx+'</div>';
@@ -1762,8 +1779,6 @@ function viewCfg(){
      + '<input id="fs" type="range" min="10" max="22" step="0.5" value="'+(cfg.fSize||16)+'" style="padding:0">';
   h += '<label>카드 글자 크기 · '+(cfg.cSize||14)+'px</label>'
      + '<input id="cs" type="range" min="10" max="20" step="0.5" value="'+(cfg.cSize||14)+'" style="padding:0">';
-  h += '<label>문자 글자 크기 · '+(cfg.sSize||15)+'px</label>'
-     + '<input id="ss" type="range" min="10" max="20" step="0.5" value="'+(cfg.sSize||15)+'" style="padding:0">';
   h += '<label>입력창 글자 크기 · '+(cfg.iSize||14)+'px</label>'
      + '<input id="is" type="range" min="10" max="20" step="0.5" value="'+(cfg.iSize||14)+'" style="padding:0">';
   h += '<label>보기 방식</label><select id="vm">'
@@ -1771,12 +1786,6 @@ function viewCfg(){
          return '<option value="'+o[0]+'"'+((cfg.viewMode||"bubble")===o[0]?" selected":"")+'>'+o[1]+'</option>';
        }).join("")
      + '</select>';
-  h += '<label>말풍선 폭 · '+(cfg.bubW||84)+'%</label>'
-     + '<input id="bw" type="range" min="50" max="96" step="2" value="'+(cfg.bubW||84)+'" style="padding:0">';
-  h += '<label>말풍선 여백 · '+(cfg.bPad==null?9:cfg.bPad)+'px</label>'
-     + '<input id="bp" type="range" min="4" max="22" step="1" value="'+(cfg.bPad==null?9:cfg.bPad)+'" style="padding:0">';
-  h += '<label>말풍선 간격 · '+(cfg.mGap==null?14:cfg.mGap)+'px</label>'
-     + '<input id="mg" type="range" min="4" max="40" step="2" value="'+(cfg.mGap==null?14:cfg.mGap)+'" style="padding:0">';
   h += '<div class="sec">프리셋</div>';
   h += '<label>기본 프리셋</label><select id="gps">'
      + '<option value=""'+(cfg.preset?"":" selected")+'>안 씀</option>'
@@ -3939,7 +3948,8 @@ var CMDS = {
   "/관계도":"이번 턴에는 관계도만 보여준다. 첫 줄에 [관계] 를 쓰고 [/관계] 로 닫는다. 그 안에 한 줄에 하나씩 '누가 누구를: 어떻게 보는지' 형식으로 쓴다. 상대와 나의 관계뿐 아니라 인물들끼리의 관계도 함께 쓴다. 겉으로 드러난 관계와 실제 거리감이 다르면 그 차이를 적는다. 지문이나 대사는 한 줄도 쓰지 않는다.",
   "/관계":"이번 턴에는 관계도만 보여준다. 첫 줄에 [관계] 를 쓰고 [/관계] 로 닫는다. 그 안에 한 줄에 하나씩 '누가 누구를: 어떻게 보는지' 형식으로 쓴다. 상대와 나의 관계뿐 아니라 인물들끼리의 관계도 함께 쓴다. 겉으로 드러난 관계와 실제 거리감이 다르면 그 차이를 적는다. 지문이나 대사는 한 줄도 쓰지 않는다.",
   "/소문":"이번 턴에는 지금 세계관에 도는 소문만 보여준다. 첫 줄에 [소문] 을 쓰고 [/소문] 로 닫는다. 그 안에 한 줄에 하나씩 '항목: 내용' 형식으로 쓴다. 무슨 소문인지, 누가 퍼뜨렸는지, 어디서 도는지, 실제와 얼마나 다른지를 적는다. 소문은 조금씩 틀리거나 부풀려져 있다. 지문이나 대사는 한 줄도 쓰지 않는다.",
-  "/\uCEE4\uBB34\uBC18\uC751":"이번 턴에는 인터넷 커뮤니티 글 하나와 그 댓글만 보여준다. 첫 줄에 [커뮤] 를 쓰고 [/커뮤] 로 닫는다. 그 안은 아래 형식을 한 글자도 바꾸지 말고 그대로 지킨다. 라벨 이름을 다른 말로 바꾸지 않고, 여러 항목을 한 줄에 몰아쓰지 않는다. 한 줄에 한 항목씩만 쓴다.\n사이트: 이 이야기 속 사람들이 실제로 드나들 만한 곳 이름\n말머리: 게시판 이름\n제목: 글 제목\n정보: 글쓴이 · 몇 분 전 · 조회 수 · 댓글 수\n본문:\n(본문 여러 줄)\n댓글:\n(닉네임 | 내용 | 추천수 형식으로 한 줄에 하나씩, 대여섯 줄)\n댓글 여섯 개 안팎은 반드시 넣는다. 댓글이 없는 글은 쓰지 않는다.\n대댓글은 줄 맨 앞에 ㄴ 를 붙이고 이어서 '닉네임 | @상대닉 내용 | 추천수' 로 쓴다.\n괄호나 꺾쇠, 따옴표로 태그 비슷한 것을 만들지 않는다.\n사이트는 지금 이 세계관에 실제로 있을 법한 곳으로 정한다. 유저가 어디인지 말했으면 그곳으로 한다. 현대 한국이면 디시, 에타, 다음카페 같은 곳이다. 군대나 학교, 회사, 길드처럼 사람들이 모여 있는 조직이 세계관에 있으면 그 이름을 붙인 내부 게시판으로 한다. 부대 이름이 페르녹스면 '페르녹스 익명 게시판', 학교 이름이 청화고면 '청화고 대나무숲' 같은 식이다. 조직 이름은 대화와 설정에 이미 나온 것을 그대로 쓴다. 없으면 그 세계에 어울리게 짓는다.\n닉네임 방식도 그곳에 맞춘다. 디시면 'ㅇㅇ(118.235)' 처럼 아이피 뒷자리를 붙이고, 에타나 대나무숲이면 '익명1', '익명2' 처럼 쓴다. 군부대 게시판이면 '이등병', '말년병장' 처럼 그곳 사람들이 쓸 만한 이름으로 한다.\n추천수는 디시일 때만 쓴다. 디시가 아니면 '닉네임 | 내용' 까지만 쓰고 추천수 칸을 아예 비운다.",
+  "/\uCEE4\uBB34\uBC18\uC751":"이번 턴에는 인터넷 커뮤니티 글 하나와 그 댓글만 보여준다. 반드시 첫 줄에 [커뮤] 를 쓰고 마지막 줄을 [/커뮤] 로 닫는다. 이 두 줄이 없으면 아무 소용이 없다.\n[커뮤]\n사이트: \n말머리: \n제목: \n정보: \n본문:\n(여러 줄)\n댓글:\n(닉네임 | 내용 | 추천수)\n[/커뮤]\n라벨 이름을 다른 말로 바꾸지 않는다. 한 줄에 한 항목씩만 쓰고 여러 항목을 몰아쓰지 않는다. 본문과 댓글도 각각 다음 줄부터 쓴다.\n정보 칸은 '글쓴이 · 몇 분 전 · 조회 수 · 댓글 수' 로 채운다.\n댓글은 여섯 개 안팎을 반드시 넣는다. 한 줄에 하나씩이다. 대댓글은 줄 맨 앞에 ㄴ 를 붙이고 '닉네임 | @상대닉 내용 | 추천수' 로 쓴다.\n사이트는 이 세계관에 실제로 있을 법한 곳으로 정한다. 유저가 어디인지 말했으면 그곳으로 한다. 현대 한국이면 디시, 에타, 다음카페 같은 곳이다. 군대나 학교, 회사, 길드처럼 사람들이 모인 조직이 세계관에 있으면 그 이름을 붙인 내부 게시판으로 한다. 부대가 페르녹스면 '페르녹스 익명 게시판', 학교가 청화고면 '청화고 대나무숲' 같은 식이다. 조직 이름은 대화와 설정에 이미 나온 것을 그대로 쓰고, 없으면 그 세계에 어울리게 짓는다.\n닉네임도 그곳에 맞춘다. 디시면 'ㅇㅇ(118.235)' 처럼 아이피 뒷자리를 붙이고, 에타나 대나무숲이면 '익명1', '익명2' 로 한다. 군부대 게시판이면 '이등병', '말년병장' 처럼 그곳 사람이 쓸 만한 이름으로 한다.\n추천수는 디시일 때만 쓴다. 디시가 아니면 '닉네임 | 내용' 까지만 쓰고 추천수 칸을 비운다.\n괄호나 꺾쇠, 따옴표로 태그 비슷한 것을 만들지 않는다.",
+
 
   "/상태창":"이번 턴에는 지금 상태만 보여준다. 첫 줄에 [상태] 를 쓰고 [/상태] 로 닫는다. 그 안에 한 줄에 하나씩 '항목: 내용' 형식으로 쓴다. 인물마다 지금 있는 곳, 입고 있는 것, 몸 상태, 겉으로 보이는 감정을 적는다. 속마음이나 앞으로 벌어질 일은 쓰지 않는다. 지문이나 대사도 쓰지 않는다.",
   "/상태":"이번 턴에는 지금 상태만 보여준다. 첫 줄에 [상태] 를 쓰고 [/상태] 로 닫는다. 그 안에 한 줄에 하나씩 '항목: 내용' 형식으로 쓴다. 인물마다 지금 있는 곳, 입고 있는 것, 몸 상태, 겉으로 보이는 감정을 적는다. 속마음이나 앞으로 벌어질 일은 쓰지 않는다. 지문이나 대사도 쓰지 않는다.",
@@ -3992,9 +4002,9 @@ function buildSystem(c, turn){
   var lenMap = {
     "한마디":"한 번의 답은 2~4줄로 끝낸다. 지문 한 조각에 대사 한두 마디면 충분하다. 티키타카로 주고받는 자리이니 장면을 길게 설명하지 않고, 절대 그보다 길게 쓰지 않는다.",
     "짧게":"한 번의 답은 2~5줄로 끝낸다. 톡 주고받듯 짧게 쓰고, 절대 그보다 길게 쓰지 않는다.",
-    "보통":"한 번의 답은 6~8줄로 끝낸다. 그보다 길게 쓰지 않는다.",
-    "길게":"한 번의 답은 9~14줄로 쓴다. 그보다 길게 쓰지 않는다.",
-    "장문":"한 번의 답은 14~20줄로 쓴다. 장면이 그럴 만하면 더 길어져도 된다.",
+    "보통":"이번 턴은 한 번 주고받고 끝낸다. 인물이 반응하고 한마디 하면 거기서 멈춘다. 대개 6~8줄이 된다.",
+    "길게":"이번 턴은 두세 번 주고받는다. 인물이 뭔가 하면 그게 상대나 주변에 닿고, 거기에 다시 반응하는 데까지 간다. 대개 10~14줄이 된다. 줄을 채우려고 대사만 늘이지 않는다. 오가는 횟수로 길어지는 것이다.",
+    "장문":"이번 턴은 여러 번 주고받다가 장면이 한 번 넘어간다. 자리를 옮기거나 시간이 흐르거나 상황이 바뀌는 지점까지 쓴다. 대개 16~22줄이 된다. 한 사람이 길게 떠들어서 채우지 않는다.",
     "자동":"전체 줄 수를 미리 정하지 않는다. 이번 턴에 말하는 인물 한 명당 지문 한두 줄에 대사 한두 줄, 그러니까 서너 줄씩 쓴다. 두 명이 말하면 예닐곱 줄, 네 명이 말하면 열두 줄쯤이 되는 식이다. 한 명하고만 이어가는 장면이면 그 한 명이 예닐곱 줄까지 써도 된다. 인물 수에 따라 전체 길이가 저절로 늘고 줄게 둔다."
   };
   var lenKey = c.length || (c.kind==="다인" ? "자동" : "보통");
@@ -4087,6 +4097,14 @@ function buildSystem(c, turn){
   if (lenLine) p.push(lenLine);
   p.push("첫 화면에 나온 도입부 나레이션은 시작할 때만 쓰인 것이다. 답변에서는 그런 전지적 나레이션을 쓰지 않고, 인물의 시점에서만 쓴다.");
   p.push("설정에 없는 단역은 그 자리에 있을 이유가 분명할 때만 등장시킨다. 둘만 있는 장면에 이유 없이 끼어들게 하지 않는다. 한 번 나온 단역도 상황이 끝나면 더 나오지 않는다.");
+  p.push("");
+  p.push("# 지문 표시");
+  p.push("지문은 반드시 별표로 감싼다. *이렇게* 쓴다. 대사는 감싸지 않는다. 이 표시가 없으면 화면에서 지문과 대사가 구분되지 않는다. 한 답 안에 지문이 여러 번 나오면 그때마다 각각 감싼다.");
+  p.push("");
+  p.push("# 절대 하지 않는 것");
+  p.push("{{user}} 의 말과 행동과 생각은 절대 쓰지 않는다. {{user}} 가 무엇을 했다거나 무슨 말을 했다고 대신 적지 않는다. {{user}} 의 대사를 지어내지 않는다.");
+  p.push("{{user}} 가 직접 쓴 것만이 {{user}} 가 한 일이다. 그 앞까지만 쓰고 멈춘다. {{user}} 의 반응이 궁금해도 기다린다.");
+  p.push("{{user}} 의 겉모습이나 표정을 묘사하는 것은 인물의 눈에 비친 것이므로 괜찮다. 다만 {{user}} 가 무엇을 느끼거나 생각했는지는 쓰지 않는다.");
   p.push("");
   p.push("# 장면이 흘러가게");
   p.push("한 장면이 다 끝났다 싶으면 다음 턴에서 시간을 흘려보내고 자리를 옮겨도 된다. '그날 저녁', '다음 날 아침' 처럼 한 줄로 넘기고 새 장면을 시작한다. 다만 대화가 한창이거나 감정이 오가는 중이면 절대 넘기지 않는다. 그 장면은 끝까지 간다.");
@@ -4478,34 +4496,45 @@ $("#reset").onclick=function(){
 applyTheme();
 render();
 
-/* 키보드가 올라오면 입력창 아래 홈바 여백을 죽인다 */
+/* 키보드가 올라오면 앱을 실제로 보이는 영역에 딱 맞춘다.
+   dvh 는 키보드를 계산에 넣지 않아서 그냥 두면 아래에 빈 자리가 남는다 */
 (function(){
   var vv = window.visualViewport;
   if (!vv) return;
-  var st = document.body.style;
-  var app = document.getElementById("app");
+  var st = document.body.style, app = document.getElementById("app");
+  var on = false;
   function sync(){
-    var gap = (window.innerHeight || 0) - (vv.height + vv.offsetTop);
-    var open = gap > 90;
-    st.setProperty("--sab", open ? "0" : "1");
-    st.setProperty("--dockb", open ? "0px" : "9px");
+    var vh = vv.height, off = vv.offsetTop || 0;
+    var full = Math.max(window.innerHeight||0, document.documentElement.clientHeight||0);
+    var open = (full - vh) > 90;
     if (open){
-      document.body.setAttribute("data-kb","1");
-      /* 사파리는 키보드가 떠도 화면 높이를 안 줄인다. 실제 보이는 만큼만 쓰게 직접 잡아준다 */
+      if (!on){ on = true; document.body.setAttribute("data-kb","1"); }
+      st.setProperty("--sab","0");
+      st.setProperty("--dockb","0px");
       if (app){
-        app.style.position = "fixed";
-        app.style.left = "0"; app.style.right = "0";
-        app.style.top = Math.round(vv.offsetTop) + "px";
-        app.style.height = Math.round(vv.height) + "px";
+        app.style.position  = "fixed";
+        app.style.left = "0"; app.style.right = "0"; app.style.top = "0";
+        app.style.height    = Math.round(vh) + "px";
+        app.style.transform = "translateY(" + Math.round(off) + "px)";
       }
-    } else {
+      var se = document.scrollingElement || document.documentElement;
+      if (se && se.scrollTop !== 0) se.scrollTop = 0;
+    } else if (on || app){
+      on = false;
       document.body.removeAttribute("data-kb");
-      if (app){ app.style.position=""; app.style.left=""; app.style.right=""; app.style.top=""; app.style.height=""; }
+      st.setProperty("--sab","1");
+      st.setProperty("--dockb","9px");
+      if (app){
+        app.style.position=""; app.style.left=""; app.style.right="";
+        app.style.top=""; app.style.height=""; app.style.transform="";
+      }
     }
   }
   vv.addEventListener("resize", sync);
   vv.addEventListener("scroll", sync);
-  window.addEventListener("orientationchange", function(){ setTimeout(sync, 250); });
+  window.addEventListener("orientationchange", function(){ setTimeout(sync,300); });
+  document.addEventListener("focusin", function(){ setTimeout(sync,50); setTimeout(sync,300); });
+  document.addEventListener("focusout", function(){ setTimeout(sync,50); setTimeout(sync,300); });
   sync();
 })();
 })();
