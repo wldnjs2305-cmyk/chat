@@ -839,7 +839,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-08 v10";
+var APP_VER = "2026-09-08 v11";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["night","밤"]
@@ -4491,8 +4491,6 @@ function turn(){
       var k=cmdOf(lg[i].t);
       if (k && !lg[i].ooc){ ti=CMDS[k]; if (CARD_CMDS[k]) cmdTurn = true; }
       if (lg[i].ooc) cmdTurn = true;
-      /* # 를 붙여 부른 것도 길이 제한 없이 간다 */
-      if (!lg[i].ooc && /(?:^|\s)#\S/.test(String(lg[i].t||""))) cmdTurn = true;
       break;
     }
   }
