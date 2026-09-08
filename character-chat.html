@@ -13,7 +13,7 @@
 <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMTgwIDE4MCI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9IiNGM0VGRkEiLz4KPHRleHQgeD0iOTAiIHk9IjkyIiBmb250LXNpemU9IjEwNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9ImNlbnRyYWwiPiYjMTI4MTQwOzwvdGV4dD4KPC9zdmc+">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@400;600&family=Nanum+Gothic&family=Nanum+Myeongjo&family=Gowun+Dodum&family=Gowun+Batang&family=Song+Myung&family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Gaegu&family=Hi+Melody&family=Black+Han+Sans&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@400;600&family=Nanum+Gothic&family=Nanum+Myeongjo&family=Gowun+Dodum&family=Gowun+Batang&family=Song+Myung&family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Gaegu&family=Hi+Melody&family=Black+Han+Sans&family=Gothic+A1:wght@400;700&family=Do+Hyeon&family=Gamja+Flower&display=swap">
 <style>
   @font-face{font-family:"RIDIBatang";font-display:swap;
     src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/RIDIBatang.woff") format("woff")}
@@ -451,6 +451,29 @@
   .insta .irow b{font-weight:700;flex:0 0 auto}
   .insta .irow.re{padding-left:18px}
   .insta .ilike{margin-left:auto;color:var(--muted);font-size:.8em;white-space:nowrap}
+  /* 카드별 글꼴 */
+  .comm, .insta{font-family:"Noto Sans KR",sans-serif}
+  .ord{font-family:"Pretendard Variable",Pretendard,-apple-system,sans-serif}
+  .statc{font-family:"Do Hyeon",sans-serif}
+  .pl{font-family:"Gothic A1",sans-serif}
+  .mind.secret{font-family:"Nanum Gothic Coding","Nanum Gothic",monospace;font-style:normal}
+  /* 공고 */
+  .notice{background:var(--paper);border:3px double var(--paper-line);border-radius:4px;
+    margin:10px 0;padding:20px 18px;color:var(--paper-text);font-size:var(--cfs,14px)}
+  .notice .npub{text-align:center;font-family:"Gothic A1",sans-serif;font-size:.8em;
+    letter-spacing:.08em;color:var(--muted);margin-bottom:10px}
+  .notice .ntit{text-align:center;font-family:"Black Han Sans",sans-serif;
+    font-size:1.5em;line-height:1.35;letter-spacing:-.02em;margin-bottom:16px;word-break:keep-all}
+  .notice .nrows{border-top:1.5px solid var(--paper-line);border-bottom:1.5px solid var(--paper-line);
+    padding:12px 0;font-family:"Gothic A1",sans-serif}
+  .notice .nrow{display:flex;gap:12px;padding:5px 0;line-height:1.6;align-items:flex-start}
+  .notice .nk{flex:0 0 auto;min-width:84px;font-weight:700;color:var(--muted);font-size:.92em}
+  .notice .nv{flex:1;min-width:0;white-space:pre-wrap}
+  .notice .nem{text-align:center;font-family:"Black Han Sans",sans-serif;
+    font-size:1.25em;margin:15px 0 4px;letter-spacing:-.01em}
+  .notice .nft{text-align:center;font-family:"Gothic A1",sans-serif;font-size:.85em;
+    color:var(--muted);line-height:1.6;margin-top:10px;white-space:pre-wrap}
+  .notice .nbody{font-family:"Gothic A1",sans-serif;line-height:1.75;white-space:pre-wrap;margin-top:12px}
   .comm .csite{font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:8px;letter-spacing:.02em}
   .comm[data-site="디시"] .ctag{background:#3b4a63;color:#e8eef7}
   .comm[data-site="카페"] .ctag{background:#e6f0dd;color:#41662c}
@@ -712,6 +735,17 @@ function get(k,d){
   if (s===null || s===undefined) return d;
   try { return JSON.parse(s); } catch(e){ return d; }
 }
+/* 인물마다 다른 손글씨. style 속성에 넣으므로 작은따옴표를 쓴다 */
+var HANDS = {
+  "\ud39c"  :"'Nanum Pen Script',cursive",
+  "\ubd93"  :"'Nanum Brush Script',cursive",
+  "\uc5f0\ud544":"'Gaegu',cursive",
+  "\ub3d9\uae00":"'Gamja Flower',cursive",
+  "\uc18c\ub140":"'Hi Melody',cursive",
+  "\uc815\uac08":"'Gowun Batang',serif",
+  "\uc815\uc790":"'Noto Serif KR',serif"
+};
+function handOf(c){ return (c && HANDS[c.hand]) || HANDS["\ud39c"]; }
 var FONTS = {
   "프리텐다드":'"Pretendard Variable",Pretendard,-apple-system,sans-serif',
   "본고딕":'"Noto Sans KR",sans-serif',
@@ -794,7 +828,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-08 v4 (공고·글꼴)";
+var APP_VER = "2026-09-08 v5 (공고·글꼴)";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["night","밤"]
@@ -2622,7 +2656,7 @@ function cardHTML(kind, body, c){
     var mw = dtxt.match(/([월화수목금토일])\s*요일/);
     if (mw){ wd = mw[0]; dtxt = dtxt.replace(/[,·\s(]*([월화수목금토일])\s*요일[)]*/,"").trim(); }
     if (!dtxt) dtxt = todayLabel();
-    return '<div class="paper diary"><div class="dhead"><span>'+esc(dtxt)+'</span>'
+    return '<div class="paper diary" style="font-family:'+handOf(c)+'"><div class="dhead"><span>'+esc(dtxt)+'</span>'
          + (wd?'<span class="wd">'+esc(wd)+'</span>':"")
          + '</div><div class="ruled">'+cardText(dl.join("\n"))+'</div></div>';
   }
@@ -2643,7 +2677,7 @@ function cardHTML(kind, body, c){
          + (sign?'<span class="lsign">'+esc(sign)+'</span>':"")
          + '</div></div>';
   }
-  if (kind==="속마음") return '<div class="mind">'+cardText(body)+'</div>';
+  if (kind==="속마음") return '<div class="mind" style="font-family:'+handOf(c)+'">'+cardText(body)+'</div>';
   if (kind==="비밀")   return '<div class="mind secret"><div class="pt">비밀</div>'+cardText(body)+'</div>';
   if (kind==="관계" || kind==="상태" || kind==="소문"){
     var rows="";
