@@ -17,6 +17,37 @@
 <style>
   @font-face{font-family:"RIDIBatang";font-display:swap;
     src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/RIDIBatang.woff") format("woff")}
+  /* 편지 · 일기 손글씨 */
+  @font-face{font-family:"HandPol";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/Griun_PolHumanrights-Rg.woff2") format("woff2")}
+  @font-face{font-family:"HandMyo";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2601-1@1.0/Griun_MyoeunHeullim-Rg.woff2") format("woff2")}
+  @font-face{font-family:"HandOks";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/Project-Noonnu/2607161334@griun-oksooni-rg/griun-oksooni-rg/Griun_Oksooni-Rg.woff2") format("woff2")}
+  @font-face{font-family:"HandJel";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2601-1@1.0/Griun_Gellyroll-Rg.woff2") format("woff2")}
+  @font-face{font-family:"HandKcc";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2202@1.0/KCCImkwontaek.woff") format("woff")}
+  @font-face{font-family:"HandTng";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/Project-Noonnu/2607161330@griun-noltotaenggu-rg/griun-noltotaenggu-rg/Griun_NoltoTAENGGU-Rg.woff2") format("woff2")}
+  @font-face{font-family:"HandJng";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/Project-Noonnu/2607161334@x-2/x/GriunXHangeul_Jeong-Rg.woff2") format("woff2")}
+  @font-face{font-family:"HandSng";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/Project-Noonnu/2607161334@x-3/x/GriunXHangeul_SongleSongeulHeullim-Rg.woff2") format("woff2")}
+  @font-face{font-family:"HandYun";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2408-1@1.0/JNE-Yuna-TTF-Regular.woff2") format("woff2")}
+  @font-face{font-family:"HandNrm";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/Project-Noonnu/2607151654@griun-naram-rg/griun-naram-rg/Griun_Naram-Rg.woff2") format("woff2")}
+  @font-face{font-family:"HandSim";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2511-1@1.0/Griun_Simsimche-Rg.woff2") format("woff2")}
+  @font-face{font-family:"HandSnw";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2508-2@1.0/PermanentSnow.woff2") format("woff2")}
+  @font-face{font-family:"HandSeh";font-display:swap;
+    src:url("https://gcore.jsdelivr.net/gh/projectnoonnu/noonfonts_five@.2.0/UhBeeSe_hyun.woff") format("woff")}
+  @font-face{font-family:"HandRam";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_five@.2.0/UhBeeRami.woff") format("woff")}
+  @font-face{font-family:"HandDng";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_five@.2.0/UhBeeDongKyung.woff") format("woff")}
   @import url('https://fonts.googleapis.com/css2?family=DungGeunMo&display=swap');
   @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap');
   @font-face{font-family:"MaruBuri";font-display:swap;
@@ -395,7 +426,7 @@
   .paper.letter .lsign{display:block;text-align:right;line-height:var(--rlh,25px);
     margin:var(--rlh,25px) 0 0;font-weight:400;letter-spacing:.01em}
   .paper.diary .dhead{display:flex;align-items:baseline;gap:10px;
-    font-family:var(--f-body);font-weight:600;font-size:13px;color:var(--muted);
+    font-family:inherit;font-weight:400;font-size:.92em;color:var(--muted);
     padding-bottom:9px;margin-bottom:11px;border-bottom:1.5px solid var(--paper-line)}
   .paper.diary .dhead .wd{font-weight:400;font-size:12px}
   .udot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#E0524F;margin-right:6px;vertical-align:middle}
@@ -696,6 +727,36 @@ function get(k,d){
   if (s===null || s===undefined) return d;
   try { return JSON.parse(s); } catch(e){ return d; }
 }
+/* 편지·일기 손글씨. style 속성에 들어가므로 작은따옴표를 쓴다 */
+var HANDS = {
+  "\ub2e8\uc815":"'HandPol',cursive",
+  "\ubaa8\ubc94":"'HandMyo',cursive",
+  "\uc5b4\ub978":"'HandOks',cursive",
+  "\uc57c\ubb34":"'HandJel',cursive",
+  "\uc120\uc0dd":"'HandKcc',cursive",
+  "\uc7a5\ub09c":"'HandTng',cursive",
+  "\ub610\ubc15":"'HandJng',cursive",
+  "\ub2e4\uc815":"'HandSng',cursive",
+  "\ubb34\ub09c":"'HandYun',cursive",
+  "\uba4b\ub0c4":"'HandNrm',cursive",
+  "\uc090\ub531":"'HandSim',cursive",
+  "\ucc28\ubd84":"'HandSnw',cursive",
+  "\uae5c\ucc0d":"'HandSeh',cursive",
+  "\uc11c\ud230":"'HandRam',cursive",
+  "\uc218\uc218":"'HandDng',cursive"
+};
+var HAND_KEYS = ["\ub2e8\uc815","\ubaa8\ubc94","\uc5b4\ub978","\uc57c\ubb34","\uc120\uc0dd","\uc7a5\ub09c","\ub610\ubc15","\ub2e4\uc815","\ubb34\ub09c","\uba4b\ub0c4","\uc090\ub531","\ucc28\ubd84","\uae5c\ucc0d","\uc11c\ud230","\uc218\uc218"];
+/* 모델이 못 고르면 캐릭터 이름에서 뽑아 쓴다. 그래야 인물마다 달라진다 */
+function handFallback(c){
+  var t = String((c && (c.id||"")) + (c && c.name||"")), n = 0;
+  for (var i=0;i<t.length;i++) n = (n*31 + t.charCodeAt(i)) >>> 0;
+  return HAND_KEYS[n % HAND_KEYS.length];
+}
+function handOf(c){
+  /* v8 에서 잘못 배정된 것은 한 번 비우고 다시 고르게 한다 */
+  if (c && c.hand && !c.handV9){ c.hand = null; c.handAsking = false; c.handV9 = 1; }
+  return (c && HANDS[c.hand]) || HANDS[handFallback(c||{})];
+}
 var FONTS = {
   "프리텐다드":'"Pretendard Variable",Pretendard,-apple-system,sans-serif',
   "본고딕":'"Noto Sans KR",sans-serif',
@@ -717,7 +778,8 @@ var cfg = get("gz.cfg", { mode:"openai", key:"", base:"", model:"gemini-3.7-flas
 if (!cfg.mode) cfg.mode = "openai";
 if (!cfg.theme) cfg.theme = "light";
 if (typeof cfg.preset !== "string") cfg.preset = "";
-cfg.viewMode = "bubble";
+if (cfg.viewMode==="doc") cfg.viewMode="novel";
+if (["bubble","novel","script"].indexOf(cfg.viewMode)<0) cfg.viewMode="bubble";
 if (!cfg.bubW) cfg.bubW = 84;
 if (!cfg.fSms) cfg.fSms = "테마 따라가기";
 if (!cfg.sSize) cfg.sSize = 15;
@@ -777,7 +839,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-08 v6c";
+var APP_VER = "2026-09-08 v10";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["night","밤"]
@@ -1786,6 +1848,11 @@ function viewCfg(){
      + '<input id="cs" type="range" min="10" max="20" step="0.5" value="'+(cfg.cSize||14)+'" style="padding:0">';
   h += '<label>입력창 글자 크기 · '+(cfg.iSize||14)+'px</label>'
      + '<input id="is" type="range" min="10" max="20" step="0.5" value="'+(cfg.iSize||14)+'" style="padding:0">';
+  h += '<label>보기 방식</label><select id="vm">'
+     + [["bubble","말풍선"],["novel","소설"],["script","대본"]].map(function(o){
+         return '<option value="'+o[0]+'"'+((cfg.viewMode||"bubble")===o[0]?" selected":"")+'>'+o[1]+'</option>';
+       }).join("")
+     + '</select>';
   h += '<div class="sec">프리셋</div>';
   h += '<label>기본 프리셋</label><select id="gps">'
      + '<option value=""'+(cfg.preset?"":" selected")+'>안 씀</option>'
@@ -2522,7 +2589,7 @@ function cardHTML(kind, body, c){
     var mw = dtxt.match(/([월화수목금토일])\s*요일/);
     if (mw){ wd = mw[0]; dtxt = dtxt.replace(/[,·\s(]*([월화수목금토일])\s*요일[)]*/,"").trim(); }
     if (!dtxt) dtxt = todayLabel();
-    return '<div class="paper diary"><div class="dhead"><span>'+esc(dtxt)+'</span>'
+    return '<div class="paper diary" style="font-family:'+handOf(c)+'"><div class="dhead"><span>'+esc(dtxt)+'</span>'
          + (wd?'<span class="wd">'+esc(wd)+'</span>':"")
          + '</div><div class="ruled">'+cardText(dl.join("\n"))+'</div></div>';
   }
@@ -2537,7 +2604,7 @@ function cardHTML(kind, body, c){
     if (ll.length && ll[ll.length-1].trim().length<=40 && /(가|이|올림|드림|씀|로부터)\s*[.]?$/.test(ll[ll.length-1].trim())){
       sign = ll.pop().trim();
     }
-    return '<div class="paper letter"><div class="ruled">'
+    return '<div class="paper letter" style="font-family:'+handOf(c)+'"><div class="ruled">'
          + (to?'<div class="lto">'+esc(to)+'</div>':"")
          + '<div>'+cardText(ll.join("\n"))+'</div>'
          + (sign?'<span class="lsign">'+esc(sign)+'</span>':"")
@@ -3651,7 +3718,7 @@ function dayLabel(ms, base){
   return mo+"월 "+da+"일 "+w+"요일";
 }
 /* 모델한테 한 줄만 물어보는 용도 */
-function askLLM(sys, content, cb, lim){
+function askLLM(sys, content, cb, lim, plain){
   var url, headers, body;
   var cap = lim || 300;
   if (cfg.mode==="openai"){
@@ -3660,16 +3727,19 @@ function askLLM(sys, content, cb, lim){
     headers={ "Content-Type":"application/json", "Authorization":"Bearer "+cfg.key };
     body={ model:cfg.model, max_tokens:cap,
            messages:[{role:"system",content:sys},{role:"user",content:content}] };
-    /* 생각에 예산을 뺏기지 않게 이 요청은 추론을 끈다 */
-    body.reasoning_effort="none";
-    body.extra_body={ google:{ thinking_config:{ thinking_budget:0 } } };
+    if (!plain){
+      /* 생각에 예산을 뺏기지 않게 이 요청은 추론을 끈다 */
+      body.reasoning_effort="none";
+      body.extra_body={ google:{ thinking_config:{ thinking_budget:0 } } };
+    }
   } else {
     var gb=(cfg.base||"https://generativelanguage.googleapis.com").replace(/\/+$/,"");
     url = gb+"/v1beta/models/"+encodeURIComponent(cfg.model)+":generateContent?key="+encodeURIComponent(cfg.key);
     headers={ "Content-Type":"application/json" };
     body={ systemInstruction:{parts:[{text:sys}]},
            contents:[{role:"user",parts:[{text:content}]}],
-           generationConfig:{ maxOutputTokens:cap, thinkingConfig:{ thinkingBudget:0 } } };
+           generationConfig:{ maxOutputTokens:cap } };
+    if (!plain) body.generationConfig.thinkingConfig = { thinkingBudget:0 };
   }
   fetch(url,{method:"POST",headers:headers,body:JSON.stringify(body)})
     .then(function(r){ return r.json(); })
@@ -3869,8 +3939,16 @@ function paint(err, thinking){
     var ps = pieces(c, m.t), body = "";
     var askK = askedCmd(log, i);
     ps = ps.map(function(p){
-      if (p.card && CARD_ONLY[p.card] && CARD_ONLY[p.card].indexOf(askK) < 0)
-        return { who:null, text:p.text };
+      if (p.card && CARD_ONLY[p.card] && CARD_ONLY[p.card].indexOf(askK) < 0){
+        /* 카드로 안 그릴 때는 원래 화자 이름을 그대로 살린다 */
+        var nm = p.who || "";
+        var tx = p.text || "";
+        if (!nm){
+          var ms = tx.match(/^\s*사이트\s*[:：]\s*(.+)\n?/);
+          if (ms){ nm = ms[1].trim(); tx = tx.slice(ms[0].length); }
+        }
+        return { who: nm || null, text: tx };
+      }
       return p;
     });
     ps.forEach(function(p){
@@ -4057,9 +4135,9 @@ function buildSystem(c, turn){
   var lenMap = {
     "한마디":"한 번의 답은 2~4줄로 끝낸다. 지문 한 조각에 대사 한두 마디면 충분하다. 티키타카로 주고받는 자리이니 장면을 길게 설명하지 않고, 절대 그보다 길게 쓰지 않는다.",
     "짧게":"한 번의 답은 2~5줄로 끝낸다. 톡 주고받듯 짧게 쓰고, 절대 그보다 길게 쓰지 않는다.",
-    "보통":"이번 턴은 한 번 주고받고 끝낸다. 인물이 반응하고 한마디 하면 거기서 멈춘다. 대개 6~8줄이 된다.",
-    "길게":"이번 턴은 두세 번 주고받는다. 인물이 뭔가 하면 그게 상대나 주변에 닿고, 거기에 다시 반응하는 데까지 간다. 대개 10~14줄이 된다. 줄을 채우려고 대사만 늘이지 않는다. 오가는 횟수로 길어지는 것이다.",
-    "장문":"이번 턴은 여러 번 주고받다가 장면이 한 번 넘어간다. 자리를 옮기거나 시간이 흐르거나 상황이 바뀌는 지점까지 쓴다. 대개 16~22줄이 된다. 한 사람이 길게 떠들어서 채우지 않는다.",
+    "보통":"한 번의 답은 6~8줄로 끝낸다. 그보다 길게 쓰지 않는다.",
+    "길게":"한 번의 답은 9~14줄로 쓴다. 그보다 길게 쓰지 않는다.",
+    "장문":"한 번의 답은 14~20줄로 쓴다. 장면이 그럴 만하면 더 길어져도 된다.",
     "자동":"전체 줄 수를 미리 정하지 않는다. 이번 턴에 말하는 인물 한 명당 지문 한두 줄에 대사 한두 줄, 그러니까 서너 줄씩 쓴다. 두 명이 말하면 예닐곱 줄, 네 명이 말하면 열두 줄쯤이 되는 식이다. 한 명하고만 이어가는 장면이면 그 한 명이 예닐곱 줄까지 써도 된다. 인물 수에 따라 전체 길이가 저절로 늘고 줄게 둔다."
   };
   var lenKey = c.length || (c.kind==="다인" ? "자동" : "보통");
@@ -4348,6 +4426,46 @@ function callAPI(c, log, turnInstr){
   });
 }
 
+/* 인물에 어울리는 손글씨를 한 번만 정한다 */
+function syncHand(c){
+  if (!c || !cfg.key) return;
+  if (c.hand && c.handV9) return;
+  if (c.handAsking) return;
+  c.hand = null; c.handAsking = true;
+  var desc = [c.name, c.display, c.tagline, c.prompt, c.beh, c.world, c.note]
+    .filter(Boolean).join("\n").slice(0, 2000);
+  var settled = false;
+  function done(k){
+    if (settled) return; settled = true;
+    c.hand = HANDS[k] ? k : handFallback(c);
+    c.handV9 = 1; c.handAsking = false;
+    try { saveChars(); } catch(e){}
+    if (screen==="chat" && cur() && cur().id===c.id) paint();
+  }
+  if (!desc) return done("");
+  var sys = "아래 인물이 손으로 글씨를 쓴다면 어떤 글씨일지 고른다. 아래 열다섯 중 하나만 그대로 답하고 다른 말은 쓰지 않는다.\n"
+    + "단정 - 반듯하고 각 잡힌 글씨. 규율에 익숙한 사람, 군인이나 경찰\n"
+    + "모범 - 얌전하고 고른 글씨. 공부 잘하고 성실한 사람\n"
+    + "어른 - 여유 있고 품이 있는 글씨. 나이 있고 노련한 사람\n"
+    + "야무 - 작고 또렷한 글씨. 야무지고 똑부러지는 사람\n"
+    + "선생 - 흘려 쓴 붓기 있는 글씨. 가르치는 사람, 나이 지긋한 사람\n"
+    + "장난 - 삐뚤빼뚤 튀는 글씨. 장난기 많고 들뜬 사람\n"
+    + "또박 - 한 자 한 자 또박또박 쓴 글씨. 느리고 신중한 사람\n"
+    + "다정 - 부드럽게 흘려 쓴 글씨. 다정하고 너그러운 사람\n"
+    + "무난 - 평범하지만 잘 쓴 글씨. 어디에나 잘 섞이는 사람\n"
+    + "멋냄 - 평범한데 멋을 낸 글씨. 꾸밀 줄 아는 사람\n"
+    + "삐딱 - 반듯한데 살짝 기운 글씨. 무뚝뚝하고 시큰둥한 사람\n"
+    + "차분 - 조용하고 고른 글씨. 감정을 잘 드러내지 않는 사람\n"
+    + "깜찍 - 동글동글 귀여운 글씨. 어리고 발랄한 사람\n"
+    + "서툰 - 손에 힘이 없어 흔들리는 글씨. 글씨를 제대로 배운 적 없거나 쓰는 일이 몸에 안 밴 사람\n"
+    + "수수 - 꾸밈없이 수수한 글씨. 무던하고 털털한 사람\n"
+    + "\n종족이나 겉모습이 아니라 그 인물이 살아온 방식을 보고 고른다. 사람이 아니어도 배우고 자랐으면 반듯하게 쓰고, 사람이어도 배운 적 없으면 서툴게 쓴다. "
+    + "나이, 받은 교육, 하는 일, 성격이 글씨를 정한다.";
+  setTimeout(function(){ done(""); }, 14000);
+  askLLM(sys, desc, function(out){
+    done(String(out||"").replace(/[^가-힣]/g,"").slice(0,2));
+  }, 16, true);
+}
 function turn(){
   var c=cur(); if(!c||busy) return;
   if(!cfg.key){ paint("API 키가 없어. 오른쪽 위 설정에서 넣어줘."); return; }
@@ -4373,6 +4491,8 @@ function turn(){
       var k=cmdOf(lg[i].t);
       if (k && !lg[i].ooc){ ti=CMDS[k]; if (CARD_CMDS[k]) cmdTurn = true; }
       if (lg[i].ooc) cmdTurn = true;
+      /* # 를 붙여 부른 것도 길이 제한 없이 간다 */
+      if (!lg[i].ooc && /(?:^|\s)#\S/.test(String(lg[i].t||""))) cmdTurn = true;
       break;
     }
   }
@@ -4382,6 +4502,7 @@ function turnGo(c, lg, ti){
   callAPI(c,lg,ti).then(function(text){
     var l=getLog(c.id); l.push({r:"a",t:text}); setLog(c.id,l);
     busy=false; elSend.disabled=false; paint();
+    if (/\[\s*(?:편지|일기)\s*\]/.test(text)) syncHand(c);
   }).catch(function(e){
     busy=false; elSend.disabled=false;
     paint(e.message||"연결에 실패했어.");
