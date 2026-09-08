@@ -221,23 +221,39 @@
     --paper-rule:rgba(190,200,230,.13);
   }
 
-  /* 문서 모드 — 말풍선 없이 소설처럼 */
-  body[data-view=doc] .msg{display:block;margin-bottom:22px}
-  body[data-view=doc] .msg .ava{display:none}
-  body[data-view=doc] .msg .col,
-  body[data-view=doc] .msg.me .col{max-width:100%}
-  body[data-view=doc] .msg .who{display:none}
-  body[data-view=doc] .bub{background:transparent;padding:0;border-radius:0;line-height:1.95}
-  body[data-view=doc] .msg.me .bub{background:transparent;
-    border-left:2px solid var(--accent);padding-left:12px;opacity:.92}
+  /* 소설 · 대본 — 말풍선 없이 */
+  body[data-view=novel] .msg, body[data-view=script] .msg{display:block;margin-bottom:24px}
+  body[data-view=novel] .msg .ava, body[data-view=script] .msg .ava{display:none}
+  body[data-view=novel] .msg .col, body[data-view=novel] .msg.me .col,
+  body[data-view=script] .msg .col, body[data-view=script] .msg.me .col{max-width:100%}
+  body[data-view=novel] .msg .who, body[data-view=script] .msg .who{display:none}
+  body[data-view=novel] .bub, body[data-view=script] .bub{
+    background:transparent;padding:0;border:0;border-radius:0;box-shadow:none;line-height:1.95}
+  body[data-view=novel] .bub::before, body[data-view=script] .bub::before{display:none}
+  body[data-view=novel] .msg.me .bub, body[data-view=script] .msg.me .bub{
+    background:transparent;border:0;box-shadow:none;color:var(--muted);
+    border-left:2px solid var(--line);padding-left:12px}
+  /* 소설 — 지문은 연한 회색 정자체, 대사는 진하게 */
+  .nov{white-space:pre-wrap;word-break:break-word;
+    font-family:var(--f-body);font-size:var(--fs);line-height:1.95;letter-spacing:-.004em}
+  .nov em{font-family:inherit;font-style:normal;font-weight:400;color:var(--nar)}
+  .nov .q2{color:var(--text);font-weight:500}
+  .nov .q2 + .tr{display:block;margin-top:1px}
+  /* 대본 — 대사마다 이름표 */
   .dturn{margin-bottom:22px}
+  .dturn > :last-child{margin-bottom:0}
+  .snar, .ssay{white-space:pre-wrap;word-break:break-word;margin:0 0 12px;
+    font-family:var(--f-body);font-size:var(--fs);line-height:1.9;letter-spacing:-.004em}
+  .snar{color:var(--nar)}
+  .ssay b{font-weight:700}
+  .ssay b::after{content:" │ ";color:var(--muted);font-weight:400}
+  .ssay .q2 + .tr{display:block;margin-top:1px}
   .dsay{white-space:pre-wrap;word-break:break-word;margin:0 0 11px;
     font-family:var(--f-body);font-size:var(--fs);line-height:1.95;letter-spacing:-.004em}
   .dsay em{font-family:var(--f-nar);font-style:italic;font-weight:300;color:var(--nar);
     font-size:calc(var(--fs) - 0.5px);line-height:1.95}
   .dsay b{font-weight:600}
   .dsay b::after{content:" │ ";color:var(--muted);font-weight:400}
-  .dturn > :last-child{margin-bottom:0}
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html{background:var(--bg)}
   html,body{margin:0;padding:0;height:100%}
@@ -316,7 +332,7 @@
   mark{background:rgba(255,214,0,.42);color:inherit;border-radius:3px;padding:0 1px}
   body.dark mark{background:rgba(255,214,0,.28)}
   .bub .tr{color:var(--trc);font-size:calc(var(--fs) - 1.5px)}
-  .narr{margin:4px 0 20px;padding:10px 14px;text-align:center;color:var(--nar);
+  .narr{margin:4px 0 20px;padding:10px 14px;text-align:left;color:var(--nar);
     font-family:var(--f-nar);font-style:italic;font-weight:300;
     font-size:calc(var(--fs) - 0.5px);line-height:1.8;white-space:pre-wrap;word-break:break-word;cursor:pointer}
   .ooc{margin:0 0 18px;padding:9px 13px;border-radius:12px;border:1px dashed var(--line);color:var(--muted);font-size:14px;white-space:pre-wrap}
@@ -689,7 +705,8 @@ var cfg = get("gz.cfg", { mode:"openai", key:"", base:"", model:"gemini-3.7-flas
 if (!cfg.mode) cfg.mode = "openai";
 if (!cfg.theme) cfg.theme = "light";
 if (typeof cfg.preset !== "string") cfg.preset = "";
-cfg.viewMode = "bubble";
+if (cfg.viewMode==="doc") cfg.viewMode="novel";
+if (["bubble","novel","script"].indexOf(cfg.viewMode)<0) cfg.viewMode="bubble";
 if (!cfg.bubW) cfg.bubW = 84;
 if (!cfg.fSms) cfg.fSms = "테마 따라가기";
 if (!cfg.sSize) cfg.sSize = 15;
@@ -763,7 +780,7 @@ function applyTheme(){
   if (!THEME_BG[t]){ t = (t==="dark"||t==="cocoa"||t==="night") ? "night" : "light"; cfg.theme = t; }
   document.body.className = THEME_DARK[t] ? "dark" : "";
   document.body.setAttribute("data-theme", t);
-  document.body.setAttribute("data-view", cfg.viewMode==="doc" ? "doc" : "bubble");
+  document.body.setAttribute("data-view", cfg.viewMode||"bubble");
   var tc = document.getElementById("tc");
   if (tc) tc.setAttribute("content", THEME_BG[t]);
   var st = document.body.style;
@@ -854,6 +871,25 @@ function fmtIn(s){
   var t=esc(flow(stripJunk(s)));
   t=t.replace(/([(（][^)）\n]*[)）])/g,'<span class="tr">$1</span>');
   return t.replace(/\*/g,"");
+}
+/* 소설 — 한 덩어리로 흐르고, 지문만 회색 */
+function novelHTML(raw, i){
+  var t = fmt(raw);
+  if (!t) return "";
+  return '<div class="nov" data-i="'+i+'">'+t+'</div>';
+}
+/* 대본 — 지문과 대사를 나누고 대사에만 이름표 */
+function scriptHTML(nm, raw, i){
+  var segs = docSegs(stripJunk(raw)), out = "";
+  segs.forEach(function(sg){
+    var tx = esc(flow(sg.t));
+    tx = tx.replace(/([(（][^)）\n]*[)）])/g,'<span class="tr">$1</span>');
+    tx = hilite(quoteMark(tx));
+    if (sg.nar) out += '<div class="snar">'+tx+'</div>';
+    else out += '<div class="ssay"><b>'+esc(nm||"")+'</b>'+tx+'</div>';
+  });
+  if (!out) return "";
+  return '<div class="dturn" data-i="'+i+'">'+out+'</div>';
 }
 function docHTML(nm, raw, i){
   var t = String(raw||"").replace(/\r/g,"").replace(/\n{3,}/g,"\n\n").trim();
@@ -1707,6 +1743,11 @@ function viewCfg(){
      + '<input id="ss" type="range" min="10" max="20" step="0.5" value="'+(cfg.sSize||15)+'" style="padding:0">';
   h += '<label>입력창 글자 크기 · '+(cfg.iSize||14)+'px</label>'
      + '<input id="is" type="range" min="10" max="20" step="0.5" value="'+(cfg.iSize||14)+'" style="padding:0">';
+  h += '<label>보기 방식</label><select id="vm">'
+     + [["bubble","말풍선"],["novel","소설"],["script","대본"]].map(function(o){
+         return '<option value="'+o[0]+'"'+((cfg.viewMode||"bubble")===o[0]?" selected":"")+'>'+o[1]+'</option>';
+       }).join("")
+     + '</select>';
   h += '<label>말풍선 폭 · '+(cfg.bubW||84)+'%</label>'
      + '<input id="bw" type="range" min="50" max="96" step="2" value="'+(cfg.bubW||84)+'" style="padding:0">';
   h += '<label>말풍선 여백 · '+(cfg.bPad==null?9:cfg.bPad)+'px</label>'
@@ -1745,7 +1786,7 @@ function viewCfg(){
     var lb=this.previousElementSibling;
     if (lb) lb.textContent="문자 글자 크기 · "+cfg.sSize+"px";
   });
-  on("#vm","onchange",function(){ cfg.viewMode=this.value; saveCfg(); });
+  on("#vm","onchange",function(){ cfg.viewMode=this.value; saveCfg(); applyTheme(); });
   on("#cs","oninput",function(){
     cfg.cSize=+this.value; saveCfg();
     var lb=this.previousElementSibling;
@@ -3731,7 +3772,7 @@ function paint(err, thinking){
       continue;
     }
     if (m.r==="u"){
-      var ub = (cfg.viewMode==="doc") ? fmtIn(m.t) : fmt(m.t);
+      var ub = (cfg.viewMode==="bubble") ? fmt(m.t) : fmtIn(m.t);
       h += '<div class="msg me"><div class="col"><div class="bub" data-i="'+i+'">'+ub+'</div>'
          + (selIdx===i?actsHTML(i):"")+'</div></div>';
       continue;
@@ -3749,8 +3790,12 @@ function paint(err, thinking){
         return;
       }
       var who = p.who ? (findPerson(c,p.who) || {name:p.who, avatar:"👤"}) : {name:dispOf(c), avatar:c.avatar};
-      if (cfg.viewMode==="doc"){
-        body += '<div class="dturn">'+docHTML(who.name||"", p.text, i)+'</div>';
+      if (cfg.viewMode==="novel"){
+        body += novelHTML(p.text, i);
+        return;
+      }
+      if (cfg.viewMode==="script"){
+        body += scriptHTML(who.name||"", p.text, i);
         return;
       }
       body += '<div class="msg">'+avaHTML(who.avatar,"🙂","sm")
