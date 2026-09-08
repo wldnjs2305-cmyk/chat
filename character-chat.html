@@ -4503,6 +4503,18 @@ render();
   if (!vv) return;
   var st = document.body.style, app = document.getElementById("app");
   var on = false;
+  /* 키보드가 올라오기 직전에 맨 아래를 보고 있었는지 기억해둔다 */
+  var wasBottom = true;
+  function vw(){ return document.getElementById("view"); }
+  function markBottom(){
+    var v = vw(); if (!v) return;
+    wasBottom = (v.scrollHeight - v.scrollTop - v.clientHeight) < 140;
+  }
+  function toBottom(){
+    var v = vw(); if (!v || !wasBottom) return;
+    v.scrollTop = v.scrollHeight;
+    requestAnimationFrame(function(){ if (wasBottom) v.scrollTop = v.scrollHeight; });
+  }
   function sync(){
     var vh = vv.height, off = vv.offsetTop || 0;
     var full = Math.max(window.innerHeight||0, document.documentElement.clientHeight||0);
@@ -4519,6 +4531,9 @@ render();
       }
       var se = document.scrollingElement || document.documentElement;
       if (se && se.scrollTop !== 0) se.scrollTop = 0;
+      /* 화면이 줄어든 만큼 대화도 따라 내려가야 마지막 말이 보인다 */
+      toBottom();
+      setTimeout(toBottom, 60);
     } else if (on || app){
       on = false;
       document.body.removeAttribute("data-kb");
@@ -4530,10 +4545,10 @@ render();
       }
     }
   }
-  vv.addEventListener("resize", sync);
+  vv.addEventListener("resize", function(){ if(!on) markBottom(); sync(); });
   vv.addEventListener("scroll", sync);
   window.addEventListener("orientationchange", function(){ setTimeout(sync,300); });
-  document.addEventListener("focusin", function(){ setTimeout(sync,50); setTimeout(sync,300); });
+  document.addEventListener("focusin", function(){ markBottom(); setTimeout(sync,50); setTimeout(sync,300); });
   document.addEventListener("focusout", function(){ setTimeout(sync,50); setTimeout(sync,300); });
   sync();
 })();
