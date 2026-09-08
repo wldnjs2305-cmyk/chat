@@ -794,7 +794,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-08 v2";
+var APP_VER = "2026-09-08 v3 (커뮤·인스타)";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["night","밤"]
@@ -2734,8 +2734,14 @@ function pieces(c, text){
     if (seg.card) return seg;
     var body = seg.text || "";
     if (!looksComm(body)) return seg;
-    if (seg.who && !/(?:^|\n)\s*사이트\s*[:：]/.test(body))
-      body = "사이트: "+seg.who+"\n"+body;
+    var site = seg.who || "";
+    /* 첫 줄이 [게시판 이름] 이면 그걸 사이트로 쓴다. 길이 제한 없이 */
+    if (!site){
+      var mb = body.match(/^\s*\[([^\]\n]{1,60})\]\s*\n?/);
+      if (mb){ site = mb[1].trim(); body = body.slice(mb[0].length); }
+    }
+    if (site && !/(?:^|\n)\s*사이트\s*[:：]/.test(body))
+      body = "사이트: "+site+"\n"+body;
     return { card:"커뮤", text:body };
   });
   // 태그를 빼먹었어도 곡 목록처럼 생겼으면 플리로 본다
