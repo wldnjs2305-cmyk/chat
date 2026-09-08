@@ -17,6 +17,25 @@
 <style>
   @font-face{font-family:"RIDIBatang";font-display:swap;
     src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/RIDIBatang.woff") format("woff")}
+  /* 편지 · 일기 손글씨 */
+  @font-face{font-family:"HandOks";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/Project-Noonnu/2607161334@griun-oksooni-rg/griun-oksooni-rg/Griun_Oksooni-Rg.woff2") format("woff2")}
+  @font-face{font-family:"HandMyo";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2601-1@1.0/Griun_MyoeunHeullim-Rg.woff2") format("woff2")}
+  @font-face{font-family:"HandYun";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2408@1.0/YoonChildfundkoreaManSeh.woff2") format("woff2")}
+  @font-face{font-family:"HandPol";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/Griun_PolHumanrights-Rg.woff2") format("woff2")}
+  @font-face{font-family:"HandJel";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2601-1@1.0/Griun_Gellyroll-Rg.woff2") format("woff2")}
+  @font-face{font-family:"HandIce";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2307-2@1.0/iceSimin-Rg.woff2") format("woff2")}
+  @font-face{font-family:"HandQue";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_five@.2.0/UhBeeQUEENJ.woff") format("woff")}
+  @font-face{font-family:"HandSen";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2601-6@1.0/Griun_PolSensibility-Rg.woff2") format("woff2")}
+  @font-face{font-family:"HandJng";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/Project-Noonnu/2607161334@x-2/x/GriunXHangeul_Jeong-Rg.woff2") format("woff2")}
   @import url('https://fonts.googleapis.com/css2?family=DungGeunMo&display=swap');
   @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap');
   @font-face{font-family:"MaruBuri";font-display:swap;
@@ -395,9 +414,9 @@
   .paper.letter .lsign{display:block;text-align:right;line-height:var(--rlh,25px);
     margin:var(--rlh,25px) 0 0;font-weight:400;letter-spacing:.01em}
   .paper.diary .dhead{display:flex;align-items:baseline;gap:10px;
-    font-family:var(--f-body);font-weight:600;font-size:13px;color:var(--muted);
+    font-family:inherit;font-weight:400;font-size:.92em;color:var(--muted);
     padding-bottom:9px;margin-bottom:11px;border-bottom:1.5px solid var(--paper-line)}
-  .paper.diary .dhead .wd{font-weight:400;font-size:12px}
+  .paper.diary .dhead .wd{font-weight:400;font-size:.86em}
   .udot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#E0524F;margin-right:6px;vertical-align:middle}
   .ping{display:flex;align-items:center;gap:10px;margin:12px 0;padding:12px 14px;
     background:var(--field);border:1px solid var(--line);border-radius:14px;cursor:pointer}
@@ -468,12 +487,13 @@
     padding:12px 0;font-family:"Gothic A1",sans-serif}
   .notice .nrow{display:flex;gap:12px;padding:5px 0;line-height:1.6;align-items:flex-start}
   .notice .nk{flex:0 0 auto;min-width:84px;font-weight:700;color:var(--muted);font-size:.92em}
-  .notice .nv{flex:1;min-width:0;white-space:pre-wrap}
+  .notice .nv{flex:1;min-width:0;white-space:pre-wrap;word-break:keep-all}
   .notice .nem{text-align:center;font-family:"Black Han Sans",sans-serif;
-    font-size:1.25em;margin:15px 0 4px;letter-spacing:-.01em}
+    font-size:1.25em;line-height:1.45;margin:15px 0 4px;letter-spacing:-.01em;
+    word-break:keep-all;white-space:pre-wrap}
   .notice .nft{text-align:center;font-family:"Gothic A1",sans-serif;font-size:.85em;
-    color:var(--muted);line-height:1.6;margin-top:10px;white-space:pre-wrap}
-  .notice .nbody{font-family:"Gothic A1",sans-serif;line-height:1.75;white-space:pre-wrap;margin-top:12px}
+    color:var(--muted);line-height:1.7;margin-top:10px;white-space:pre-wrap;word-break:keep-all}
+  .notice .nbody{font-family:"Gothic A1",sans-serif;line-height:1.75;white-space:pre-wrap;word-break:keep-all;margin-top:12px}
   .comm .csite{font-size:11.5px;font-weight:700;color:var(--muted);margin-bottom:8px;letter-spacing:.02em}
   .comm[data-site="디시"] .ctag{background:#3b4a63;color:#e8eef7}
   .comm[data-site="카페"] .ctag{background:#e6f0dd;color:#41662c}
@@ -735,17 +755,21 @@ function get(k,d){
   if (s===null || s===undefined) return d;
   try { return JSON.parse(s); } catch(e){ return d; }
 }
-/* 인물마다 다른 손글씨. style 속성에 넣으므로 작은따옴표를 쓴다 */
+/* 편지·일기 손글씨. style 속성에 넣으므로 작은따옴표를 쓴다 */
 var HANDS = {
-  "\ud39c"  :"'Nanum Pen Script',cursive",
-  "\ubd93"  :"'Nanum Brush Script',cursive",
-  "\uc5f0\ud544":"'Gaegu',cursive",
-  "\ub3d9\uae00":"'Gamja Flower',cursive",
-  "\uc18c\ub140":"'Hi Melody',cursive",
-  "\uc815\uac08":"'Gowun Batang',serif",
-  "\uc815\uc790":"'Noto Serif KR',serif"
+  "\ub465\uae00" :"'HandOks',cursive",
+  "\ubc18\ub4ef" :"'HandMyo',cursive",
+  "\uc5f0\ud55c" :"'HandYun',cursive",
+  "\uae09\ud788" :"'HandPol',cursive",
+  "\ub2f4\ubc31" :"'HandJel',cursive",
+  "\uc5b4\ub978" :"'HandIce',cursive",
+  "\uc11c\ud230" :"'HandQue',cursive",
+  "\uac70\uce5c" :"'HandSen',cursive",
+  "\uc2dc\uc6d0" :"'HandJng',cursive"
 };
-function handOf(c){ return (c && HANDS[c.hand]) || HANDS["\ud39c"]; }
+var OLD_HANDS = { "펜":1,"붓":1,"연필":1,"동글":1,"소녀":1,"정갈":1,"정자":1 };
+function handOf(c){
+  if (c && c.hand && OLD_HANDS[c.hand]){ c.hand = null; c.handAsking = false; } return (c && HANDS[c.hand]) || HANDS["\ubc18\ub4ef"]; }
 var FONTS = {
   "프리텐다드":'"Pretendard Variable",Pretendard,-apple-system,sans-serif',
   "본고딕":'"Noto Sans KR",sans-serif',
@@ -828,7 +852,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-08 v5 (공고·글꼴)";
+var APP_VER = "2026-09-08 v6";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["night","밤"]
@@ -2677,7 +2701,7 @@ function cardHTML(kind, body, c){
          + (sign?'<span class="lsign">'+esc(sign)+'</span>':"")
          + '</div></div>';
   }
-  if (kind==="속마음") return '<div class="mind" style="font-family:'+handOf(c)+'">'+cardText(body)+'</div>';
+  if (kind==="속마음") return '<div class="mind">'+cardText(body)+'</div>';
   if (kind==="비밀")   return '<div class="mind secret"><div class="pt">비밀</div>'+cardText(body)+'</div>';
   if (kind==="관계" || kind==="상태" || kind==="소문"){
     var rows="";
@@ -4200,7 +4224,12 @@ CMDS["/공고"] = CMDS["/전단"] = CMDS["/수배"] =
 + "꼬리말: 발견 즉시 아래로 연락 바랍니다\n"
 + "연락처: 010-0000-8924\n"
 + "[/공고]\n"
-+ "항목은 몇 개든 좋다. 한 줄에 하나씩 쓰고 세로줄로 이름과 내용을 나눈다. 한 항목의 내용이 길면 다음 줄에 이어 써도 된다.\n"
++ "항목은 여섯에서 열 개쯤 넉넉히 넣는다. 한 줄에 하나씩 쓰고 세로줄로 이름과 내용을 나눈다. 한 항목의 내용이 길면 다음 줄에 이어 써서 여러 줄로 만들어도 된다.\n"
++ "겉모습만 늘어놓지 않는다. 성격, 버릇, 자주 하는 행동, 사람을 대하는 태도, 조심할 점, 어디에 있을 법한지까지 담는다. 읽는 사람이 그 인물을 알아볼 수 있을 만큼 구체적으로 쓴다.\n"
++ "한 항목 안에서 나눠 쓸 것이 있으면 나눈다. 외형이면 '1) 인간형 ... 2) 수인형 ...' 처럼, 특이사항이면 한 줄에 하나씩 쌓는다.\n"
++ "말투는 실제 공문처럼 담담하게 쓴다. '~함', '~바랍니다', '~요망' 같은 사무적인 어미를 쓴다.\n"
++ "전화번호를 쓸 때는 뒷자리를 XXXX 로 가린다. 010-3341-XXXX 처럼 쓴다.\n"
++ "강조와 꼬리말이 한 줄에 안 들어갈 만큼 길면, 뜻이 끊기지 않는 자리에서 직접 줄을 나눠 쓴다.\n"
 + "강조는 맨 아래 굵게 나오는 한 줄이다. 사례금, 마감일, 경고문처럼 제일 눈에 띄어야 하는 것을 쓴다. 없으면 빼도 된다.\n"
 + "이 세계관에 실제로 붙어 있을 법한 기관 이름과 말투로 쓴다. 대화와 설정에 이미 나온 이름을 그대로 쓰고, 없으면 그 세계에 어울리게 짓는다.\n"
 + "지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.";
@@ -4533,24 +4562,26 @@ function syncHand(c){
   c.handAsking = true;
   var desc = [c.name, c.display, c.persona, c.prompt, c.summary]
     .filter(Boolean).join("\n").slice(0, 1800);
-  if (!desc){ c.hand = "펜"; saveChars(); return; }
-  var sys = "아래 인물에게 어울리는 손글씨를 하나 고른다. 아래 일곱 중 하나만 그대로 답하고 다른 말은 쓰지 않는다.\n"
-    + "펜 - 얇고 반듯한 볼펜 글씨. 무난한 사람\n"
-    + "붓 - 굵고 거친 붓펜. 힘 있고 험한 사람, 무인, 조직, 군인\n"
-    + "연필 - 흐릿하고 서툰 연필 글씨. 아이, 어린 인물\n"
-    + "동글 - 크고 둥글둥글 삐뚤한 글씨. 발랄하고 장난기 많은 사람\n"
-    + "소녀 - 작고 동그란 글씨. 여리고 조심스러운 사람\n"
-    + "정갈 - 곱고 단정한 붓글씨. 차분하고 우아한 사람\n"
-    + "정자 - 각 잡힌 정자체. 격식 차리고 딱딱한 사람";
+  if (!desc){ c.hand = "반듯"; saveChars(); return; }
+  var sys = "아래 인물에게 어울리는 손글씨를 하나 고른다. 아래 아홉 중 하나만 그대로 답하고 다른 말은 쓰지 않는다.\n"
+    + "둥글 - 굵고 통통하게 둥근 글씨. 발랄하고 애교 많은 사람\n"
+    + "반듯 - 얇고 반듯한 글씨. 무난하고 평범한 사람\n"
+    + "연한 - 아주 가늘고 흐릿한 글씨. 소심하고 여린 사람\n"
+    + "급히 - 오른쪽으로 기울어 갈겨쓴 글씨. 성격 급하고 정신없는 사람\n"
+    + "담백 - 가늘고 시원한 펜 글씨. 담백하고 깔끔한 사람\n"
+    + "어른 - 붓끝이 살아있는 흘림. 나이 있고 점잖은 사람\n"
+    + "서툰 - 큼직하고 서툰 글씨. 아이나 어린 인물\n"
+    + "거친 - 굵은 붓으로 눌러쓴 사나운 글씨. 험하고 거친 사람, 군인이나 조직\n"
+    + "시원 - 또렷하고 시원시원한 글씨. 자신감 있고 당당한 사람";
   var settled = false;
   function done(k){
     if (settled) return; settled = true;
-    c.hand = HANDS[k] ? k : "펜";
+    c.hand = HANDS[k] ? k : "반듯";
     c.handAsking = false;
     try { saveChars(); } catch(e){}
     if (screen==="chat" && cur() && cur().id===c.id) paint();
   }
-  setTimeout(function(){ done("펜"); }, 12000);
+  setTimeout(function(){ done("반듯"); }, 14000);
   askLLM(sys, desc, function(out){
     done(String(out||"").replace(/[^가-힣]/g,"").slice(0,2));
   }, 16);
