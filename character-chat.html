@@ -13,7 +13,7 @@
 <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMTgwIDE4MCI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9IiNGM0VGRkEiLz4KPHRleHQgeD0iOTAiIHk9IjkyIiBmb250LXNpemU9IjEwNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9ImNlbnRyYWwiPiYjMTI4MTQwOzwvdGV4dD4KPC9zdmc+">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@400;600&family=Nanum+Gothic&family=Nanum+Myeongjo&family=Gowun+Dodum&family=Gowun+Batang&family=Song+Myung&family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Gaegu&family=Hi+Melody&family=Black+Han+Sans&family=Gothic+A1:wght@400;700&family=Do+Hyeon&family=Gamja+Flower&family=Caveat:wght@400;600&family=Yomogi&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@400;600&family=Nanum+Gothic&family=Nanum+Myeongjo&family=Gowun+Dodum&family=Gowun+Batang&family=Song+Myung&family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Gaegu&family=Hi+Melody&family=Black+Han+Sans&family=Gothic+A1:wght@400;700&family=Do+Hyeon&family=Gamja+Flower&display=swap">
 <style>
   @font-face{font-family:"RIDIBatang";font-display:swap;
     src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/RIDIBatang.woff") format("woff")}
@@ -688,51 +688,87 @@
   #send{flex:0 0 auto;width:44px;height:44px;border-radius:22px;border:0;background:var(--accent);color:#fff;font-size:17px;cursor:pointer}
   #send:disabled{opacity:.4}
 
-  /* v27 · a quiet place for conversations */
-  body[data-theme=light]{--bg:#F7F5FA;--panel:#FFFEFF;--field:#F1EEF6;--line:#E7E0EF;
-    --text:#302A3B;--muted:#82778F;--bub:#FFFEFF;--mine:#E8DFF6;--nar:#72657E;--accent:#8B6AAF;
-    background:radial-gradient(ellipse at 10% 0%,#EEE5F7 0,transparent 48%),var(--bg)}
-  #app{width:100%;max-width:860px;margin:0 auto;min-height:0;overflow:hidden}
+  /* v28: original themes, stable viewport, and an optional strawberry-milk theme. */
+  html,body{overflow:hidden;overscroll-behavior:none}
+  body{position:fixed;inset:0;width:100%;height:100%;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  #app{position:fixed!important;top:0;left:0;right:0;width:100%;height:var(--app-height,100dvh);min-height:0;overflow:hidden}
   #view{min-height:0;overscroll-behavior-y:contain;scrollbar-gutter:stable}
   #view.chat,#view.sms{overflow-anchor:none}
-  #bar{padding-bottom:12px;padding-top:calc(env(safe-area-inset-top) + 12px)}
-  #bar .sub{margin-top:3px}
-  #left.create-char{display:flex;align-items:center;justify-content:flex-start;padding-left:6px}
-  #left.create-char span{display:grid;place-items:center;width:40px;height:40px;border-radius:14px;
-    font-size:28px;font-weight:300;color:var(--accent);background:var(--field);border:1px solid var(--line)}
+  #left.create-char{display:flex;align-items:center;justify-content:flex-start;padding-left:4px}
+  #left.create-char span{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;
+    font-size:27px;font-weight:300;color:var(--accent);background:var(--field)}
   :is(button,a,input,select,textarea):focus-visible{outline:2px solid var(--accent);outline-offset:3px}
-  .list-intro{padding:24px 4px 26px}
-  .eyebrow{font-size:10px;font-weight:700;letter-spacing:.18em;color:var(--accent)}
-  .list-intro h2{font-size:23px;font-weight:600;letter-spacing:-.045em;margin:8px 0 6px}
-  .list-intro p{margin:0;font-size:13px;color:var(--muted)}
-  #view.list .card{padding:18px 16px;border-radius:20px;margin-bottom:12px;
-    box-shadow:0 3px 12px rgba(53,35,75,.035);transition:background .16s,border-color .16s}
-  #view.list .card .ava{width:52px;height:52px;border-radius:18px}
-  #view.list .card .nm{font-size:16px;margin-bottom:4px}
-  #view.list .card .ds{font-size:13px}
-  .empty-start{margin:auto 0;padding:36px 16px 64px}
-  .empty-symbol{display:block;font-size:44px;color:var(--accent);margin-bottom:14px}
-  .empty-start b{font-size:16px;color:var(--text);font-weight:500}
+  .empty-start{padding:36px 16px 56px}
+  .empty-symbol{display:block;font-size:36px;color:var(--accent);margin-bottom:12px}
+  .empty-start b{font-size:15px;color:var(--text);font-weight:500}
   .bub{word-break:normal;overflow-wrap:anywhere}
-  body[data-theme=light][data-view=bubble] .bub{box-shadow:0 2px 10px rgba(53,35,75,.04)}
   .bub em,.dsay em,.narr{font-size:var(--nfs,var(--fs));font-weight:400}
   .nov em,.nov .nn,.snar{font-size:var(--nfs,var(--fs))}
-  .paper.letter,.paper.diary{border-radius:12px;box-shadow:0 6px 20px rgba(53,35,75,.07)}
-  .paper .hand-en{font-family:'Caveat',cursive;font-size:1.17em;font-weight:400;line-height:inherit}
-  .paper .hand-ja{font-family:'Yomogi',cursive;font-size:1em;font-weight:400;line-height:inherit}
-  #dock{padding-top:10px;padding-bottom:calc(env(safe-area-inset-bottom) * var(--sab,1) + 10px)}
-  #dock .tools{gap:8px;padding-bottom:10px;scrollbar-width:none}
-  #dock .tools button{padding:5px 10px;background:var(--field);border-radius:10px;font-size:12px}
+  .paper .hand-en,.paper .hand-ja{font-weight:400;line-height:inherit}
+  #inp{resize:none;overflow-y:hidden;font-size:var(--ifs,14px);min-height:44px}
+  #dock .tools{scrollbar-width:none}
   #dock .tools::-webkit-scrollbar{display:none}
-  body[data-kb="1"] #dock{padding-top:10px}
-  body[data-kb="1"] #dock .tools{padding-bottom:10px}
-  #inp{resize:none;overflow-y:hidden;font-size:max(16px,var(--ifs,16px));border-radius:18px;min-height:44px}
-  #send{border-radius:16px;box-shadow:0 3px 10px rgba(74,49,108,.12)}
+  body[data-kb="1"] #dock{padding-top:9px}
+  body[data-kb="1"] #dock .tools{padding-bottom:8px}
   .input-mirror{position:fixed!important;top:0!important;left:-10000px!important;visibility:hidden!important;
     height:0!important;min-height:0!important;max-height:none!important;overflow:hidden!important;resize:none!important;pointer-events:none!important}
-  @media(hover:hover){#view.list .card:hover{background:var(--field);border-color:var(--accent)}}
-  @media(min-width:900px){#app{border-left:1px solid var(--line);border-right:1px solid var(--line)}
-    #view{padding-left:28px;padding-right:28px}#view.chat{padding:28px 28px 10px}#bar{padding-left:22px;padding-right:22px}#dock{padding-left:24px;padding-right:24px}}
+
+  body[data-theme=strawberry]{
+    --bg:#FFF4F4;--panel:#FFFCF7;--field:#FFF0F1;--line:#E8B3C0;
+    --text:#643C49;--muted:#96707D;--bub:#FFFCF8;--mine:#FBE0E6;
+    --nar:#836772;--accent:#B54D6B;--trc:#8B6A77;
+    --paper:#FFFCF2;--paper-line:#DEC1B8;--paper-text:#64464B;--paper-rule:rgba(183,107,120,.2);
+    --strawberry:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2048%2056%22%3E%3Cpath%20d%3D%22M9%2019C1%2031%2018%2051%2024%2052C31%2051%2047%2031%2039%2019C34%2012%2016%2012%209%2019Z%22%20fill%3D%22%23EC7185%22%20stroke%3D%22%23B54D65%22%20stroke-width%3D%221.5%22%2F%3E%3Cpath%20d%3D%22m24%2018-11-6%208-1%203-9%203%209%209%201-12%206%22%20fill%3D%22%23839D78%22%2F%3E%3Cpath%20d%3D%22m17%2023%201%203m13-4-1%203m-6%205%201%203m-9%201%201%203m15-4-1%203m-7%206%201%203%22%20stroke%3D%22%23FFF3D9%22%20stroke-width%3D%222.5%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E");--ribbon:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2072%2044%22%3E%3Cpath%20d%3D%22M33%2020C7-7%202%204%208%2023c3%209%2015%201%2025-3m6%200C65-7%2070%204%2064%2023c-3%209-15%201-25-3%22%20fill%3D%22%23F6B7C5%22%20stroke%3D%22%23B95873%22%20stroke-width%3D%221.5%22%2F%3E%3Cpath%20d%3D%22m32%2021-12%2021%2011-4%205%205%201-22m3%200%2012%2021-11-4-5%205-1-22%22%20fill%3D%22%23F6B7C5%22%20stroke%3D%22%23B95873%22%20stroke-width%3D%221.5%22%2F%3E%3Cellipse%20cx%3D%2236%22%20cy%3D%2220%22%20rx%3D%225%22%20ry%3D%226%22%20fill%3D%22%23D77490%22%2F%3E%3C%2Fsvg%3E");
+    background-color:var(--bg);
+    background-image:linear-gradient(90deg,rgba(224,137,159,.10) 50%,transparent 50%),linear-gradient(rgba(224,137,159,.10) 50%,transparent 50%);
+    background-size:32px 32px}
+  body[data-theme=strawberry] #bar{position:relative;background:var(--panel);border-bottom:1px dashed var(--line);
+    padding-top:calc(env(safe-area-inset-top) + 13px);padding-bottom:16px}
+  body[data-theme=strawberry] #bar::after{content:"";position:absolute;left:0;right:0;bottom:-7px;height:7px;
+    background:radial-gradient(circle at 7px 0,var(--panel) 6px,transparent 6.5px) 0 0/14px 7px repeat-x;pointer-events:none;z-index:2}
+  body[data-theme=strawberry] #bar .ttl{position:relative;padding-top:5px}
+  body[data-theme=strawberry] #bar h1::before{content:"";display:inline-block;vertical-align:-5px;width:19px;height:23px;
+    background:var(--strawberry) center/contain no-repeat;margin-right:7px}
+  body[data-theme=strawberry] #bar .sub{color:#A46B7C;margin-top:2px}
+  body[data-theme=strawberry] #left.create-char span{border:1px solid var(--line);background:#FFF0F1;box-shadow:inset 0 0 0 3px #FFFCF7}
+  body[data-theme=strawberry] #view{background:transparent;padding-top:22px}
+  body[data-theme=strawberry] #view.list .card{position:relative;margin:5px 0 17px;padding:18px 34px 18px 16px;
+    border:1px solid #E6C1C4;border-radius:18px;background:var(--panel);
+    outline:1px dashed #E2ADB9;outline-offset:-6px;box-shadow:0 4px 0 rgba(200,122,142,.10)}
+  body[data-theme=strawberry] #view.list .card::after{content:"";position:absolute;right:12px;top:-9px;
+    width:40px;height:27px;background:var(--ribbon) center/contain no-repeat;pointer-events:none}
+  body[data-theme=strawberry] .ava{border:3px solid #FFFCF8;box-shadow:0 0 0 1px #DDA3B4,0 3px 6px #C0798F20}
+  body[data-theme=strawberry] #view.list .ava{width:50px;height:50px;border-radius:16px}
+  body[data-theme=strawberry] .card .nm{font-size:16px;margin-bottom:3px}
+  body[data-theme=strawberry] .card .ds{font-size:12px}
+  body[data-theme=strawberry] .msg .who{font-size:12px;color:#91586B;margin:1px 0 6px 3px}
+  body[data-theme=strawberry][data-view=bubble] .bub{border:1px solid #ECD0D3;box-shadow:0 3px 0 #CE8B9E15;
+    padding:11px 14px;background:var(--panel);border-radius:18px 18px 18px 5px}
+  body[data-theme=strawberry][data-view=bubble] .msg.me .bub{background:var(--mine);border-color:#E6B3C1;
+    border-radius:18px 18px 5px 18px}
+  body[data-theme=strawberry] .paper.letter,body[data-theme=strawberry] .paper.diary{
+    margin-top:25px;padding:28px 21px 23px;border:1px solid #DDC2B6;border-radius:3px 12px 4px 9px;
+    background-color:var(--paper);box-shadow:3px 4px 0 #F5E5DF,4px 5px 0 #DDC2B680}
+  body[data-theme=strawberry] .paper.letter::before,body[data-theme=strawberry] .paper.diary::before{
+    content:"";position:absolute;width:68px;height:23px;top:-11px;left:calc(50% - 34px);transform:rotate(-4deg);
+    background:repeating-linear-gradient(90deg,#EFAFC480 0 5px,#FFD3DFB0 5px 10px);border:1px solid #DEA5B660;pointer-events:none}
+  body[data-theme=strawberry] .paper.letter::after,body[data-theme=strawberry] .paper.diary::after{
+    content:"";position:absolute;right:10px;top:8px;width:19px;height:23px;background:var(--strawberry) center/contain no-repeat;pointer-events:none}
+  body[data-theme=strawberry] #dock{position:relative;background:var(--panel);border-top:1px dashed var(--line);padding-top:12px}
+  body[data-theme=strawberry] #dock::before{content:"";position:absolute;left:0;right:0;top:-7px;height:7px;
+    background:radial-gradient(circle at 7px 7px,var(--panel) 6px,transparent 6.5px) 0 0/14px 7px repeat-x;pointer-events:none}
+  body[data-theme=strawberry] #dock .tools{gap:7px;padding-bottom:10px}
+  body[data-theme=strawberry] #dock .tools button{background:#FFF1F2;border:1px solid #EDC9D2;border-radius:9px;
+    padding:4px 8px;font-size:12px;color:#986075}
+  body[data-theme=strawberry] #inp{background:#FFFEFA;border:1px solid #DFA8B8;border-radius:16px}
+  body[data-theme=strawberry] #star{color:var(--accent);font-size:17px}
+  body[data-theme=strawberry] #send{border-radius:15px;background:#C96F89;color:#fff;border:1px solid #B45470;
+    box-shadow:inset 0 0 0 3px #D992A6,0 3px 0 #AE5D7425}
+  body[data-theme=strawberry] .btn{border-radius:13px}
+  body[data-theme=strawberry] .btn.primary{background:#C96F89;border-color:#B45470}
+  body[data-theme=strawberry] .castbox{background:#FFFCF7;border-style:dashed}
+  body[data-theme=strawberry] .sec{border-top-style:dashed;color:#A34D69}
+  body[data-theme=strawberry] .empty-symbol{font-size:0;width:45px;height:54px;margin:0 auto 14px;background:var(--strawberry) center/contain no-repeat}
   @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
 </head>
@@ -836,12 +872,44 @@ function handFallback(c){
   return HAND_KEYS[n % HAND_KEYS.length];
 }
 function handOf(c){
-  /* 예전에 잘못 배정된 것은 한 번 비우고 다시 고르게 한다 */
-  if (c && c.hand && !c.handV9){
-    c.hand = null; c.handAsking = false; c.handV9 = 1;
-    try { saveChars(); } catch(e){}
+  // Existing Korean handwriting is never migrated away or reselected.
+  if(c)syncHand(c);
+  return (c && HANDS[c.hand]) || HANDS[handFallback(c||{})] || HANDS["무난"];
+}
+var INTL_HANDS = {
+  ja:{klee:["Klee One",1],zen:["Zen Kurenaido",1],yomogi:["Yomogi",1.02],hachi:["Hachi Maru Pop",1.04],yuji:["Yuji Mai",1.06]},
+  en:{patrick:["Patrick Hand",1.1],kalam:["Kalam",1.03],caveat:["Caveat",1.17],apple:["Homemade Apple",.95],reenie:["Reenie Beanie",1.2]}
+};
+var HAND_PAIRS={
+  "단정":["klee","patrick"],"모범":["klee","patrick"],"어른":["yuji","apple"],
+  "야무":["zen","kalam"],"선생":["yuji","apple"],"장난":["hachi","reenie"],
+  "또박":["klee","patrick"],"다정":["yomogi","caveat"],"무난":["zen","patrick"],
+  "멋냄":["yuji","apple"],"삐딱":["zen","kalam"],"차분":["klee","kalam"],
+  "깜찍":["hachi","caveat"],"서툰":["yomogi","reenie"],"수수":["zen","caveat"]
+};
+var handLoads={},handRequests={};
+function hasIntlHand(c){return !!(c && c.handIntl && INTL_HANDS.ja[c.handIntl.ja] && INTL_HANDS.en[c.handIntl.en]);}
+function fallbackIntl(c){
+  var pair=HAND_PAIRS[c.hand] || HAND_PAIRS[handFallback(c)] || HAND_PAIRS["무난"];
+  return {ja:pair[0],en:pair[1],version:1};
+}
+function ensureHandFont(family){
+  if(handLoads[family])return;
+  handLoads[family]=true;
+  var link=document.createElement("link");link.rel="stylesheet";
+  link.href="https://fonts.googleapis.com/css2?family="+encodeURIComponent(family).replace(/%20/g,"+")+"&display=swap";
+  link.onerror=function(){delete handLoads[family];link.remove();};
+  document.head.appendChild(link);
+}
+function foreignHand(c,lang){
+  if(c && c.id && !hasIntlHand(c) && !handRequests[c.id]){
+    if(!HANDS[c.hand])c.hand=HANDS[handFallback(c)]?handFallback(c):"무난";
+    c.handIntl=fallbackIntl(c);saveChars();
   }
-  return (c && HANDS[c.hand]) || HANDS[handFallback(c||{})];
+  var choice=hasIntlHand(c)?c.handIntl:fallbackIntl(c||{});
+  var spec=INTL_HANDS[lang][choice[lang]];
+  ensureHandFont(spec[0]);
+  return spec;
 }
 var FONTS = {
   "프리텐다드":'"Pretendard Variable",Pretendard,-apple-system,sans-serif',
@@ -872,7 +940,9 @@ if (!cfg.sSize) cfg.sSize = 15;
 if (!cfg.think) cfg.think = "auto";
 if (!cfg.safe) cfg.safe = "loose";
 if (!cfg.cSize) cfg.cSize = 14;
-cfg.iSize = Math.max(16, Number(cfg.iSize)||16);
+// Undo v27's forced 16px once; later user choices remain their own.
+if (!cfg.inputSizeV28){cfg.iSize=14;cfg.inputSizeV28=1;put("gz.cfg",cfg);}
+if (!cfg.iSize) cfg.iSize=14;
 if (typeof cfg.models !== "string") cfg.models = "";
 var chars = get("gz.chars", []);
 var presets = get("gz.presets", []);
@@ -926,14 +996,14 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-09 v27";
+var APP_VER = "2026-09-10 v28";
 var THEMES = [
   ["light","밝게"],
-  ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["night","밤"]
+  ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["strawberry","딸기우유"], ["retro","레트로"], ["night","밤"]
 ];
 var THEME_DARK = { night:1 };
 var THEME_BG = { light:"#FFFFFF", ocean:"#eef6ff", green:"#ffffff", retro:"#c5d1b8", berry:"#fff8fa",
-                 night:"#12141C" };
+                 night:"#12141C", strawberry:"#FFF4F4" };
 
 function applyTheme(){
   var t = cfg.theme || "light";
@@ -961,6 +1031,7 @@ function applyTheme(){
   st.setProperty("--brad", Math.min(18, bp+8)+"px");
   st.setProperty("--mgap", (cfg.mGap==null ? 14 : cfg.mGap)+"px");
   st.setProperty("--ifs", (cfg.iSize||14)+"px");
+  if(typeof inputMirror!=="undefined" && inputMirror) requestAnimationFrame(resizeComposer);
 }
 
 /* ---------- 도구 ---------- */
@@ -1650,7 +1721,7 @@ function viewList(){
       listQ=String(q).trim(); render();
     }
   };
-  var h='<div class="listbody"><div class="list-intro"><span class="eyebrow">OUR LITTLE STORIES</span><h2>어떤 이야기를 나눌까요?</h2><p>마음이 닿는 대화, 여기서 이어가요.</p></div>';
+  var h='<div class="listbody">';
   if (listQ) h += '<div class="searchbar"><b>찾는 말 · '+esc(listQ)+'</b><button id="qclr">✕</button></div>';
   for (var i=0;i<order.length;i++){
     var c=order[i], n=getLog(c.id).length;
@@ -1767,7 +1838,7 @@ function viewEdit(){
          return '<option'+(def===o?" selected":"")+'>'+o+"</option>"; }).join("")+"</select>";
   h += '<label>대사 언어</label><select data-k="lang">'
      + ["한국어","일본어","영어","중국어"].map(function(o){ return '<option'+((c.lang||"한국어")===o?" selected":"")+'>'+o+"</option>"; }).join("")+"</select>";
-  h += '<div class="hint">편지·일기도 선택한 언어로 써요. 일본어는 Yomogi, 영어는 Caveat 손글씨가 자동으로 적용돼요.</div>';
+  h += '<div class="hint">편지·일기도 선택한 언어로 써요. 일본어·영어 손글씨는 인물 설정과 대화를 참고해 한 번 정하고 계속 유지해요.</div>';
   h += '<label>발음 표기</label><select data-k="romaji">'
      + '<option value="on"'+(c.romaji?" selected":"")+'>켜기</option>'
      + '<option value="off"'+(c.romaji?"":" selected")+'>끄기</option></select>';
@@ -2004,7 +2075,7 @@ function viewCfg(){
   h += '<label>카드 글자 크기 · '+(cfg.cSize||14)+'px</label>'
      + '<input id="cs" type="range" min="10" max="20" step="0.5" value="'+(cfg.cSize||14)+'" style="padding:0">';
   h += '<label>입력창 글자 크기 · '+(cfg.iSize||14)+'px</label>'
-     + '<input id="is" type="range" min="16" max="20" step="0.5" value="'+(cfg.iSize||14)+'" style="padding:0">';
+     + '<input id="is" type="range" min="10" max="20" step="0.5" value="'+(cfg.iSize||14)+'" style="padding:0">';
   h += '<label>보기 방식</label><select id="vm">'
      + [["bubble","말풍선"],["novel","소설"],["script","대본"]].map(function(o){
          return '<option value="'+o[0]+'"'+((cfg.viewMode||"bubble")===o[0]?" selected":"")+'>'+o[1]+'</option>';
@@ -2666,6 +2737,9 @@ function handText(t, c){
         var span=document.createElement("span");
         span.className=isEnglish?"hand-en":"hand-ja";
         span.lang=isEnglish?"en":"ja";
+        var font=foreignHand(c,span.lang);
+        span.style.fontFamily="\""+font[0]+"\", cursive";
+        span.style.fontSize=font[1]+"em";
         span.textContent=match[0]; frag.appendChild(span);
       }
       last=pattern.lastIndex;
@@ -4149,7 +4223,6 @@ function viewChat(){
     c.startG = "";
     if (g0) setLog(c.id, seedGreeting(c, g0));
   }
-  syncHand(c);
   paint();
   paintModelBtn();
   paintLenBtn();
@@ -4724,49 +4797,47 @@ function callAPI(c, log, turnInstr){
 
 /* 인물에 어울리는 손글씨를 한 번만 정한다 */
 function syncHand(c){
-  if (!c || !cfg.key) return;
-  if (c.hand && c.handV9) return;
-  if (c.handAsking) return;
-  c.hand = null; c.handAsking = true;
-  var desc = [c.name, c.display, c.tagline, c.prompt, c.beh, c.world, c.note]
-    .filter(Boolean).join("\n").slice(0, 2000);
-  var settled = false;
-  function done(k){
-    if (settled) return; settled = true;
-    c.hand = HANDS[k] ? k : handFallback(c);
-    c.handV9 = 1; c.handAsking = false;
-    try { saveChars(); } catch(e){}
-    if (screen==="chat" && cur() && cur().id===c.id) paint();
+  if(!c)return;
+  if(HANDS[c.hand] && hasIntlHand(c))return;
+  // In-flight state is session-only, so reloading cannot leave a character permanently waiting.
+  if(handRequests[c.id])return;
+  if(!cfg.key || (cfg.mode==="openai" && !cfg.base)){
+    if(!HANDS[c.hand])c.hand=HANDS[handFallback(c)]?handFallback(c):"무난";
+    if(!hasIntlHand(c))c.handIntl=fallbackIntl(c);
+    saveChars();return;
   }
-  if (!desc) return done("");
-  var sys = "아래 인물이 손으로 글씨를 쓴다면 어떤 글씨일지 고른다. 아래 열다섯 중 하나만 그대로 답하고 다른 말은 쓰지 않는다.\n"
-    + "단정 - 반듯하고 각 잡힌 글씨. 규율에 익숙한 사람, 군인이나 경찰\n"
-    + "모범 - 얌전하고 고른 글씨. 공부 잘하고 성실한 사람\n"
-    + "어른 - 여유 있고 품이 있는 글씨. 나이 있고 노련한 사람\n"
-    + "야무 - 작고 또렷한 글씨. 야무지고 똑부러지는 사람\n"
-    + "선생 - 흘려 쓴 붓기 있는 글씨. 가르치는 사람, 나이 지긋한 사람\n"
-    + "장난 - 삐뚤빼뚤 튀는 글씨. 장난기 많고 들뜬 사람\n"
-    + "또박 - 한 자 한 자 또박또박 쓴 글씨. 느리고 신중한 사람\n"
-    + "다정 - 부드럽게 흘려 쓴 글씨. 다정하고 너그러운 사람\n"
-    + "무난 - 평범하지만 잘 쓴 글씨. 어디에나 잘 섞이는 사람\n"
-    + "멋냄 - 평범한데 멋을 낸 글씨. 꾸밀 줄 아는 사람\n"
-    + "삐딱 - 반듯한데 살짝 기운 글씨. 무뚝뚝하고 시큰둥한 사람\n"
-    + "차분 - 조용하고 고른 글씨. 감정을 잘 드러내지 않는 사람\n"
-    + "깜찍 - 동글동글 귀여운 글씨. 어리고 발랄한 사람\n"
-    + "서툰 - 손에 힘이 없어 흔들리는 글씨. 글씨를 제대로 배운 적 없거나 쓰는 일이 몸에 안 밴 사람\n"
-    + "수수 - 꾸밈없이 수수한 글씨. 무던하고 털털한 사람\n"
-    + "\n종족이나 겉모습이 아니라 그 인물이 살아온 방식을 보고 고른다. 사람이 아니어도 배우고 자랐으면 반듯하게 쓰고, 사람이어도 배운 적 없으면 서툴게 쓴다. "
-    + "나이, 받은 교육, 하는 일, 성격이 글씨를 정한다.";
-  setTimeout(function(){ done(""); }, 20000);
-  function ask(again){
-    askLLM(sys, desc, function(out){
-      var k = String(out||"").replace(/[^가-힣]/g,"").slice(0,2);
-      if (HANDS[k]) return done(k);
-      if (!again) return ask(true);   /* 한 번은 다시 물어본다 */
-      done("");
-    }, 16, true);
+  handRequests[c.id]=true;
+  var existing=HANDS[c.hand]?c.hand:null, settled=false, timer;
+  var recent=getLog(c.id).filter(function(m){return !m.secret;}).slice(-16)
+    .map(function(m){return (m.r==="a"?"인물: ":"상대: ")+String(m.t||"").slice(0,600);}).join("\n").slice(-6000);
+  var desc=["인물 설정",[c.name,c.display,c.tagline,c.prompt,c.beh,c.world,c.note].filter(Boolean).join("\n").slice(0,5000),
+    "최근 대화",recent,existing?"유지할 한국어 필체: "+existing:""].join("\n");
+  function done(out){
+    if(settled)return;settled=true;clearTimeout(timer);delete handRequests[c.id];
+    var obj=null;
+    try{var match=String(out||"").match(/\{[\s\S]*\}/);if(match)obj=JSON.parse(match[0]);}catch(e){}
+    if(!HANDS[c.hand])c.hand=obj && HANDS[obj.ko]?obj.ko:(handFallback(c)||"무난");
+    if(!HANDS[c.hand])c.hand="무난";
+    if(!hasIntlHand(c)){
+      var fallback=fallbackIntl(c);
+      c.handIntl={ja:obj && INTL_HANDS.ja[obj.ja]?obj.ja:fallback.ja,
+        en:obj && INTL_HANDS.en[obj.en]?obj.en:fallback.en,version:1};
+    }
+    c.handV9=1;c.handAsking=false;saveChars();
+    if(screen==="chat" && cur() && cur().id===c.id){
+      var oldTop=view.scrollTop, bottom=view.scrollHeight-view.clientHeight-oldTop<48;
+      paint();if(!bottom)view.scrollTop=oldTop;
+    }
   }
-  ask(false);
+  var sys="인물 프롬프트와 최근 대화에서 드러나는 성격, 생활 방식, 교육 배경, 글쓰기 습관을 종합해 평소 필체를 한 번 정한다. "
+    +"직업·나이·종족만으로 단정하지 않는다. 수인이라도 글쓰기에 익숙할 수 있고 선생님이라도 흘려 쓸 수 있다. "
+    +"일시적 기분보다 평소 습관을 반영한다. 이미 지정된 한국어 필체는 유지한다. "
+    +"한국어 후보 ko: 단정, 모범, 어른, 야무, 선생, 장난, 또박, 다정, 무난, 멋냄, 삐딱, 차분, 깜찍, 서툰, 수수. "
+    +"일본어 후보 ja: klee(정갈한 펜), zen(담백한 볼펜), yomogi(부드러운 손글씨), hachi(동글동글 발랄), yuji(흐르는 붓글씨). "
+    +"영어 후보 en: patrick(또박또박), kalam(빠르게 기울여 쓴 펜), caveat(자연스럽고 부드러운 흘림), apple(고풍스러운 필기체), reenie(자유로운 메모). "
+    +"세 언어에서 같은 인물의 분위기가 느껴지도록 고른다. JSON 객체 하나만 출력: {\"ko\":\"단정\",\"ja\":\"klee\",\"en\":\"patrick\"}.";
+  timer=setTimeout(function(){done("");},20000);
+  askLLM(sys,desc,done,150,true);
 }
 function turn(){
   var c=cur(); if(!c||busy) return;
@@ -5013,49 +5084,73 @@ $("#reset").onclick=function(){
 applyTheme();
 render();
 
-/* Apply viewport changes once per frame; a caret scroll is not a reason to scroll the chat. */
-(function(){
-  var vv=window.visualViewport;
-  if(!vv) return;
-  var app=document.getElementById("app"), on=false, frame=0, previous="";
-  var pinned=true;
-  view.addEventListener("scroll",function(){pinned=view.scrollHeight-view.scrollTop-view.clientHeight<48;},{passive:true});
+/* Keep the visual viewport and the reading position together through Safari's Done animation. */
+function installViewportLayout(){
+  var vv=window.visualViewport,app=document.getElementById("app"),frame=0,restoreFrame=0;
+  var settling=false,settleTimer=0,checks=[],lastHeight=-1,lastTop=-1,lastKeyboard=null;
+  var anchor={bottom:true,top:0},screenKey="";
+  function chatScreen(){return screen==="chat"||screen==="sms";}
+  function remember(){
+    anchor={bottom:chatScreen() && view.scrollHeight-view.clientHeight-view.scrollTop<48,top:view.scrollTop};
+    screenKey=screen+":"+(curId||"");
+  }
+  function restore(){
+    restoreFrame=0;
+    if(screenKey!==screen+":"+(curId||""))remember();
+    view.scrollTop=anchor.bottom && chatScreen()?Math.max(0,view.scrollHeight-view.clientHeight):anchor.top;
+  }
   function sync(){
     frame=0;
-    if(Math.abs(vv.scale-1)>0.02) return;
+    // Do not fight the user's deliberate pinch zoom.
+    if(vv && Math.abs(vv.scale-1)>.02)return;
+    if(screenKey!==screen+":"+(curId||""))remember();
+    var height=Math.round(vv?vv.height:window.innerHeight),offset=Math.round(vv?vv.offsetTop:0);
+    var focused=document.activeElement,editing=focused && /^(INPUT|TEXTAREA)$/.test(focused.tagName);
     var full=Math.max(window.innerHeight||0,document.documentElement.clientHeight||0);
-    var focused=document.activeElement;
-    var editing=focused && /^(INPUT|TEXTAREA)$/.test(focused.tagName);
-    var open=!!editing && full-vv.height>90;
-    var height=Math.round(vv.height), offset=Math.round(vv.offsetTop||0);
-    var state=open+":"+(open?height+":"+offset:"");
-    if(state===previous) return;
-    previous=state;
-    var top=view.scrollTop, keepBottom=pinned && (screen==="chat"||screen==="sms");
-    on=open;
-    document.body.toggleAttribute("data-keyboard-open",open);
-    if(open){
-      document.body.setAttribute("data-kb","1");
-      document.body.style.setProperty("--sab","0");
-      app.style.position="fixed"; app.style.left="0"; app.style.right="0";
-      app.style.top=offset+"px"; app.style.height=height+"px";
-    }else{
-      document.body.removeAttribute("data-kb");
-      document.body.style.setProperty("--sab","1");
-      app.style.position=""; app.style.left=""; app.style.right="";
-      app.style.top=""; app.style.height="";
-    }
-    view.scrollTop=keepBottom?view.scrollHeight:top;
+    var keyboard=!!editing && full-height>90;
+    // Safari may leave the document scrolled after the keyboard toolbar's Done button.
+    if(!keyboard && (window.scrollY||window.scrollX))window.scrollTo(0,0);
+    var top=keyboard?Math.max(0,offset):0;
+    if(height===lastHeight && top===lastTop && keyboard===lastKeyboard){if(settling)restore();return;}
+    settling=true;
+    lastHeight=height;lastTop=top;lastKeyboard=keyboard;
+    document.body.style.setProperty("--app-height",height+"px");
+    document.body.style.setProperty("--sab",keyboard?"0":"1");
+    if(keyboard)document.body.setAttribute("data-kb","1");else document.body.removeAttribute("data-kb");
+    app.style.top=top+"px";
     resizeComposer();
+    restore();
+    if(restoreFrame)cancelAnimationFrame(restoreFrame);
+    restoreFrame=requestAnimationFrame(restore);
+    clearTimeout(settleTimer);
+    settleTimer=setTimeout(function(){restore();settling=false;remember();},180);
   }
-  function schedule(){if(!frame) frame=requestAnimationFrame(sync);}
-  vv.addEventListener("resize",schedule,{passive:true});
-  vv.addEventListener("scroll",schedule,{passive:true});
-  document.addEventListener("focusin",schedule);
-  document.addEventListener("focusout",schedule);
-  window.addEventListener("orientationchange",schedule);
-  schedule();
-})();
+  function schedule(){if(!frame)frame=requestAnimationFrame(sync);}
+  function transition(){
+    if(!settling)remember();
+    settling=true;
+    checks.forEach(clearTimeout);checks=[];
+    schedule();
+    // Done/focusout can precede the final viewport resize, including browser-toolbar changes.
+    [80,220,450,700].forEach(function(ms){checks.push(setTimeout(schedule,ms));});
+    clearTimeout(settleTimer);
+    settleTimer=setTimeout(function(){restore();settling=false;remember();},850);
+  }
+  view.addEventListener("scroll",function(){if(!settling)remember();},{passive:true});
+  function userScroll(){settling=false;clearTimeout(settleTimer);checks.forEach(clearTimeout);checks=[];remember();}
+  view.addEventListener("touchstart",userScroll,{passive:true});
+  view.addEventListener("wheel",userScroll,{passive:true});
+  if(vv){vv.addEventListener("resize",schedule,{passive:true});vv.addEventListener("scroll",schedule,{passive:true});vv.addEventListener("scrollend",schedule,{passive:true});}
+  window.addEventListener("resize",schedule,{passive:true});
+  window.addEventListener("pageshow",transition);
+  window.addEventListener("orientationchange",transition);
+  document.addEventListener("focusin",transition);
+  document.addEventListener("focusout",transition);
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)transition();});
+  if(window.ResizeObserver)new ResizeObserver(schedule).observe(dock);
+  remember();schedule();
+}
+installViewportLayout();
 })();
 </script>
 </body>
