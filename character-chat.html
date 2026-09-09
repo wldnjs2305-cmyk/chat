@@ -878,7 +878,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-08 v20";
+var APP_VER = "2026-09-08 v21";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["night","밤"]
@@ -2995,22 +2995,26 @@ function makeRecap(c, done){
     return (m.r==="u" ? (c.userName||"나") : (c.name||"상대")) + ": " + m.t;
   }).join("\n").slice(-9000);
   if (!body) return done();
-  var sys = "너는 이야기를 정리하는 도우미다. 아래 상황극 기록을 6~10줄로 요약한다. "
+  var sys = "너는 이야기를 정리하는 도우미다. 아래 상황극 기록을 6~12줄로 요약한다. "
           + "인물 사이에 무슨 일이 있었는지, 관계가 어떻게 변했는지, 아직 풀리지 않은 것이 무엇인지 담는다. "
-          + "대사나 묘사를 옮기지 말고 사실만 담백하게 적는다.";
+          + "인물이 감추고 있는 것, 상대가 알아낸 것, 서로 아는 것과 모르는 것을 반드시 적는다. "
+          + "이름이나 정체처럼 드러난 사실은 그대로 적는다. "
+          + "대사나 묘사를 옮기지 말고 사실만 담백하게 적는다. 반드시 끝까지 다 쓰고 마친다.";
   var prev = recapOf(c) ? "이전 요약:\n"+recapOf(c)+"\n\n" : "";
   var url, headers, bd;
   if (cfg.mode==="openai"){
     var b=(cfg.base||"").replace(/\/+$/,"");
     url = /chat\/completions$/.test(b) ? b : b+"/chat/completions";
     headers={ "Content-Type":"application/json", "Authorization":"Bearer "+cfg.key };
-    bd={ model:cfg.model, max_tokens:1200, messages:[{role:"system",content:sys},{role:"user",content:prev+body}] };
+    bd={ model:cfg.model, max_tokens:3000, messages:[{role:"system",content:sys},{role:"user",content:prev+body}] };
+    bd.reasoning_effort="none";
+    bd.extra_body={ google:{ thinking_config:{ thinking_budget:0 } } };
   } else {
     var gb=(cfg.base||"https://generativelanguage.googleapis.com").replace(/\/+$/,"");
     url = gb+"/v1beta/models/"+encodeURIComponent(cfg.model)+":generateContent?key="+encodeURIComponent(cfg.key);
     headers={ "Content-Type":"application/json" };
     bd={ systemInstruction:{parts:[{text:sys}]}, contents:[{role:"user",parts:[{text:prev+body}]}],
-         generationConfig:{ maxOutputTokens:1200 } };
+         generationConfig:{ maxOutputTokens:3000, thinkingConfig:{ thinkingBudget:0 } } };
   }
   fetch(url,{method:"POST",headers:headers,body:JSON.stringify(bd)})
   .then(function(r){ return r.text(); })
@@ -3024,7 +3028,12 @@ function makeRecap(c, done){
       var cd=d&&d.candidates&&d.candidates[0];
       out=cd?((cd.content&&cd.content.parts)||[]).map(function(x){return x.text||"";}).join(""):"";
     }
-    if (out.trim()) setRecap(c, out.trim());
+    var v = out.trim();
+    /* 마지막 줄이 뚝 끊긴 요약은 버린다. 그걸 저장하면 앞 이야기가 통째로 날아간다 */
+    var last = v.split("\n").filter(Boolean).pop() || "";
+    var cut = v.length < 40 || (last.length < 12 && !/[.!?…”"\)]\s*$/.test(last));
+    if (v && !cut) setRecap(c, v);
+    else if (v) alert("요약이 도중에 끊겨서 저장하지 않았어. 앞 이야기는 그대로 남아 있어.");
     done();
   })
   .catch(function(){ done(); });
@@ -4433,12 +4442,6 @@ function buildSystem(c, turn){
   p.push("# 인물의 태도");
   p.push(DEFY[c.defy||"보통"] || DEFY["보통"]);
   p.push("상대가 말한 지난 일은 이 기록에 없더라도 실제로 있었던 일로 받아들인다. 없던 일로 취급하거나 그런 적 없다고 부정하지 않는다.");
-  p.push("");
-  p.push("# 앞말과 어긋나지 않게");
-  p.push("인물이 한 말은 다음 턴에도 그대로 간다. 아니라고 했으면 계속 아니고, 인정했으면 계속 인정한 상태다. 방금 부정해놓고 다음 턴에 인정하거나, 방금 인정해놓고 다음 턴에 처음 듣는 척하지 않는다.");
-  p.push("말을 바꾸려면 바뀔 이유가 장면에 있어야 한다. 증거를 봤거나, 더 우길 수 없게 몰렸거나, 마음이 달라졌거나. 그 이유 없이는 앞말을 지킨다.");
-  p.push("무슨 말을 하든 상관없다. 되묻든 화제를 돌리든 얼버무리든, 앞말과 앞뒤만 맞으면 된다.");
-  p.push("모습과 자세와 위치도 마찬가지다. 짐승 모습으로 변했으면 계속 그 모습이고, 무릎을 꿇었으면 계속 꿇고 있다. 바꾸려면 바꾸는 장면을 직접 쓴다.");
   p.push("다만 사실을 인정하는 것과 아무렇지 않게 넘어가는 것은 다르다. 인물이 이미 알고 있던 일에는 담담히 반응하고, 인물에게 처음 알려지는 사실에는 놀라고 캐묻는다. 새로 알게 된 사실일수록 그냥 받아들이지 말고 어떻게 된 일인지 물어야 한다.");
   p.push("사실 자체는 받아들이되 감정까지 순순할 필요는 없다. 걸리는 단어를 되뇌거나, 왜 지금 그 이야기를 꺼내는지 묻거나, 대답을 피하고 화제를 돌려도 된다.");
   p.push("상대가 자기 쪽 사정을 말할 때, 인물이 알 리 없는 인물이나 사건이라면 아는 척하지 않는다. 모르면 모른다고 하고 궁금하면 물어본다.");
