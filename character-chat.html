@@ -823,6 +823,7 @@ if (!cfg.bubW) cfg.bubW = 84;
 if (!cfg.fSms) cfg.fSms = "테마 따라가기";
 if (!cfg.sSize) cfg.sSize = 15;
 if (!cfg.think) cfg.think = "auto";
+if (!cfg.safe) cfg.safe = "loose";
 if (!cfg.cSize) cfg.cSize = 14;
 if (!cfg.iSize) cfg.iSize = 14;
 if (typeof cfg.models !== "string") cfg.models = "";
@@ -878,7 +879,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-08 v25";
+var APP_VER = "2026-09-08 v26";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["night","밤"]
@@ -1457,6 +1458,25 @@ function presetOf(c){
 }
 /* 제미나이 추론 예산. 중계 서버가 그대로 넘겨줘야 먹힌다 */
 var THINK_BUDGET = { off:0, low:512, mid:2048, high:8192 };
+/* 제미나이 안전 필터 완화. 중계 서버가 그대로 넘겨줘야 먹힌다 */
+var SAFE_CATS = ["HARM_CATEGORY_HARASSMENT","HARM_CATEGORY_HATE_SPEECH",
+                 "HARM_CATEGORY_SEXUALLY_EXPLICIT","HARM_CATEGORY_DANGEROUS_CONTENT",
+                 "HARM_CATEGORY_CIVIC_INTEGRITY"];
+function safetyList(){
+  return SAFE_CATS.map(function(c){ return { category:c, threshold:"BLOCK_NONE" }; });
+}
+function applySafety(body, isGemini){
+  if ((cfg.safe||"loose") !== "loose") return body;
+  if (isGemini){
+    body.safetySettings = safetyList();
+  } else {
+    body.extra_body = body.extra_body || {};
+    body.extra_body.google = body.extra_body.google || {};
+    body.extra_body.google.safety_settings = safetyList();
+    body.safety_settings = safetyList();
+  }
+  return body;
+}
 function applyThink(body, isGemini){
   var k = cfg.think || "auto";
   if (k === "auto") return body;
@@ -1890,6 +1910,11 @@ function viewCfg(){
          return '<option value="'+o[0]+'"'+((cfg.think||"auto")===o[0]?" selected":"")+'>'+o[1]+'</option>';
        }).join("")
      + '</select>';
+  h += '<label>안전 필터</label><select id="sfg">'
+     + [["loose","완화 · 막히면 이걸 꺼봐"],["default","기본"]].map(function(o){
+         return '<option value="'+o[0]+'"'+((cfg.safe||"loose")===o[0]?" selected":"")+'>'+o[1]+'</option>';
+       }).join("")
+     + '</select>';
   h += '<label>최대 응답 길이</label><input id="t" value="'+esc(cfg.maxTokens)+'" inputmode="numeric">';
   h += '<button class="btn" id="ping">연결 테스트</button>';
   h += '<div class="hint" id="pingout"></div>';
@@ -1950,6 +1975,7 @@ function viewCfg(){
 
   on("#md","onchange",function(){ cfg.mode=this.value; saveCfg(); });
   on("#thk","onchange",function(){ cfg.think=this.value; saveCfg(); });
+  on("#sfg","onchange",function(){ cfg.safe=this.value; saveCfg(); });
   on("#mlist","oninput",function(){ cfg.models=this.value; saveCfg(); });
   on("#th","onchange",function(){ cfg.theme=this.value; saveCfg(); });
   on("#fb","onchange",function(){ cfg.fBody=this.value; saveCfg(); });
@@ -3775,6 +3801,7 @@ function smsTurn2(c, t){
     if (sgen.topP!==null) body.generationConfig.topP=sgen.topP;
   }
   applyThink(body, cfg.mode!=="openai");
+  applySafety(body, cfg.mode!=="openai");
 
   fetch(url,{method:"POST",headers:headers,body:JSON.stringify(body)})
   .then(function(res){ return res.text().then(function(txt){
@@ -4560,6 +4587,7 @@ function callAPI(c, log, turnInstr){
     if (gen.topP!==null) body.generationConfig.topP=gen.topP;
   }
   applyThink(body, cfg.mode!=="openai");
+  applySafety(body, cfg.mode!=="openai");
   return fetchJSON(url,{ method:"POST", headers:headers, body:JSON.stringify(body) }, 120000)
   .then(function(res){
     return res.text().then(function(txt){
