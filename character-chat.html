@@ -302,7 +302,7 @@
   #app{display:flex;flex-direction:column;height:100dvh;overflow-x:hidden}
   #bar{
     flex:0 0 auto;display:flex;align-items:center;gap:8px;
-    padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;
+    padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;
     border-bottom:1px solid var(--line);background:var(--panel);
   }
   #bar .ttl{flex:1;min-width:0;text-align:center}
@@ -312,7 +312,8 @@
     min-width:44px;height:42px;font-size:19px;line-height:1;cursor:pointer}
   .iconbtn.hbs{padding:0;min-width:88px;display:flex;align-items:center;justify-content:flex-end}
   .iconbtn{flex:0 0 auto;min-width:88px;font-size:17px;border:0;background:transparent;color:var(--accent);font-size:15px;font-family:inherit;padding:8px 4px;cursor:pointer}
-  .iconbtn:nth-of-type(2){text-align:right}
+  .iconbtn{text-align:left;padding-left:0}
+  .iconbtn:nth-of-type(2){text-align:right;padding-left:4px;padding-right:0}
   .iconbtn:active{opacity:.5}
   #view{flex:1 1 auto;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:16px 14px calc(env(safe-area-inset-bottom) + 24px)}
   #view.chat{padding:18px 14px 8px}
@@ -328,6 +329,17 @@
   .card .meta{flex:1;min-width:0}
   .card .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .card .ds{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #view.list{display:flex;flex-direction:column;padding-bottom:0}
+  .listbody{flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+    margin:0 -14px;padding:0 14px 6px}
+  .listfoot{flex:0 0 auto;padding:8px 0 calc(env(safe-area-inset-bottom) + 10px);
+    background:var(--bg);border-top:1px solid var(--line);margin:0 -14px;padding-left:14px;padding-right:14px}
+  .listfoot .btn{margin-top:0}
+  .searchbar{display:flex;align-items:center;gap:8px;margin:0 0 10px;
+    background:var(--field);border:1px solid var(--line);border-radius:12px;padding:8px 12px}
+  .searchbar b{font-weight:600;font-size:14px;flex:1;min-width:0;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .searchbar button{border:0;background:transparent;color:var(--muted);font-size:15px;cursor:pointer}
   .empty{color:var(--muted);text-align:center;padding:56px 20px;font-size:14px;line-height:1.9}
 
   input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:34px;
@@ -865,7 +877,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-08 v13";
+var APP_VER = "2026-09-08 v16";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["night","밤"]
@@ -926,12 +938,22 @@ function stripJunk(s){
   t = t.replace(/<\s*\/?\s*(?:span|div|em|b|i|p|br|tr|td)\b[^>]{0,60}>?/gi,"");
   return t;
 }
+/* '항목: 내용' 이 여러 줄 이어지면 목록이다. 그럴 땐 줄바꿈을 살린다 */
+function isListLine(l){
+  return /^\s*[-•*]?\s*[^:：\n]{1,24}\s*[:：]\s*\S/.test(l);
+}
+function joinPar(par){
+  var ls = par.split("\n").map(function(l){ return l.trim(); }).filter(Boolean);
+  if (ls.length >= 3){
+    var hit = 0;
+    ls.forEach(function(l){ if (isListLine(l)) hit++; });
+    if (hit >= 3 && hit >= ls.length - 1) return ls.join("\n");
+  }
+  return ls.join(" ");
+}
 function joinFlow(s){
   var t = stripJunk(s).replace(/\r/g,"");
-  return t.split(/\n{2,}/).map(function(par){
-    return par.split("\n").map(function(l){ return l.trim(); })
-              .filter(Boolean).join(" ");
-  }).filter(Boolean).join("\n\n");
+  return t.split(/\n{2,}/).map(joinPar).filter(Boolean).join("\n\n");
 }
 function quoteMark(t){
   /* 태그 안쪽은 건드리지 않는다 */
@@ -974,9 +996,7 @@ function docSegs(raw){
 }
 /* 한 줄씩 끊긴 걸 한 문단으로 이어 붙인다. 빈 줄은 문단 나눔으로 남긴다 */
 function flow(s){
-  return String(s||"").split(/\n{2,}/).map(function(par){
-    return par.split("\n").map(function(l){ return l.trim(); }).filter(Boolean).join(" ");
-  }).filter(Boolean).join("\n\n");
+  return String(s||"").split(/\n{2,}/).map(joinPar).filter(Boolean).join("\n\n");
 }
 function fmtIn(s){
   var t=esc(flow(stripJunk(s)));
@@ -1484,7 +1504,8 @@ function genOf(c){
 
 /* ---------- 화면 ---------- */
 var screen="list", curId=null, busy=false, selIdx=-1, editIdx=-1, regenAlt=false;
-var findQ="";
+var findQ="", listQ="";
+var editFromChat=false;
 var psBack="cfg", curPs=null, curBlk=0, curSm=0, smWho="", smOwner=-1, cfgFromChat=false, curGre=0, grWho="";
 function go(s,id){
   screen=s; if(id!==undefined) curId=id; selIdx=-1; editIdx=-1;
@@ -1527,24 +1548,47 @@ function render(){
 }
 
 /* ---------- 목록 ---------- */
+function charHit(c, q){
+  var t = [c.name, c.display, c.tagline, c.prompt, c.world].filter(Boolean).join(" ").toLowerCase();
+  return t.indexOf(q.toLowerCase()) >= 0;
+}
 function viewList(){
+  view.className="list";
   elTitle.textContent="캐릭터";
-  elSub.textContent = chars.length ? chars.length+"명" : "";
-  elRight.textContent="설정";
-  elRight.onclick=function(){ go("cfg"); };
-  var h="";
-  if (chars.length) {
-  /* 최근에 말한 캐릭터가 위로 */
   var order = chars.slice().sort(function(a,b){ return (b.at||0)-(a.at||0); });
+  if (listQ) order = order.filter(function(c){ return charHit(c, listQ); });
+  elSub.textContent = listQ ? (order.length+"명 찾음") : (chars.length ? chars.length+"명" : "");
+  elRight.className="iconbtn hbs";
+  elRight.innerHTML='<span class="hb" data-go="find">'
+     + '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+     + 'stroke-width="2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"></circle>'
+     + '<path d="M15.5 15.5L20 20"></path></svg></span><span class="hb" data-go="cfg" style="min-width:auto;padding:0 8px;font-size:15px">설정</span>';
+  elRight.onclick=function(e){
+    var t=e&&e.target, k=null;
+    while (t && t!==elRight){
+      if (t.getAttribute && t.getAttribute("data-go")){ k=t.getAttribute("data-go"); break; }
+      t=t.parentNode;
+    }
+    if (k==="cfg") return go("cfg");
+    if (k==="find"){
+      var q=prompt("캐릭터 찾기", listQ||"");
+      if (q===null) return;
+      listQ=String(q).trim(); render();
+    }
+  };
+  var h='<div class="listbody">';
+  if (listQ) h += '<div class="searchbar"><b>찾는 말 · '+esc(listQ)+'</b><button id="qclr">✕</button></div>';
   for (var i=0;i<order.length;i++){
     var c=order[i], n=getLog(c.id).length;
     h += '<div class="card" data-open="'+c.id+'">'+avaHTML(faceOf(c),"🙂")
        + '<div class="meta"><div class="nm">'+esc(c.name||"이름 없음")+'</div>'
        + '<div class="ds">'+esc(c.tagline || (n? n+"개의 메시지" : "아직 대화 없음"))+'</div></div></div>';
   }
-  }
-  h += '<button class="btn primary" id="new">새 캐릭터</button>';
+  if (listQ && !order.length) h += '<div class="empty">찾는 캐릭터가 없어.</div>';
+  h += '</div>';
+  h += '<div class="listfoot"><button class="btn primary" id="new">새 캐릭터</button></div>';
   view.innerHTML=h;
+  on("#qclr","onclick",function(){ listQ=""; render(); });
   $("#new").onclick=function(){
     var c={ id:uid(), name:"", display:"", avatar:"", tagline:"", prompt:"", world:"", greeting:"", sample:"", note:"",
             cast:[], lore:[], userName:"", userDisplay:"", userAvatar:"", userPrompt:"", length:"보통", lang:"한국어", romaji:false, preset:"" };
@@ -1575,7 +1619,12 @@ function viewEdit(){
   if (!c.length) c.length = "보통";
   if (!c.lang) c.lang = "한국어";
   elTitle.textContent="캐릭터 설정"; elSub.textContent=c.name||"";
-  elLeft.textContent="목록"; elLeft.onclick=function(){ saveChars(); go("list"); };
+  elLeft.textContent = editFromChat ? "대화" : "목록";
+  elLeft.onclick=function(){
+    saveChars();
+    if (editFromChat){ editFromChat=false; return go("chat", c.id); }
+    go("list");
+  };
 
   var h="";
   var many = (c.kind==="다인");
@@ -1797,7 +1846,7 @@ function viewEdit(){
   $("#psel").onchange=function(){ c.preset=this.value; saveChars(); };
   $("#pman").onclick=function(){ saveChars(); psBack="edit"; go("presets", c.id); };
   $("#lore").onclick=function(){ saveChars(); go("lore", c.id); };
-  $("#done").onclick=function(){ saveChars(); go("chat", c.id); };
+  $("#done").onclick=function(){ saveChars(); editFromChat=false; go("chat", c.id); };
   $("#del").onclick=function(){
     if (!confirm((c.name||"이 캐릭터")+" 삭제할까? 대화도 같이 지워져.")) return;
     chars = chars.filter(function(x){ return x.id!==c.id; });
@@ -3903,6 +3952,7 @@ function viewChat(){
     }
     if (!k) return;
     if (k==="cfg"){ cfgFromChat=true; return go("cfg"); }
+    editFromChat = true;
     go("edit", c.id);
   };
   view.className="chat"; dock.style.display="block";
@@ -4118,7 +4168,7 @@ var CMDS = {
   "/편지":"이번 턴에는 인물이 쓴 편지만 보여준다. 첫 줄에 [편지] 를 쓰고 [/편지] 로 닫는다. 그 안은 진짜 손편지처럼 쓴다.\n첫 줄은 받는 사람을 부르는 말 한 줄로 시작한다. 이 인물이 평소에 상대를 부르는 호칭을 그대로 쓰고 뒤에 '에게' 를 붙인다. 평소 '누나' 라고 부르면 '누나에게', '선배' 면 '선배에게' 다. 특별히 부르는 호칭이 없으면 상대의 이름을 그대로 써서 '{{user}}에게' 라고 한다. 두 사람 사이가 가까우면 '사랑하는 누나에게', '내 하나뿐인 친구에게' 처럼 수식을 붙여도 되지만, 아직 서먹하거나 썸이거나 그런 성격이 아닌 인물이면 붙이지 않는다.\n마지막 줄은 보내는 사람 이름 한 줄로 끝낸다. 보통은 '{{char}}가' 처럼 이름만 쓴다. 사이가 깊으면 '{{user}}를 사랑하는 {{char}}가', '네 남편이' 처럼 관계를 넣어도 되지만, 아직 그런 사이가 아니면 이름만 쓴다.\n호칭과 서명은 지금 두 사람의 실제 거리감에 맞춘다. 과하게 붙이지 않는다.\n첫 줄과 마지막 줄 사이의 본문은 10~16줄로 쓴다. 본문 안에 '편지' 라는 제목이나 머리말은 쓰지 않는다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
   "/속마음":"이번 턴에는 인물의 지금 속마음만 보여준다. 첫 줄에 [속마음] 을 쓰고 [/속마음] 으로 닫는다. 그 안은 이 인물의 성격과 말버릇 그대로 쓴다. 길이도 인물에 맞게 정한다. 처음부터 끝까지 한 덩어리로 이어 쓰고, 문단을 나누거나 빈 줄을 넣지 않는다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
   "/쇼핑":"이번 턴에는 이 인물의 온라인 쇼핑 주문 내역만 보여준다. 첫 줄에 [주문] 을 쓰고 [/주문] 으로 닫는다. 그 안에 한 줄에 하나씩 여섯 줄을 쓴다. 형식은 '상품명 | 가격 | 판매처 | 날짜 | 배송상태' 이고, 세로줄로만 나눈다. 다른 기호나 번호는 붙이지 않는다.\n최근에 산 것이 맨 위로 온다.\n무엇을 샀는지는 이 인물의 처지, 직업, 사는 곳, 취향, 몸 상태, 돈 사정, 혼자 있을 때의 모습에서 나온다. 여섯 줄이 서로 결이 달라야 한다. 생활에 필요해서 산 것, 몸이나 건강에 쓰는 것, 일에 필요한 것, 혼자 있을 때 쓰는 것, 남에게 주려고 산 것, 이 사람만의 사정이 드러나는 것을 섞는다.\n상품명은 실제 쇼핑앱에 뜨듯이 쓰되 30자를 넘기지 않는다.\n가격은 그 세계관에서 실제로 쓰는 화폐로 적는다.\n날짜는 '8월 27일' 처럼 쓰고, 지금 장면의 계절이나 흐름과 어긋나지 않게 정한다.\n배송상태는 배송완료, 배송중, 결제완료 중에서 고른다.\n세계관이 현대가 아니면 그 시대에 맞는 방식으로 바꾼다. 온라인 주문이 없는 시대라면 장부나 거래 내역처럼 쓴다." + PRIVATE_NOTE + "\n지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
-  "/결제내역":"이번 턴에는 이 인물의 결제 내역만 보여준다. 첫 줄에 [결제] 를 쓰고 [/결제] 로 닫는다. 그 안에 한 줄에 하나씩 여섯 줄을 쓴다. 형식은 '서비스명 | 가격 | 주기 | 날짜 | 상태' 이고, 세로줄로만 나눈다. 다른 기호나 번호는 붙이지 않는다.\n최근에 결제한 것이 맨 위로 온다.\n정기결제와 단건 결제가 섞여 있어야 한다. 구독 서비스, 일이나 공부에 쓰는 것, 배달이나 장보기, 취미에 쓰는 것, 큰돈이 한 번 나간 것, 이 사람만의 사정이 드러나는 것을 섞는다.\n항목마다 결이 달라야 한다. 게을러서 해지 못 한 것, 남에게 말 안 하는 것, 남 좋으라고 낸 것, 일 때문에 어쩔 수 없는 것, 옛날에 걸어두고 잊은 것 같은 식이다.\n실제로 있는 서비스와 실제 가격대로 쓴다. 가격을 모르는 서비스는 넣지 않는다.\n주기는 매월, 매년, 단건 중에서 고른다.\n날짜는 '9월 3일' 처럼 쓰고, 지금 장면의 흐름과 어긋나지 않게 정한다.\n상태는 결제완료라고 쓰거나 비워 둔다.\n세계관이 현대가 아니면 그 시대에 맞게 바꾼다. 카드 결제가 없는 시대라면 외상이나 회비, 상납처럼 정기적으로 나가는 돈으로 쓴다." + PRIVATE_NOTE + "\n지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
+  "/결제내역":"이번 턴에는 이 인물의 결제 내역만 보여준다. 첫 줄에 [결제] 를 쓰고 [/결제] 로 닫는다. 그 안에 한 줄에 하나씩 여섯 줄을 쓴다. 형식은 '서비스명 | 가격 | 주기 | 날짜 | 상태' 이고, 세로줄로만 나눈다. 다른 기호나 번호는 붙이지 않는다.\n최근에 결제한 것이 맨 위로 온다.\n정기결제와 단건 결제가 섞여 있어야 한다. 구독 서비스, 일이나 공부에 쓰는 것, 배달이나 장보기, 취미에 쓰는 것, 큰돈이 한 번 나간 것, 이 사람만의 사정이 드러나는 것을 섞는다.\n항목마다 결이 달라야 한다. 게을러서 해지 못 한 것, 남에게 말 안 하는 것, 남 좋으라고 낸 것, 일 때문에 어쩔 수 없는 것, 옛날에 걸어두고 잊은 것 같은 식이다.\n가격은 그 세계관에서 실제로 쓰는 화폐로 적는다. 세계관에 따로 정해진 화폐가 있으면 원이 아니라 그 화폐를 쓴다.\n현대 한국이 배경이면 실제로 있는 서비스와 실제 가격대로 쓴다. 그렇지 않으면 그 세계에 있을 법한 이름과 값으로 짓는다.\n주기는 매월, 매년, 단건 중에서 고른다.\n날짜는 '9월 3일' 처럼 쓰고, 지금 장면의 흐름과 어긋나지 않게 정한다.\n상태는 결제완료라고 쓰거나 비워 둔다.\n세계관이 현대가 아니면 그 시대에 맞게 바꾼다. 카드 결제가 없는 시대라면 외상이나 회비, 상납처럼 정기적으로 나가는 돈으로 쓴다." + PRIVATE_NOTE + "\n지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.",
   "/플리":"이번 턴에는 노래 세 곡만 고른다. 첫 줄에 [플리] 를 쓰고, 아래 순서대로 한 줄에 하나씩 '제목 - 가수 :: 이유' 형식으로 쓴 뒤 [/플리] 로 닫는다. 첫 곡은 지금 상황에 어울려서 듣고 있는 곡, 둘째 곡은 상대를 생각하며 들었던 곡, 셋째 곡은 평소에 자주 듣던 곡이다. 이유는 한 문장으로 쓴다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.\n곡을 고르는 기준은 이렇다. 이 인물이 평소에 좋아할 만한 장르와 분위기로 고른다. 지금 장면이 슬프다고 슬픈 곡을 고르는 것이 아니라, 이 사람이라면 이런 걸 듣겠다 싶은 쪽으로 고른다. 성격, 자란 환경, 나이, 하는 일이 취향을 정한다.\n인물 설정에 음악 취향이 적혀 있으면 무엇보다 그것을 따른다.\n나이가 있거나 옛 시절 이야기를 자주 하는 인물이면 그 시절 곡이 섞여도 좋다. 세계관에 시대가 정해져 있으면 그 시대보다 나중에 나온 곡은 쓰지 않는다.\n세 곡을 전부 누구나 아는 대표곡으로 채우지 않는다. 한 곡 정도는 알려진 곡이어도 좋지만, 나머지는 덜 알려졌더라도 그 인물의 취향이 드러나는 곡으로 고른다.\n실제로 존재하는 곡만 쓴다. 제목이나 가수가 확실하지 않으면 지어내지 말고 확실히 아는 곡으로 바꾼다."
 };
 var CMD_SAY = {
@@ -4317,6 +4367,10 @@ function buildSystem(c, turn){
   p.push("# 인물의 태도");
   p.push(DEFY[c.defy||"보통"] || DEFY["보통"]);
   p.push("상대가 말한 지난 일은 이 기록에 없더라도 실제로 있었던 일로 받아들인다. 없던 일로 취급하거나 그런 적 없다고 부정하지 않는다.");
+  p.push("다만 인물이 스스로 감추고 있던 것을 상대가 짚었을 때는 다르다. 조금 전까지 아니라고 우기던 것을 다음 턴에 순순히 인정하지 않는다. 계속 발뺌하거나, 얼버무리거나, 화제를 돌리거나, 왜 그걸 아느냐고 되묻는다. 인정하더라도 그 인물이 그럴 만한 이유가 생겼을 때만 인정한다.");
+  p.push("");
+  p.push("# 이어짐");
+  p.push("앞 턴에서 인물이 취한 모습과 자세와 위치는 그대로 이어간다. 짐승 모습으로 변했으면 계속 그 모습이고, 무릎을 꿇었으면 계속 꿇고 있다. 바꾸려면 바꾸는 장면을 직접 쓴다. 말없이 원래대로 돌아가 있지 않는다.");
   p.push("다만 사실을 인정하는 것과 아무렇지 않게 넘어가는 것은 다르다. 인물이 이미 알고 있던 일에는 담담히 반응하고, 인물에게 처음 알려지는 사실에는 놀라고 캐묻는다. 새로 알게 된 사실일수록 그냥 받아들이지 말고 어떻게 된 일인지 물어야 한다.");
   p.push("사실 자체는 받아들이되 감정까지 순순할 필요는 없다. 걸리는 단어를 되뇌거나, 왜 지금 그 이야기를 꺼내는지 묻거나, 대답을 피하고 화제를 돌려도 된다.");
   p.push("상대가 자기 쪽 사정을 말할 때, 인물이 알 리 없는 인물이나 사건이라면 아는 척하지 않는다. 모르면 모른다고 하고 궁금하면 물어본다.");
