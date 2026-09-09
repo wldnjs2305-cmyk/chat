@@ -878,7 +878,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-08 v24";
+var APP_VER = "2026-09-08 v25";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["night","밤"]
@@ -4495,6 +4495,7 @@ function buildSystem(c, turn){
   if (lenLine){
     p.push("");
     p.push("# 길이");
+    p.push("앞 기록에 편지나 일기, 공고문 같은 긴 글이 있어도 그 길이를 따라 하지 않는다. 그것은 명령어로 뽑은 것이라 길 뿐이다. 이번 답의 길이는 아래 기준만 따른다.");
     p.push(lenLine);
   }
   return p.join("\n");
