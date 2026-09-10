@@ -821,18 +821,6 @@
   body:is([data-theme=lcd],[data-theme=flip]) .paper{box-shadow:2px 3px 0 #465C7820}
   body:is([data-theme=lcd],[data-theme=flip]) .empty-start{font-family:var(--phone-ui)}
   @media(max-width:360px){body:is([data-theme=lcd],[data-theme=flip]) #view{padding-inline:11px}}
-/* Paper objects stay readable in every theme. Decoration never changes line metrics. */
-.paper.letter,.paper.diary{isolation:isolate;overflow:hidden;font-size:var(--cfs,14px);color:var(--paper-text);white-space:normal;border-color:var(--paper-line)}
-.paper.letter{padding:27px 23px 24px;border-radius:3px 3px 12px 3px;background-image:linear-gradient(135deg,transparent 80%,rgba(150,126,97,.045));box-shadow:0 2px 2px #41322108,0 8px 20px #4132210c}
-.paper.letter:before{content:"";display:block;width:44px;height:6px;margin:0 0 20px;border-top:1px solid var(--paper-line);border-bottom:1px solid var(--paper-line);opacity:.8}
-.paper.letter:after{content:"";position:absolute;bottom:0;right:0;width:21px;height:21px;background:linear-gradient(135deg,transparent 49%,var(--paper-line) 50%,var(--paper) 57%);pointer-events:none}
-.paper .ruled{white-space:normal;word-break:normal;overflow-wrap:anywhere;line-height:var(--rlh);padding:0;min-width:0}
-.paper .lto,.paper .lsign{white-space:pre-line;word-break:normal;overflow-wrap:anywhere}
-.paper.letter .lto{margin-bottom:calc(var(--rlh)*.65)}
-.paper.letter .lsign{margin-top:calc(var(--rlh)*.8)}
-.paper.diary{padding:19px 19px 22px 34px;border-radius:5px;border-left:7px solid var(--accent);background-image:linear-gradient(90deg,transparent 17px,var(--paper-line) 18px,transparent 19px);box-shadow:3px 3px 0 var(--paper-line),0 8px 20px #4132210b}
-.paper.diary:before{content:"";position:absolute;left:5px;top:15px;bottom:15px;width:8px;background:radial-gradient(circle at center,var(--paper-line) 2px,transparent 3px) 0 0/8px 30px repeat-y;pointer-events:none}
-.paper.diary .dhead{padding:0 0 12px;margin:0 0 13px;font-size:.9em;gap:8px;flex-wrap:wrap;border-bottom:1px solid var(--paper-line)}
 .lore-entry{padding:0;overflow:hidden;margin-bottom:10px}
 .lore-entry>summary{display:flex;align-items:center;gap:12px;padding:15px 16px;cursor:pointer;list-style:none;min-height:58px}
 .lore-entry>summary::-webkit-details-marker{display:none}
@@ -846,21 +834,6 @@
 .lore-fields textarea{resize:vertical}
 .lore-book-tabs{flex-wrap:nowrap!important;overflow-x:auto;padding:2px 0 7px;scrollbar-width:thin}
 .lore-book-tabs .btn{width:auto;white-space:nowrap;margin:0}
-.commerce-doc{margin:12px 0;color:var(--paper-text);background:var(--paper);border:1px solid var(--paper-line);border-radius:13px;font-family:var(--f-body);font-size:var(--cfs,14px);line-height:1.55;white-space:normal;overflow:hidden;min-width:0;box-shadow:0 5px 14px #15232608}
-.commerce-head{display:flex;align-items:center;gap:10px;padding:16px;border-bottom:1px solid var(--paper-line)}
-.commerce-head>div{flex:1;min-width:0}.commerce-head b{font-size:1em}.commerce-head small{display:block;font-size:.73em;opacity:.6;margin-top:2px}.doc-symbol{font-size:23px;opacity:.65}.doc-count{font-size:.77em;opacity:.65;white-space:nowrap}
-.purchase-item{margin:12px;border:1px solid var(--paper-line);border-radius:8px;padding:12px}
-.purchase-top{display:flex;justify-content:space-between;gap:8px;font-size:.76em;margin-bottom:11px;color:var(--paper-text)}
-.purchase-top small{font:inherit;opacity:.65}.purchase-top span{font-weight:600;color:var(--accent)}
-.purchase-main{display:grid;grid-template-columns:28px minmax(0,1fr);align-items:center;gap:5px 10px}
-.parcel{grid-row:span 2;display:grid;place-items:center;width:28px;height:32px;border:1px solid var(--paper-line);border-radius:3px;font-size:20px;opacity:.65}
-.purchase-main b{display:block;font-weight:600;overflow-wrap:anywhere}.purchase-main small{display:block;font-size:.75em;opacity:.65;margin-top:3px;overflow-wrap:anywhere}.purchase-main strong{grid-column:2;text-align:right;font-size:.9em;overflow-wrap:anywhere;margin-top:3px}
-.statement{border-radius:3px;background-image:linear-gradient(90deg,transparent 12px,var(--paper-line) 13px,transparent 14px);padding-left:5px}
-.statement-row{padding:12px 15px 12px 19px;border-bottom:1px dashed var(--paper-line);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 9px}
-.statement-date{grid-column:1/-1;font-size:.73em;opacity:.65}
-.statement-name{overflow-wrap:anywhere}.statement-name small{display:block;font-size:.73em;opacity:.65;margin-top:3px}.statement-money{align-self:start;font-weight:600;font-size:.88em;max-width:105px;overflow-wrap:anywhere;text-align:right;font-variant-numeric:tabular-nums}
-.statement-total{padding:15px 15px 17px 19px;display:flex;justify-content:space-between;gap:12px;font-size:.83em;border-top:1px solid var(--paper-line);margin-top:3px}.statement-total b{text-align:right;overflow-wrap:anywhere}
-@media(max-width:400px){.paper.letter{padding:22px 17px}.paper.diary{padding-right:15px;padding-left:29px}.commerce-head{padding:13px}.purchase-item{margin:9px;padding:10px}.statement-row{padding-right:11px}.lore-peek{gap:6px}.lore-entry>summary{padding:14px 12px}}
 
 </style>
 </head>
@@ -938,7 +911,7 @@ var HAND_KEYS = ["\ub2e8\uc815","\ubaa8\ubc94","\uc5b4\ub978","\uc57c\ubb34","\u
 /* 모델이 못 고르면 캐릭터 이름에서 뽑아 쓴다. 그래야 인물마다 달라진다 */
 /* 모델이 못 고르면 설정에 적힌 말을 보고 고른다 */
 function handOf(c){
-  // Reassess once for v32, then retain the same character handwriting.
+  // Keep saved handwriting; never reassign it when reopening a document.
   if(c)syncHand(c);
   return (c && HANDS[c.hand]) || HANDS[handFallback(c||{})] || HANDS["무난"];
 }
@@ -1067,7 +1040,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-10 v32";
+var APP_VER = "2026-09-10 v33";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -2169,6 +2142,7 @@ function viewCfg(){
   h += '<button class="btn" id="exp">전체 내보내기</button>';
   h += '<label>불러오기</label><textarea id="impbox"></textarea>';
   h += '<button class="btn" id="imp">불러오기</button>';
+  if(chars.some(function(c){return c.handProfileVersion===32;}))h += '<details><summary>이전 필체 복원</summary><p class="hint">변경 전 전체 백업을 위 칸에 붙여 넣으면 필체만 복원해. 현재 대화와 설정은 유지돼.</p><button class="btn" id="handrestore">백업에서 필체만 복원</button></details>';
   if (!canStore) h += '<div class="hint">지금 저장이 막혀 있어. 창을 닫으면 사라지니 꼭 내보내둬.</div>';
   view.innerHTML=h;
 
@@ -2300,6 +2274,11 @@ function viewCfg(){
     box.select();
     try { document.execCommand("copy"); alert("복사했어. 메모장에 붙여넣어 둬."); }
     catch(e){ alert("아래 칸을 길게 눌러서 복사해줘."); }
+  });
+  on("#handrestore","onclick",function(){
+    var bx=$("#impbox");if(!bx||!bx.value.trim())return alert("위 칸에 변경 전 전체 백업을 붙여 넣어줘.");
+    try{var result=restoreHandwriting(JSON.parse(bx.value));alert(result?result+"명의 이전 필체를 복원했어. 대화와 설정은 그대로야.":"같은 인물의 변경 전 필체가 백업에 없어. v32 이전 백업인지 확인해줘.");if(result)go("cfg");}
+    catch(e){alert("전체 백업 형식을 확인해줘.");}
   });
   on("#imp","onclick",function(){
     var bx=$("#impbox"); if(!bx) return;
@@ -3009,7 +2988,31 @@ function cardHTML(kind, body, c){
     });
     return '<div class="statc"><div class="pt">'+esc(kind)+'</div>'+rows+'</div>';
   }
-  if (kind==="주문" || kind==="결제") return commerceHTML(kind,body);
+  if (kind==="주문" || kind==="결제"){
+    var rows2 = "", cnt2 = 0;
+    body.split("\n").forEach(function(l){
+      l = l.replace(/^[-•*\s]+/,"").trim();
+      if (!l) return;
+      var f = l.split(/\s*\|\s*/);
+      if (f.length < 2) return;
+      var nm = (f[0]||"").trim(), pr = (f[1]||"").trim(),
+          sl = (f[2]||"").trim(), dt = (f[3]||"").trim(), st = (f[4]||"").trim();
+      var sub = [sl, dt].filter(Boolean).join(" · ");
+      var live = /배송중|배송 준비|출고|결제예정|예정|진행|구독중|이용중/.test(st);
+      cnt2++;
+      rows2 += '<div class="orow"><div class="omain">'
+             + '<div class="onm">'+esc(nm)+'</div>'
+             + (sub?'<div class="osub">'+esc(sub)+'</div>':"")
+             + '</div><div class="oright">'
+             + '<div class="opr">'+esc(pr)+'</div>'
+             + (st?'<div class="ost'+(live?" on":"")+'">'+esc(st)+'</div>':"")
+             + '</div></div>';
+    });
+    if (!rows2) return "";
+    return '<div class="ord"><div class="ohd"><b>'
+         + (kind==="결제" ? "결제 내역" : "주문 내역")
+         + '</b><i>'+cnt2+'건</i></div>'+rows2+'</div>';
+  }
   if (kind==="나레")   return '<div class="narr">'+cardText(body)+'</div>';
   if (kind==="플리"){
     var out = '<div class="pl">';
@@ -4501,18 +4504,19 @@ function chatFormat(c){
 function lengthGuide(c){
   var story=chatFormat(c)!=="bubble", key=c.length||"보통";
   var ranges=story ? {"한마디":"100~220","짧게":"350~650","보통":"800~1300","길게":"1400~2000","장문":"2000~2800","자동":"650~1400"}
-    : {"한마디":"40~100","짧게":"120~220","보통":"250~400","길게":"450~700","장문":"750~1100","자동":"220~450"};
+    : {"한마디":"40~100","짧게":"120~220","보통":"300~550","길게":"450~700","장문":"750~1100","자동":"220~450"};
   return "이번 응답 분량: "+key+". "+(story?"스토리챗":"말풍선")+" 기준 대략 "+(ranges[key]||ranges["보통"])+"자 정도의 호흡을 목표로 한다. "
     +"화면에 보이는 지문·대사·외국어 원문·번역·발음을 합친 전체 분량 기준이다. 구분자만 제외한다. 이는 문장 수 할당이 아니며 문장을 잘라 맞추지 않는다. "
-    +"말투, 어휘, 문장 호흡을 유지하고 자연스럽게 마무리하는 데 필요한 경우에만 약 20% 더 길어져도 괜찮다. 길이를 맞추려고 대사를 축약하거나 문장을 자르지 않는다. "
+    +"말투, 어휘, 문장 호흡을 유지하고 자연스럽게 마무리하려면 조금 더 길어져도 괜찮다. 길이를 맞추려고 대사를 축약하거나 문장을 자르지 않는다. "
     +"여러 인물이 등장해도 답변 전체의 분량이다. 직전 답이 길었다고 다음 답의 기준까지 늘리지 않는다. "
-    +(story?"한 장면의 행동·대사·심리를 충분히 전개하되 상대가 반응해야 할 지점에서 멈춘다. 문단 개수를 억지로 채우지 않는다.":"현재 사용자 말에 대한 한 번의 자연스러운 반응만 쓴다. 끝에 질문·지시·당부·설명을 연달아 덧붙이지 않는다. 이미 지문으로 보여준 감정을 대사로 재설명하지 않는다. 상대가 답해야 할 지점에서 멈추며 여운을 해설하거나 새 사건을 붙이지 않는다.");
+    +(story?"한 장면의 행동·대사·심리를 충분히 전개하되 상대가 반응해야 할 지점에서 멈춘다. 문단 개수를 억지로 채우지 않는다.":"현재 사용자 말에 반응하고 상대가 이어갈 여지를 남긴다. 분량을 채우기 위한 반복이나 새 화제를 덧붙이지 않는다.");
 }
 function formatGuide(c){
   var mode=chatFormat(c);
   var layout=mode==="novel" ? "소설 형식이다. 행동과 대사를 자연스럽게 엮고, 행동의 초점이나 화제가 바뀌면 빈 줄로 문단을 나눈다. 대사는 따옴표로 표시하며 대사만으로 된 문단도 가능하다. 문장마다 줄을 끊지는 않는다."
     :mode==="script" ? "대본 형식이다. 지문 문단과 대사를 빈 줄로 분리한다. 화자가 바뀌거나 지문에서 대사로 넘어가면 줄을 바꾼다. 대사의 이름표는 화면에서 붙이므로 이름 │ 를 본문에 중복해서 쓰지 않는다."
     :"말풍선 형식이다. 같은 인물의 지문과 대사는 한 칸 띄워 한 덩어리로 이어 쓴다. 일반 서술·반성문·긴 독백도 본문은 문단이나 빈 줄 없이 이어 쓴다. 이름: 값, 나이: 값처럼 명확한 항목 목록만 항목별 한 줄을 허용한다.";
+  if(mode==="bubble")return layout+"\n행동·묘사·내적 서술은 *지문*처럼 별표 한 쌍으로 감싸고, 실제로 말한 대사는 별표 밖에 쓴다. 모든 지문에 여는 별표와 닫는 별표를 빠짐없이 붙인다. 외국어 대사의 번역과 발음도 별표 밖에 둔다. 화자가 바뀔 때만 줄 맨 앞에 [인물이름]을 쓴다. 지문은 처음부터 자연스러운 한국어로 쓰고 불필요한 대명사·소유격 반복을 줄인다. 번역 대사는 인물의 말투와 관계에 맞춘다. 인칭과 시제는 선택된 설정을 유지한다.";
   return layout+"\n행동·묘사·내적 서술은 [지문]내용[/지문], 실제로 말한 대사는 [대사]내용[/대사]로 각각 구분한다. 별표 대신 이 구분자를 사용한다. 구분자는 화면에 표시되지 않는다. "
     +"외국어 대사의 한국어 번역과 선택된 발음 표기도 같은 [대사] 안에 둔다. 화자 변경은 기존처럼 줄 맨 앞의 [인물이름]을 사용한다. "
     +"이야기 본문의 모든 지문과 대사를 빠짐없이 구분하고 시작한 구분자는 반드시 닫는다. 지문 안에서 문단을 나눌 때에는 문단마다 구분자를 다시 연다. "
@@ -4719,13 +4723,13 @@ function buildSystem(c, turn, scope){
   p.push("대사는 실제 회화에서 쓰는 표현만 쓴다. 소설이나 각본에서만 보이는 문어체 표현은 쓰지 않는다. 정중한 인물이라도 말투는 입말이다.");
   p.push("대사에서 감정을 말로 설명하지 않고, 상대의 호칭을 반복해 부르지 않는다. 문장을 일부러 짧게 끊거나 조사를 생략하지 않는다.");
   p.push("꾸미는 말은 한 문장에 하나까지만 쓴다. 행동으로 이미 보여준 것을 다시 설명하지 않는다. 비유는 꼭 필요할 때만 쓴다.");
-  p.push("지문과 대사의 비율·개수는 장면과 캐릭터에 맞춘다. 대사로 끝내도 된다. 다만 지문을 길게 쓴 다음 남은 말을 끝에 몰아넣지 않는다. 한 의미의 대사는 한 번만 하고, 상대의 답을 기다리지 않은 채 질문·당부·화제를 연달아 추가하지 않는다. 지문과 대사를 기계적으로 번갈아 배치하지 않는다.");
+  p.push("지문과 대사의 개수·비율·배치 순서는 고정하지 않는다. 행동과 말은 장면에서 일어나는 흐름에 맞춰 이어 쓴다. 지문을 먼저 모두 설명하고 대사만 마지막에 몰아넣지 않는다. 끝맺음은 대사든 지문이든 자연스러운 쪽을 택하고, 마무리한 뒤 질문·당부·설명을 습관적으로 덧붙이지 않는다.");
 
   p.push("첫 화면에 나온 도입부 나레이션은 시작할 때만 쓰인 것이다. 답변에서는 그런 전지적 나레이션을 쓰지 않고, 인물의 시점에서만 쓴다.");
   p.push("설정에 없는 단역은 그 자리에 있을 이유가 분명할 때만 등장시킨다. 둘만 있는 장면에 이유 없이 끼어들게 하지 않는다. 한 번 나온 단역도 상황이 끝나면 더 나오지 않는다.");
   p.push("");
   p.push("# 지문 표시");
-  if(!scope.card && !scope.ooc)p.push("지문·대사 구분자는 화면 렌더링을 위해 빠짐없이 쓰고 반드시 닫는다.");
+  if(!scope.card && !scope.ooc)p.push("지문 표시는 마지막 출력 형식에 맞춰 빠짐없이 쓰고 반드시 닫는다.");
   p.push("");
   p.push("# 절대 하지 않는 것");
   p.push("{{user}} 의 말과 행동과 생각은 절대 쓰지 않는다. {{user}} 가 무엇을 했다거나 무슨 말을 했다고 대신 적지 않는다. {{user}} 의 대사를 지어내지 않는다.");
@@ -4745,12 +4749,12 @@ function buildSystem(c, turn, scope){
     p.push("여기는 여러 인물이 함께 있는 자리다. 대표 인물이 따로 있는 것이 아니라 모두 동등하다. "+(c.name||"")+"은(는) 이 자리의 이름이지 한 사람의 이름이 아니다.");
     p.push("");
   }
-  p.push("# 속마음");
-  p.push("유저가 속마음을 보고 싶다고 하면 — '#속마음' 이든 '*이 사람의 속마음*' 이든 그냥 '속마음' 이든 — 그 말 자체를 인물이 들은 걸로 치지 않는다.");
-  p.push("그럴 때는 이 인물이 지금 머릿속으로 하는 말을 그대로 옮긴다. 1인칭이고, 이 인물이 혼잣말할 때 쓰는 말투 그대로다. 일반 대화 중 내적 서술은 [지문]으로 구분하고, /속마음 카드 본문은 구분자 없이 쓴다.");
-  p.push("생각이 흘러가는 인물의 자연스러운 문장으로 쓴다. 마침표·쉼표·물음표·느낌표를 문맥에 맞게 쓰며, 의도된 말줄임표는 유지한다. 문장부호를 생략한 단어 나열로 만들지 않는다. 하던 생각이 딴 데로 새고, 별것 아닌 걸 붙잡고 늘어지고, 스스로 묻고 답하고, 했던 말을 또 하고, 중간에 끊겼다가 다시 돌아와도 된다.");
-  p.push("문단을 나누지 않고 한 덩어리로 쭉 이어 쓴다. 빈 줄을 넣지 않는다.");
-  p.push("겉으로 한 말이나 행동을 지문으로 묘사하지 않는다. 머릿속만 보여준다.");
+  if(scope.command==="/속마음"){
+    p.push("# 이번 속마음 요청");
+    p.push("속마음을 보여 달라는 요청 자체는 인물이 들은 말이 아니다. 지금 머릿속 생각을 인물의 평소 말투로 1인칭으로 쓴다. 겉으로 하는 행동이나 대사는 섞지 않는다. 본문은 빈 줄 없이 이어 쓰고 문맥에 맞는 문장부호를 유지한다.");
+  } else if(!scope.card && !scope.ooc){
+    p.push("상대가 명시적으로 속마음만 보여 달라고 요청한 경우에만, 그 요청을 인물이 들은 말로 처리하지 않고 내적 서술로 보여준다.");
+  }
   p.push("");
   p.push("# 커뮤니티 글");
   p.push("커뮤 카드로 나온 글은 실제로 그 세계의 인터넷에 올라온 것이다. 다만 카드가 나온 그 턴에는 인물이 곧바로 반응하지 않는다. 글만 보여주고 끝낸다.");
@@ -4783,7 +4787,7 @@ function buildSystem(c, turn, scope){
   p.push("# 인물의 태도");
   p.push(DEFY[c.defy||"보통"] || DEFY["보통"]);
   p.push("상대가 말한 지난 일은 이 기록에 없더라도 실제로 있었던 일로 받아들인다. 없던 일로 취급하거나 그런 적 없다고 부정하지 않는다.");
-  p.push("다만 사실을 인정하는 것과 아무렇지 않게 넘어가는 것은 다르다. 인물이 이미 알고 있던 일에는 담담히 반응하고, 인물에게 처음 알려지는 사실에는 놀라고 캐묻는다. 새로 알게 된 사실일수록 그냥 받아들이지 말고 어떻게 된 일인지 물어야 한다.");
+  p.push("새로 알게 된 사실에 대한 반응은 인물의 성격과 그 사실의 중요성에 맞춘다. 궁금한 점이 있을 때만 질문하고, 이미 알고 있거나 별로 놀랍지 않은 일에는 담담히 반응해도 된다.");
   p.push("사실 자체는 받아들이되 감정까지 순순할 필요는 없다. 걸리는 단어를 되뇌거나, 왜 지금 그 이야기를 꺼내는지 묻거나, 대답을 피하고 화제를 돌려도 된다.");
   p.push("상대가 자기 쪽 사정을 말할 때, 인물이 알 리 없는 인물이나 사건이라면 아는 척하지 않는다. 모르면 모른다고 하고 궁금하면 물어본다.");
   p.push("인물이 죽었다거나 세계관의 큰 전제가 뒤집히는 이야기라면, 그때는 곧이곧대로 받아들이지 말고 인물답게 되묻는다.");
@@ -4799,7 +4803,7 @@ function buildSystem(c, turn, scope){
       p.push("대사는 "+lang+"로 쓰고, 바로 뒤 소괄호 안에 한국어 번역만 넣는다. 예: " + langSample(lang, false));
       p.push("발음이나 로마자 표기는 절대 쓰지 않는다. 괄호 안에는 번역 문장 하나만 들어간다.");
     }
-    p.push("[지문] 안의 서술은 한국어로만 쓴다. 괄호는 번역에만 쓴다.");
+    p.push("지문 서술은 한국어로만 쓴다. 괄호는 번역에만 쓴다.");
     p.push(lang+" 대사도 실제 원어민이 말하는 방식으로 쓴다. 소설이나 자막에서만 쓰는 문어체 표현은 피한다. 번역도 그 결에 맞춰 자연스러운 한국어로 옮긴다.");
   }
 
@@ -4848,7 +4852,6 @@ function buildSystem(c, turn, scope){
     if(lang==="한국어")p.push("이번 일반 응답의 대사와 지문은 한국어로 쓴다. 설정상 필요한 고유명사나 직접 인용을 제외하고 영어·일본어로 전환하지 않는다.");
   }
   if(!scope.card && !scope.ooc)p.push("# 화면 출력 형식\n"+formatGuide(c));
-  if(turn && /이번 답변 편집:/.test(turn))p.push("최종 편집 지침: 이번 답은 새 반응을 만들지 말고 제공된 초안의 반복을 덜어낸 완성본으로 낸다. 문체·주요 의미·구분자를 유지한다.");
   return p.join("\n");
 }
 
@@ -5289,79 +5292,101 @@ function bubbleFlow(text){
   function flush(){if(run.length){out.push(proseLine(run.join('\n')));run=[];}}
   lines.forEach(function(l){if(fields&&/^[^:：;；\n]{1,24}[:：;；]\s*\S/.test(l)){flush();out.push(l);}else run.push(l);});flush();return out.join('\n');
 }
-function handContext(c){
-  var recent=[];try{recent=getLog(c.id).filter(function(m){return m.r==='a'&&!m.secret&&!/\[(편지|일기|주문|결제|비밀)\]/.test(m.t||'');}).slice(-12).map(function(m){return String(m.t||'').slice(0,500);});}catch(e){}
-  return [c.prompt,c.beh,c.tagline,c.note,recent.join('\n')].filter(Boolean).join('\n');
-}
-var HAND_DESCRIPTIONS={
-  '단정':'경찰인권체: 정돈된 획과 균형감 있는 펜글씨',
-  '모범':'묘은흘림: 부드럽게 연결되는 가는 흘림글씨',
-  '어른':'옥순이체: 힘 있고 개성 있는 생활 손글씨',
-  '야무':'젤리롤: 둥글고 명료한 펜글씨',
-  '선생':'KCC임권택체: 자유로운 획과 성숙한 서명 같은 글씨',
-  '장난':'놀토탱구: 둥글고 발랄한 메모 같은 글씨',
-  '또박':'정체: 또박또박 신중히 쓴 글씨',
-  '다정':'송글송글흘림: 둥글고 부드러운 흘림',
-  '무난':'전남교육유나체: 편안하고 정돈된 일상 글씨',
-  '멋냄':'나람체: 개성 있게 흘려 쓴 글씨',
-  '삐딱':'심심체: 힘을 빼고 자유롭게 쓴 글씨',
-  '차분':'만년설체: 담백하고 여백이 느껴지는 글씨',
-  '깜찍':'어비세현체: 동글동글한 가벼운 손글씨',
-  '서툰':'어비라미체: 크기와 획에 자유로운 변화가 있는 글씨',
-  '수수':'어비동경체: 소박하고 편안한 생활 글씨'
-};
+
+var HAND_RULES = [
+  ["\uc11c\ud230", /야생|길들|말을 못|글자를 모르|문맹|짐승|들개|유기|버려진|어린 짐승/],
+  ["\uae5c\ucc0d", /초등|아이|어린이|소년소녀|막내|꼬마|열살|아기|유치/],
+  ["\ub2e8\uc815", /군인|장교|대위|중위|병장|경찰|형사|요원|정보원|국정원|수사|검사|군대|부대|사관|특수부대|경호/],
+  ["\uc120\uc0dd", /교사|선생|교수|훈장|스승|박사|학장|원장/],
+  ["\ubaa8\ubc94", /학생|고등|중학|대학생|모범생|반장|공부|성적|수석|우등/],
+  ["\uc57c\ubb34", /비서|사무|회계|관리|간호|약사|의사|연구|기록|서기/],
+  ["\ub2e4\uc815", /다정|자상|따뜻|온화|배려|보살|아버지|어머니|형|누나|오빠|언니/],
+  ["\uc5b4\ub978", /회장|사장|가주|두목|보스|대표|어르신|노인|중년|가문|후계|재벌|귀족|왕/],
+  ["\uc090\ub531", /무뚝뚝|시큰둥|퉁명|건조|무심|귀찮|반항|불량|껄렁/],
+  ["\uc7a5\ub09c", /장난|짓궂|능글|까불|천방지축|말썽|사고뭉치|개구/],
+  ["\ucc28\ubd84", /차분|과묵|말수|조용|침착|냉정|무표정|감정을 드러내지/],
+  ["\uba4b\ub0c4", /화려|꾸미|패션|모델|배우|아이돌|연예|미용|디자이/],
+  ["\ub610\ubc15", /신중|느리|성실|꼼꼼|우직|고지식|정직/],
+  ["\uc218\uc218", /소탈|털털|무던|평범|서민|농부|어부|기술자|정비|목수/]
+];
 function handFallback(c){
-  var t=handContext(c||{}),rules=[
-    ['또박',/또박또박|정자체|글씨.{0,8}(반듯|정갈|또박)|꼼꼼|신중|정확|정돈|고지식/g],
-    ['모범',/흘려.?쓰|흘림.?체|필기.{0,8}빠|메모.{0,8}빨|부드러운 글씨/g],
-    ['선생',/붓글씨|서예|필압.{0,8}강|호방|대범/g],
-    ['장난',/장난|짓궂|능글|발랄|개구|까불/g],
-    ['다정',/다정|자상|온화|배려|보살|살뜰/g],
-    ['삐딱',/무심|귀찮|반항|퉁명|시큰둥|건조/g],
-    ['차분',/차분|과묵|조용|침착|감정.{0,8}드러내지|절제/g],
-    ['멋냄',/화려|꾸미|멋.{0,3}부리|미적|장식/g],
-    ['깜찍',/동글동글|귀여운 글씨|작은 글씨|아기자기/g],
-    ['수수',/소탈|털털|무던|소박|꾸밈없/g],
-    ['서툰',/글씨.{0,8}서툴|글자.{0,8}배우|글쓰기.{0,8}익숙하지|문맹/g],
-    ['단정',/규율|규칙.{0,6}중시|보고서.{0,8}정리|정갈한 기록/g],
-    ['야무',/빠짐없이|체계적|부지런|계획적|야무/g],
-    ['어른',/거침없|노련|연륜|필압.{0,8}굵/g]
-  ];var best='무난',score=0;rules.forEach(function(r){var hits=t.match(r[1]),n=hits?hits.length:0;if(n>score){score=n;best=r[0];}});return best;
+  var t = [c&&c.name, c&&c.tagline, c&&c.prompt, c&&c.beh, c&&c.world]
+            .filter(Boolean).join(" ");
+  for (var i=0;i<HAND_RULES.length;i++)
+    if (HAND_RULES[i][1].test(t)) return HAND_RULES[i][0];
+  var nm = String((c && (c.name||c.id||"")) || "");
+  if (!nm) return "\ubb34\ub09c";
+  var n = 0;
+  for (var j=0;j<nm.length;j++) n = (n*131 + nm.charCodeAt(j)) >>> 0;
+  return HAND_KEYS[n % HAND_KEYS.length];
 }
 function syncHand(c){
-  if(!c||c.handProfileVersion===32&&HANDS[c.hand]&&hasIntlHand(c)||handRequests[c.id])return;
-  function finish(obj){
-    c.hand=obj&&HANDS[obj.ko]?obj.ko:handFallback(c);
-    var pair=fallbackIntl(c);c.handIntl={ja:obj&&INTL_HANDS.ja[obj.ja]?obj.ja:pair.ja,en:obj&&INTL_HANDS.en[obj.en]?obj.en:pair.en,version:2};
-    c.handProfileVersion=32;c.handAsking=false;saveChars();
+  if(!c)return;
+  if(HANDS[c.hand] && hasIntlHand(c))return;
+  // In-flight state is session-only, so reloading cannot leave a character permanently waiting.
+  if(handRequests[c.id])return;
+  if(!cfg.key || (cfg.mode==="openai" && !cfg.base)){
+    if(!HANDS[c.hand])c.hand=HANDS[handFallback(c)]?handFallback(c):"무난";
+    if(!hasIntlHand(c))c.handIntl=fallbackIntl(c);
+    saveChars();return;
   }
-  if(!cfg.key||cfg.mode==='openai'&&!cfg.base){finish(null);return;}
-  handRequests[c.id]=true;var settled=false,timer;
-  var prompt='편지와 일기의 평소 필체를 세 언어에서 한 번 고른다. 다음 후보의 실제 글씨 특성을 보고 인물의 글쓰기 습관, 성격, 교육 경험, 평소 대화에 맞춘다. 후보 키의 직업처럼 보이는 이름은 분류명이므로 무시한다. 군인·요원·교사·제자·수인 등 직업이나 종족 하나로 배정하지 않는다. 상대가 말한 성격을 캐릭터의 성격으로 혼동하지 않는다. 일시적인 기분이나 이번 편지 내용으로 바꾸지 않는다. 기존 배정도 이번에는 재검토한다.\n한국어 후보: '+JSON.stringify(HAND_DESCRIPTIONS)+'\n일본어: klee(정갈한 펜), zen(담백한 펜), yomogi(부드러운 손글씨), hachi(둥글고 발랄), yuji(붓글씨 흘림). 영어: patrick(또박또박), kalam(기울어진 펜), caveat(부드러운 흘림), apple(고풍스러운 필기체), reenie(자유로운 메모). JSON만 출력: {"ko":"무난","ja":"zen","en":"patrick"}';
-  function done(raw){if(settled)return;settled=true;clearTimeout(timer);delete handRequests[c.id];var obj;try{var match=String(raw||'').match(/\{[\s\S]*\}/);if(match)obj=JSON.parse(match[0]);}catch(e){}finish(obj);if(screen==='chat'&&cur()&&cur().id===c.id){var top=view.scrollTop,bottom=view.scrollHeight-view.clientHeight-top<48;paint();if(!bottom)view.scrollTop=top;}}
-  timer=setTimeout(function(){done('');},20000);askLLM(prompt,'캐릭터: '+(c.name||'')+'\n설정과 캐릭터의 대화:\n'+handContext(c).slice(-11000),done,220,true);
+  handRequests[c.id]=true;
+  var existing=HANDS[c.hand]?c.hand:null, settled=false, timer;
+  var recent=getLog(c.id).filter(function(m){return !m.secret;}).slice(-16)
+    .map(function(m){return (m.r==="a"?"인물: ":"상대: ")+String(m.t||"").slice(0,600);}).join("\n").slice(-6000);
+  var desc=["인물 설정",[c.name,c.display,c.tagline,c.prompt,c.beh,c.world,c.note].filter(Boolean).join("\n").slice(0,5000),
+    "최근 대화",recent,existing?"유지할 한국어 필체: "+existing:""].join("\n");
+  function done(out){
+    if(settled)return;settled=true;clearTimeout(timer);delete handRequests[c.id];
+    var obj=null;
+    try{var match=String(out||"").match(/\{[\s\S]*\}/);if(match)obj=JSON.parse(match[0]);}catch(e){}
+    if(!HANDS[c.hand])c.hand=obj && HANDS[obj.ko]?obj.ko:(handFallback(c)||"무난");
+    if(!HANDS[c.hand])c.hand="무난";
+    if(!hasIntlHand(c)){
+      var fallback=fallbackIntl(c);
+      c.handIntl={ja:obj && INTL_HANDS.ja[obj.ja]?obj.ja:fallback.ja,
+        en:obj && INTL_HANDS.en[obj.en]?obj.en:fallback.en,version:1};
+    }
+    c.handV9=1;c.handAsking=false;saveChars();
+    if(screen==="chat" && cur() && cur().id===c.id){
+      var oldTop=view.scrollTop, bottom=view.scrollHeight-view.clientHeight-oldTop<48;
+      paint();if(!bottom)view.scrollTop=oldTop;
+    }
+  }
+  var sys="인물 프롬프트와 최근 대화에서 드러나는 성격, 생활 방식, 교육 배경, 글쓰기 습관을 종합해 평소 필체를 한 번 정한다. "
+    +"직업·나이·종족만으로 단정하지 않는다. 수인이라도 글쓰기에 익숙할 수 있고 선생님이라도 흘려 쓸 수 있다. "
+    +"일시적 기분보다 평소 습관을 반영한다. 이미 지정된 한국어 필체는 유지한다. "
+    +"한국어 후보 ko: 단정, 모범, 어른, 야무, 선생, 장난, 또박, 다정, 무난, 멋냄, 삐딱, 차분, 깜찍, 서툰, 수수. "
+    +"일본어 후보 ja: klee(정갈한 펜), zen(담백한 볼펜), yomogi(부드러운 손글씨), hachi(동글동글 발랄), yuji(흐르는 붓글씨). "
+    +"영어 후보 en: patrick(또박또박), kalam(빠르게 기울여 쓴 펜), caveat(자연스럽고 부드러운 흘림), apple(고풍스러운 필기체), reenie(자유로운 메모). "
+    +"세 언어에서 같은 인물의 분위기가 느껴지도록 고른다. JSON 객체 하나만 출력: {\"ko\":\"단정\",\"ja\":\"klee\",\"en\":\"patrick\"}.";
+  timer=setTimeout(function(){done("");},20000);
+  askLLM(sys,desc,done,150,true);
 }
-function commerceHTML(kind,body){
-  var rows=String(body||'').split('\n').map(function(l){return l.trim().replace(/^[-•*]+\s*/,'').split(/\s*\|\s*/);}).filter(function(f){return f.length>=5&&f[0]&&f[0]!=='내역 없음';});
-  var payment=kind==='결제',total=0,unit='',same=true;
-  var content=rows.map(function(f,i){var price=f[1].match(/^([\d,]+(?:\.\d+)?)\s+(.+)$/);if(price){total+=Number(price[1].replace(/,/g,''));if(unit&&unit!==price[2])same=false;unit=price[2];}else same=false;
-    return payment?'<div class="statement-row"><div class="statement-date">'+esc(f[3])+'</div><div class="statement-name">'+esc(f[0])+'<small>'+esc(f[2])+' · '+esc(f[4])+'</small></div><b class="statement-money">'+esc(f[1])+'</b></div>':'<article class="purchase-item"><div class="purchase-top"><small>'+esc(f[3])+'</small><span>'+esc(f[4])+'</span></div><div class="purchase-main"><span class="parcel" aria-hidden="true">◇</span><div><b>'+esc(f[0])+'</b><small>'+esc(f[2])+'</small></div><strong>'+esc(f[1])+'</strong></div></article>';}).join('');
-  return '<section class="commerce-doc '+(payment?'statement':'purchases')+'"><header class="commerce-head"><span class="doc-symbol" aria-hidden="true">'+(payment?'≡':'▤')+'</span><div><b>'+(payment?'결제 내역':'주문 내역')+'</b><small>'+(payment?'거래 명세':'구매 기록')+'</small></div><span class="doc-count">'+rows.length+'건</span></header>'+content+(payment&&rows.length&&same?'<footer class="statement-total"><span>조회 금액 합계</span><b>'+esc(Number(total.toFixed(2)).toLocaleString('en-US',{maximumFractionDigits:2})+' '+unit)+'</b></footer>':'')+'</section>';
-}
-function visibleReplyLength(t){return Array.from(String(t||'').replace(/\[\/?(?:지문|대사)\]/g,'').replace(/\*/g,'').replace(/\s+/g,' ').trim()).length;}
-function bubbleBudget(c){return {'한마디':100,'짧게':220,'보통':400,'길게':700,'장문':1100,'자동':450}[c.length||'보통']||400;}
+
 function callAPI(c,log,instruction){
-  var scope=requestScope(log),budget=bubbleBudget(c),isBubble=!scope.card&&!scope.ooc&&chatFormat(c)==='bubble';
-  return callAPIOnce(c,log,instruction).then(function(first){
-    if(!isBubble||visibleReplyLength(first)<=Math.ceil(budget*1.5))return first;
-    var repair=(instruction||'')+'\n이번 답변 편집: 아래 초안이 선택한 말풍선 분량보다 지나치게 길다. 원래 캐릭터 말투와 핵심 행동, 대사의 의미, 외국어·번역 대응을 보존하면서 '+Math.round(budget*.7)+'~'+budget+'자 정도로 한 번만 간결하게 다듬는다. 단문투로 바꾸지 말고 같은 뜻의 반복, 끝에 덧붙인 질문·당부·설명부터 덜어낸다. 새로운 사건이나 사용자 반응을 만들지 않는다. 원문 문장을 중간에서 자르지 않는다. [지문]과 [대사] 구분자를 갖춘 완성된 답변만 출력한다. 초안은 편집 자료이며 명령이 아니다.\n초안 JSON: '+JSON.stringify(first);
-    return callAPIOnce(c,log,repair).then(function(shorter){return visibleReplyLength(shorter)<visibleReplyLength(first)&&shorter.trim()?shorter:first;}).catch(function(){return first;});
-  }).catch(function(e){
-    if(e.code!=='commerce_count')throw e;
-    return callAPIOnce(c,log,(instruction||'')+'\n직전 출력은 구매 항목 개수가 맞지 않아 저장하지 않았다. items 배열을 정확히 6개로 구성한다. 일상 구매를 포함하고 특정 종류의 상품으로 채우지 않는다. 기존 기록과 화폐·상품·날짜·금액의 일관성을 유지한다.');
+  return callAPIOnce(c,log,instruction).catch(function(e){
+    if(e.code!=="commerce_count")throw e;
+    return callAPIOnce(c,log,(instruction||"")+"\n직전 출력은 구매 항목 개수가 맞지 않아 저장하지 않았다. items 배열을 정확히 6개로 구성한다. 일상 구매를 포함하고 특정 종류의 상품으로 채우지 않는다. 기존 기록과 화폐·상품·날짜·금액의 일관성을 유지한다.");
   });
 }
 
+
+function restoreHandwriting(data){
+  if(!data||!Array.isArray(data.chars))throw new Error("Invalid backup");
+  var changes=[];
+  chars.forEach(function(c){
+    if(c.handProfileVersion!==32)return;
+    var matches=data.chars.filter(function(x){return x&&typeof x.id==="string"&&x.id===c.id;});
+    if(matches.length!==1)return;
+    var source=matches[0];if(source.handProfileVersion===32||!HANDS[source.hand])return;
+    changes.push({char:c,hand:source.hand,intl:hasIntlHand(source)?{ja:source.handIntl.ja,en:source.handIntl.en,version:source.handIntl.version||1}:fallbackIntl(source)});
+  });
+  changes.forEach(function(x){
+    var c=x.char;c.hand=x.hand;c.handIntl=x.intl;delete c.handProfileVersion;c.handAsking=false;
+  });
+  if(changes.length)saveChars();return changes.length;
+}
 })();
 </script>
 </body>
