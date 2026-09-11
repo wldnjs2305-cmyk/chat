@@ -13,7 +13,7 @@
 <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMTgwIDE4MCI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iNDAiIGZpbGw9IiNGM0VGRkEiLz4KPHRleHQgeD0iOTAiIHk9IjkyIiBmb250LXNpemU9IjEwNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZG9taW5hbnQtYmFzZWxpbmU9ImNlbnRyYWwiPiYjMTI4MTQwOzwvdGV4dD4KPC9zdmc+">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@400;600&family=Nanum+Gothic&family=Nanum+Myeongjo&family=Gowun+Dodum&family=Gowun+Batang&family=Song+Myung&family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Gaegu&family=Hi+Melody&family=Black+Han+Sans&family=Gothic+A1:wght@400;700&family=Do+Hyeon&family=Gamja+Flower&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@400;600&family=Nanum+Gothic&family=Nanum+Myeongjo&family=Gowun+Dodum&family=Gowun+Batang&family=Song+Myung&family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Gaegu&family=Hi+Melody&family=Black+Han+Sans&family=Gothic+A1:wght@400;700&family=Do+Hyeon&family=Gamja+Flower&family=Caveat:wght@400;600&family=Yomogi&display=swap">
 <style>
   @font-face{font-family:"RIDIBatang";font-display:swap;
     src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/RIDIBatang.woff") format("woff")}
@@ -704,7 +704,6 @@
   .bub{word-break:normal;overflow-wrap:anywhere}
   .bub em,.dsay em,.narr{font-size:var(--nfs,var(--fs));font-weight:400}
   .nov em,.nov .nn,.snar{font-size:var(--nfs,var(--fs))}
-  .paper .hand-en,.paper .hand-ja{font-weight:400;line-height:inherit}
   #inp{resize:none;overflow-y:hidden;font-size:var(--ifs,14px);min-height:44px}
   #dock .tools{scrollbar-width:none}
   #dock .tools::-webkit-scrollbar{display:none}
@@ -716,7 +715,6 @@
   /* v30: fixed paper rhythm across writing systems. */
   .paper{min-width:0;max-width:100%;overflow-wrap:anywhere;word-break:normal}
   .paper .ruled{line-height:var(--rlh);white-space:pre-wrap;overflow-wrap:anywhere;word-break:normal}
-  .paper .hand-en,.paper .hand-ja{line-height:0;vertical-align:baseline}
   .paper .lto,.paper .lsign{white-space:pre-wrap;overflow-wrap:anywhere}
   .paper.letter .lto{margin:0 0 var(--rlh)}
   .paper.letter .lsign{margin:var(--rlh) 0 0;display:block}
@@ -910,41 +908,40 @@ var HANDS = {
 var HAND_KEYS = ["\ub2e8\uc815","\ubaa8\ubc94","\uc5b4\ub978","\uc57c\ubb34","\uc120\uc0dd","\uc7a5\ub09c","\ub610\ubc15","\ub2e4\uc815","\ubb34\ub09c","\uba4b\ub0c4","\uc090\ub531","\ucc28\ubd84","\uae5c\ucc0d","\uc11c\ud230","\uc218\uc218"];
 /* 모델이 못 고르면 캐릭터 이름에서 뽑아 쓴다. 그래야 인물마다 달라진다 */
 /* 모델이 못 고르면 설정에 적힌 말을 보고 고른다 */
+var HAND_RULES = [
+  ["\uc11c\ud230", /야생|길들|말을 못|글자를 모르|문맹|짐승|들개|유기|버려진|어린 짐승/],
+  ["\uae4c\uce69", /초등|아이|어린이|소년소녀|막내|꼬마|열살|아기|유치/],
+  ["\ub2e8\uc815", /군인|장교|대위|중위|병장|경찰|형사|요원|정보원|국정원|수사|검사|군대|부대|사관|특수부대|경호/],
+  ["\uc120\uc0dd", /교사|선생|교수|훈장|스승|박사|학장|원장/],
+  ["\ubaa8\ubc94", /학생|고등|중학|대학생|모범생|반장|공부|성적|수석|우등/],
+  ["\uc57c\ubb34", /비서|사무|회계|관리|간호|약사|의사|연구|기록|서기/],
+  ["\ub2e4\uc815", /다정|자상|따뜻|온화|배려|보살|아버지|어머니|형|누나|오빠|언니/],
+  ["\uc5b4\ub978", /회장|사장|가주|두목|보스|대표|어르신|노인|중년|가문|후계|재벌|귀족|왕/],
+  ["\uc0d0\ub51d", /무뚝뚝|시큰둥|퉁명|건조|무심|귀찮|반항|불량|껄렁/],
+  ["\uc7a5\ub09c", /장난|짓궂|능글|까불|천방지축|말썽|사고뭉치|개구/],
+  ["\ucc28\ubd84", /차분|과묵|말수|조용|침착|냉정|무표정|감정을 드러내지/],
+  ["\uba4b\ub0c4", /화려|꾸미|패션|모델|배우|아이돌|연예|미용|디자이/],
+  ["\ub610\ubc15", /신중|느리|성실|꼼꼼|우직|고지식|정직/],
+  ["\uc218\uc218", /소탈|털털|무던|평범|서민|농부|어부|기술자|정비|목수/]
+];
+function handFallback(c){
+  var t = [c&&c.name, c&&c.tagline, c&&c.prompt, c&&c.beh, c&&c.world]
+            .filter(Boolean).join(" ");
+  for (var i=0;i<HAND_RULES.length;i++)
+    if (HAND_RULES[i][1].test(t)) return HAND_RULES[i][0];
+  var nm = String((c && (c.name||c.id||"")) || "");
+  if (!nm) return "\ubb34\ub09c";
+  var n = 0;
+  for (var j=0;j<nm.length;j++) n = (n*131 + nm.charCodeAt(j)) >>> 0;
+  return HAND_KEYS[n % HAND_KEYS.length];
+}
 function handOf(c){
-  // Keep saved handwriting; never reassign it when reopening a document.
-  if(c)syncHand(c);
-  return (c && HANDS[c.hand]) || HANDS[handFallback(c||{})] || HANDS["무난"];
-}
-var INTL_HANDS = {
-  ja:{klee:["Klee One",1],zen:["Zen Kurenaido",1],yomogi:["Yomogi",1.02],hachi:["Hachi Maru Pop",1.04],yuji:["Yuji Mai",1.06]},
-  en:{patrick:["Patrick Hand",1.1],kalam:["Kalam",1.03],caveat:["Caveat",1.17],apple:["Homemade Apple",.95],reenie:["Reenie Beanie",1.2]}
-};
-var HAND_PAIRS={
-  "단정":["klee","patrick"],"모범":["klee","patrick"],"어른":["yuji","apple"],
-  "야무":["zen","kalam"],"선생":["yuji","apple"],"장난":["hachi","reenie"],
-  "또박":["klee","patrick"],"다정":["yomogi","caveat"],"무난":["zen","patrick"],
-  "멋냄":["yuji","apple"],"삐딱":["zen","kalam"],"차분":["klee","kalam"],
-  "깜찍":["hachi","caveat"],"서툰":["yomogi","reenie"],"수수":["zen","caveat"]
-};
-var handLoads={},handRequests={},handAttempts={};
-function hasIntlHand(c){return !!(c && c.handIntl && INTL_HANDS.ja[c.handIntl.ja] && INTL_HANDS.en[c.handIntl.en]);}
-function fallbackIntl(c){
-  var pair=HAND_PAIRS[c.hand] || HAND_PAIRS[handFallback(c)] || HAND_PAIRS["무난"];
-  return {ja:pair[0],en:pair[1],version:1};
-}
-function ensureHandFont(family){
-  if(handLoads[family])return;
-  handLoads[family]=true;
-  var link=document.createElement("link");link.rel="stylesheet";
-  link.href="https://fonts.googleapis.com/css2?family="+encodeURIComponent(family).replace(/%20/g,"+")+"&display=swap";
-  link.onerror=function(){delete handLoads[family];link.remove();};
-  document.head.appendChild(link);
-}
-function foreignHand(c,lang){
-  if(c)syncHand(c);
-  var choice=hasIntlHand(c)?c.handIntl:fallbackIntl(c||{});
-  var spec=INTL_HANDS[lang][choice[lang]];
-  ensureHandFont(spec[0]);return spec;
+  /* 예전에 잘못 배정된 것은 한 번 비우고 다시 고르게 한다 */
+  if (c && c.hand && !c.handV9){
+    c.hand = null; c.handAsking = false; c.handV9 = 1;
+    try { saveChars(); } catch(e){}
+  }
+  return (c && HANDS[c.hand]) || HANDS[handFallback(c||{})];
 }
 var FONTS = {
   "Neo둥근모":'"NeoDunggeunmo","Galmuri14",monospace',
@@ -982,7 +979,19 @@ if (!cfg.cSize) cfg.cSize = 14;
 if (!cfg.inputSizeV28){cfg.iSize=14;cfg.inputSizeV28=1;put("gz.cfg",cfg);}
 if (!cfg.iSize) cfg.iSize=14;
 if (typeof cfg.models !== "string") cfg.models = "";
+function undoV34Hand(c){
+  if(!c || c.handRollbackV35 || c.handRuleVersion!==34 || c.handOrigin==="restored")return;
+  var previous=c.handBeforeV34;
+  if(previous){
+    c.hand=previous.hand;c.handV9=previous.handV9;c.handIntl=previous.handIntl;
+    if(previous.handProfileVersion)c.handProfileVersion=previous.handProfileVersion;
+    else delete c.handProfileVersion;
+    c.handAsking=false;
+  }
+  delete c.handRuleVersion;delete c.handOrigin;c.handRollbackV35=1;
+}
 var chars = get("gz.chars", []);
+chars.forEach(undoV34Hand);
 chars.forEach(function(c){if(!c.chatFormat)c.chatFormat=cfg.viewMode||"bubble";});
 put("gz.chars",chars);
 var presets = get("gz.presets", []);
@@ -1036,7 +1045,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-11 v34";
+var APP_VER = "2026-09-11 v35";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -2282,7 +2291,7 @@ function viewCfg(){
     try{
       var d=JSON.parse(raw);
       if(d.cfg){ cfg=d.cfg; saveCfg(); }
-      if(d.chars){ chars=d.chars; chars.forEach(function(c){if(!c.chatFormat)c.chatFormat=cfg.viewMode||"bubble";}); saveChars(); }
+      if(d.chars){ chars=d.chars; chars.forEach(undoV34Hand); chars.forEach(function(c){if(!c.chatFormat)c.chatFormat=cfg.viewMode||"bubble";}); saveChars(); }
       if(d.presets){ presets=d.presets; savePresets(); }
       if(d.logs) for(var id in d.logs){
         put(/^gz\.log\./.test(id) ? id : ("gz.log."+id), d.logs[id]);
@@ -2765,34 +2774,6 @@ function viewBlockEdit(){
 
 /* ---------- 특수 블록 렌더 ---------- */
 /* 카드 본문 — 한 줄씩 끊긴 걸 문단으로 잇고 별표는 기울임으로 */
-function handText(t, c){
-  var box=document.createElement("div");
-  box.innerHTML=esc(stripJunk(t));
-  var walker=document.createTreeWalker(box, NodeFilter.SHOW_TEXT), nodes=[], node;
-  while ((node=walker.nextNode())) nodes.push(node);
-  nodes.forEach(function(n){
-    var pattern=/[A-Za-z\u00C0-\u024F]+(?:[ \t'’.,!?;:\-]+[A-Za-z\u00C0-\u024F]+)*|[\u3040-\u30ff\u31f0-\u31ff\u3400-\u9fff\uff66-\uff9f々〆ヵヶー]+/g;
-    var s=n.nodeValue, last=0, match, frag=document.createDocumentFragment();
-    while ((match=pattern.exec(s))){
-      frag.appendChild(document.createTextNode(s.slice(last,match.index)));
-      var isEnglish=/^[A-Za-z\u00C0-\u024F]/.test(match[0]);
-      if (!isEnglish && c && c.lang==="중국어") frag.appendChild(document.createTextNode(match[0]));
-      else {
-        var span=document.createElement("span");
-        span.className=isEnglish?"hand-en":"hand-ja";
-        span.lang=isEnglish?"en":"ja";
-        var font=foreignHand(c,span.lang);
-        span.style.fontFamily="\""+font[0]+"\", cursive";
-        span.style.fontSize=font[1]+"em";
-        span.textContent=match[0]; frag.appendChild(span);
-      }
-      last=pattern.lastIndex;
-    }
-    frag.appendChild(document.createTextNode(s.slice(last)));
-    n.parentNode.replaceChild(frag,n);
-  });
-  return box.innerHTML;
-}
 function cardText(t){
   var out=esc(chatFormat(cur())==="bubble"?bubbleFlow(stripJunk(t)):flow(stripJunk(t)));
   out=out.replace(/\*{1,3}([^*\n]+?)\*{1,3}/g,'<em>$1</em>');
@@ -2960,14 +2941,14 @@ function cardHTML(kind, body, c){
     if (!dtxt) dtxt = todayLabel();
     return '<div class="paper diary" style="font-family:'+handOf(c)+'"><div class="dhead"><span>'+esc(dtxt)+'</span>'
          + (wd?'<span class="wd">'+esc(wd)+'</span>':"")
-         + '</div><div class="ruled">'+handText(proseLine(dl.join("\n")), c)+'</div></div>';
+         + '</div><div class="ruled">'+cardText(proseLine(dl.join("\n")))+'</div></div>';
   }
   if (kind==="편지"){
     var letter=letterParts(body,c);
     return '<div class="paper letter" style="font-family:'+handOf(c)+'">'
-      +(letter.to?'<div class="lto">'+handText(letter.to,c)+'</div>':'')
-      +'<div class="ruled lbody">'+handText(proseLine(letter.body),c)+'</div>'
-      +(letter.sign?'<div class="lsign">'+handText(letter.sign,c)+'</div>':'')+'</div>';
+      +(letter.to?'<div class="lto">'+esc(letter.to)+'</div>':'')
+      +'<div class="ruled lbody">'+cardText(proseLine(letter.body))+'</div>'
+      +(letter.sign?'<div class="lsign">'+esc(letter.sign)+'</div>':'')+'</div>';
   }
   if (kind==="인스타") return instagramHTML(body,c);
   if (kind==="비밀" || kind==="관계" || kind==="소문") return detailCard(kind,body);
@@ -4238,6 +4219,7 @@ function viewChat(){
     c.startG = "";
     if (g0) setLog(c.id, seedGreeting(c, g0));
   }
+  syncHand(c);
   paint();
   paintModelBtn();
   paintLenBtn();
@@ -5317,65 +5299,22 @@ function bubbleFlow(text){
   lines.forEach(function(l){if(fields&&/^[^:：;；\n]{1,24}[:：;；]\s*\S/.test(l)){flush();out.push(l);}else run.push(l);});flush();return out.join('\n');
 }
 
-var HAND_RULES = [
-  ["\uc11c\ud230", /야생|길들|말을 못|글자를 모르|문맹|짐승|들개|유기|버려진|어린 짐승/],
-  ["\uae5c\ucc0d", /초등|아이|어린이|소년소녀|막내|꼬마|열살|아기|유치/],
-  ["\ub2e8\uc815", /군인|장교|대위|중위|병장|경찰|형사|요원|정보원|국정원|수사|검사|군대|부대|사관|특수부대|경호/],
-  ["\uc120\uc0dd", /교사|선생|교수|훈장|스승|박사|학장|원장/],
-  ["\ubaa8\ubc94", /학생|고등|중학|대학생|모범생|반장|공부|성적|수석|우등/],
-  ["\uc57c\ubb34", /비서|사무|회계|관리|간호|약사|의사|연구|기록|서기/],
-  ["\ub2e4\uc815", /다정|자상|따뜻|온화|배려|보살|아버지|어머니|형|누나|오빠|언니/],
-  ["\uc5b4\ub978", /회장|사장|가주|두목|보스|대표|어르신|노인|중년|가문|후계|재벌|귀족|왕/],
-  ["\uc090\ub531", /무뚝뚝|시큰둥|퉁명|건조|무심|귀찮|반항|불량|껄렁/],
-  ["\uc7a5\ub09c", /장난|짓궂|능글|까불|천방지축|말썽|사고뭉치|개구/],
-  ["\ucc28\ubd84", /차분|과묵|말수|조용|침착|냉정|무표정|감정을 드러내지/],
-  ["\uba4b\ub0c4", /화려|꾸미|패션|모델|배우|아이돌|연예|미용|디자이/],
-  ["\ub610\ubc15", /신중|느리|성실|꼼꼼|우직|고지식|정직/],
-  ["\uc218\uc218", /소탈|털털|무던|평범|서민|농부|어부|기술자|정비|목수/]
-];
-function handFallback(c){
-  var t = [c&&c.name, c&&c.tagline, c&&c.prompt, c&&c.beh, c&&c.world]
-            .filter(Boolean).join(" ");
-  for (var i=0;i<HAND_RULES.length;i++)
-    if (HAND_RULES[i][1].test(t)) return HAND_RULES[i][0];
-  var nm = String((c && (c.name||c.id||"")) || "");
-  if (!nm) return "\ubb34\ub09c";
-  var n = 0;
-  for (var j=0;j<nm.length;j++) n = (n*131 + nm.charCodeAt(j)) >>> 0;
-  return HAND_KEYS[n % HAND_KEYS.length];
-}
 function syncHand(c){
-  if(!c)return;
-  var canAsk=!!(cfg.key && (cfg.mode!=="openai" || cfg.base));
-  if(c.handRuleVersion===34 && HANDS[c.hand]){
-    if(!hasIntlHand(c)){c.handIntl=fallbackIntl(c);saveChars();}
-    if(c.handOrigin!=="fallback" || !canAsk || handAttempts[c.id])return;
-  }
-  if(handRequests[c.id])return;
-  if(c.handRuleVersion!==34){
-    // Preserve the previous assignment in exported character data before selecting by the original rules.
-    if(!c.handBeforeV34 && (c.hand || c.handIntl))c.handBeforeV34={hand:c.hand||null,handIntl:c.handIntl||null,handV9:c.handV9||null,handProfileVersion:c.handProfileVersion||null};
-    c.hand=HANDS[handFallback(c)]?handFallback(c):"무난";
-    c.handIntl=fallbackIntl(c);c.handRuleVersion=34;c.handOrigin="fallback";c.handAsking=false;
-    saveChars();
-  }
-  if(!canAsk || handAttempts[c.id])return;
-  handRequests[c.id]=true;handAttempts[c.id]=true;
-  var desc=[c.name,c.display,c.tagline,c.prompt,c.beh,c.world,c.note].filter(Boolean).join("\n").slice(0,2000);
-  var settled=false,timer;
+  if (!c || !cfg.key) return;
+  if (c.hand && c.handV9) return;
+  if (c.handAsking) return;
+  c.hand = null; c.handAsking = true;
+  var desc = [c.name, c.display, c.tagline, c.prompt, c.beh, c.world, c.note]
+    .filter(Boolean).join("\n").slice(0, 2000);
+  var settled = false;
   function done(k){
-    if(settled)return;settled=true;clearTimeout(timer);delete handRequests[c.id];
-    // A backup restoration performed while the request was pending wins over this response.
-    if(c.handOrigin==="restored")return;
-    c.hand=HANDS[k]?k:(HANDS[handFallback(c)]?handFallback(c):"무난");
-    c.handIntl=fallbackIntl(c);c.handV9=1;c.handRuleVersion=34;c.handOrigin=HANDS[k]?"model":"fallback";c.handAsking=false;
-    delete c.handProfileVersion;saveChars();
-    if(screen==="chat" && cur() && cur().id===c.id){
-      var oldTop=view.scrollTop,bottom=view.scrollHeight-view.clientHeight-oldTop<48;
-      paint();if(!bottom)view.scrollTop=oldTop;
-    }
+    if (settled) return; settled = true;
+    c.hand = HANDS[k] ? k : handFallback(c);
+    c.handV9 = 1; c.handAsking = false;
+    try { saveChars(); } catch(e){}
+    if (screen==="chat" && cur() && cur().id===c.id) paint();
   }
-  if(!desc)return done("");
+  if (!desc) return done("");
   var sys = "아래 인물이 손으로 글씨를 쓴다면 어떤 글씨일지 고른다. 아래 열다섯 중 하나만 그대로 답하고 다른 말은 쓰지 않는다.\n"
     + "단정 - 반듯하고 각 잡힌 글씨. 규율에 익숙한 사람, 군인이나 경찰\n"
     + "모범 - 얌전하고 고른 글씨. 공부 잘하고 성실한 사람\n"
@@ -5394,16 +5333,14 @@ function syncHand(c){
     + "수수 - 꾸밈없이 수수한 글씨. 무던하고 털털한 사람\n"
     + "\n종족이나 겉모습이 아니라 그 인물이 살아온 방식을 보고 고른다. 사람이 아니어도 배우고 자랐으면 반듯하게 쓰고, 사람이어도 배운 적 없으면 서툴게 쓴다. "
     + "나이, 받은 교육, 하는 일, 성격이 글씨를 정한다.";
-
-  timer=setTimeout(function(){done("");},20000);
+  setTimeout(function(){ done(""); }, 20000);
   function ask(again){
-    askLLM(sys,desc,function(out){
-      if(settled)return;
-      var k=String(out||"").replace(/[^가-힣]/g,"").slice(0,2);
-      if(HANDS[k])return done(k);
-      if(!again)return ask(true);
+    askLLM(sys, desc, function(out){
+      var k = String(out||"").replace(/[^가-힣]/g,"").slice(0,2);
+      if (HANDS[k]) return done(k);
+      if (!again) return ask(true);   /* 한 번은 다시 물어본다 */
       done("");
-    },16,true);
+    }, 16, true);
   }
   ask(false);
 }
@@ -5424,10 +5361,10 @@ function restoreHandwriting(data){
     var matches=data.chars.filter(function(x){return x&&typeof x.id==="string"&&x.id===c.id;});
     if(matches.length!==1)return;
     var source=matches[0];if(source.handProfileVersion===32||!HANDS[source.hand])return;
-    changes.push({char:c,hand:source.hand,intl:hasIntlHand(source)?{ja:source.handIntl.ja,en:source.handIntl.en,version:source.handIntl.version||1}:fallbackIntl(source)});
+    changes.push({char:c,hand:source.hand});
   });
   changes.forEach(function(x){
-    var c=x.char;c.hand=x.hand;c.handIntl=x.intl;c.handRuleVersion=34;c.handOrigin="restored";c.handV9=1;delete c.handProfileVersion;c.handAsking=false;
+    var c=x.char;c.hand=x.hand;c.handV9=1;delete c.handRuleVersion;delete c.handOrigin;delete c.handProfileVersion;c.handRollbackV35=1;c.handAsking=false;
   });
   if(changes.length)saveChars();return changes.length;
 }
