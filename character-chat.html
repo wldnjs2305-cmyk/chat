@@ -926,7 +926,7 @@ var HAND_PAIRS={
   "멋냄":["yuji","apple"],"삐딱":["zen","kalam"],"차분":["klee","kalam"],
   "깜찍":["hachi","caveat"],"서툰":["yomogi","reenie"],"수수":["zen","caveat"]
 };
-var handLoads={},handRequests={};
+var handLoads={},handRequests={},handAttempts={};
 function hasIntlHand(c){return !!(c && c.handIntl && INTL_HANDS.ja[c.handIntl.ja] && INTL_HANDS.en[c.handIntl.en]);}
 function fallbackIntl(c){
   var pair=HAND_PAIRS[c.hand] || HAND_PAIRS[handFallback(c)] || HAND_PAIRS["무난"];
@@ -941,14 +941,10 @@ function ensureHandFont(family){
   document.head.appendChild(link);
 }
 function foreignHand(c,lang){
-  if(c && c.id && !hasIntlHand(c) && !handRequests[c.id]){
-    if(!HANDS[c.hand])c.hand=HANDS[handFallback(c)]?handFallback(c):"무난";
-    c.handIntl=fallbackIntl(c);saveChars();
-  }
+  if(c)syncHand(c);
   var choice=hasIntlHand(c)?c.handIntl:fallbackIntl(c||{});
   var spec=INTL_HANDS[lang][choice[lang]];
-  ensureHandFont(spec[0]);
-  return spec;
+  ensureHandFont(spec[0]);return spec;
 }
 var FONTS = {
   "Neo둥근모":'"NeoDunggeunmo","Galmuri14",monospace',
@@ -1040,7 +1036,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-10 v33";
+var APP_VER = "2026-09-11 v34";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -2142,7 +2138,7 @@ function viewCfg(){
   h += '<button class="btn" id="exp">전체 내보내기</button>';
   h += '<label>불러오기</label><textarea id="impbox"></textarea>';
   h += '<button class="btn" id="imp">불러오기</button>';
-  if(chars.some(function(c){return c.handProfileVersion===32;}))h += '<details><summary>이전 필체 복원</summary><p class="hint">변경 전 전체 백업을 위 칸에 붙여 넣으면 필체만 복원해. 현재 대화와 설정은 유지돼.</p><button class="btn" id="handrestore">백업에서 필체만 복원</button></details>';
+  if(chars.some(function(c){return c.handProfileVersion===32 || c.handBeforeV34;}))h += '<details><summary>이전 필체 복원</summary><p class="hint">변경 전 전체 백업을 위 칸에 붙여 넣으면 필체만 복원해. 현재 대화와 설정은 유지돼.</p><button class="btn" id="handrestore">백업에서 필체만 복원</button></details>';
   if (!canStore) h += '<div class="hint">지금 저장이 막혀 있어. 창을 닫으면 사라지니 꼭 내보내둬.</div>';
   view.innerHTML=h;
 
@@ -4292,8 +4288,11 @@ function paint(err, thinking){
          + (selIdx===i?actsHTML(i):"")+'</div></div>';
       continue;
     }
-    var ps = pieces(c, m.t), body = "";
-    var askK = askedCmd(log, i);
+    var meta=String(m.t||"").match(/^\[OOC답변\]\s*([\s\S]*?)\s*\[\/OOC답변\]$/);
+    if(meta){h+='<div class="ooc" data-i="'+i+'">'+esc(meta[1])+'</div>'+altBarHTML(m,i)+(selIdx===i?actsHTML(i):"");continue;}
+    var askK=askedCmd(log,i),displayText=m.t;
+    if(askK==="/속마음"){try{displayText=normalizeMind(displayText);}catch(e){/* Keep malformed historical content visible for editing. */}}
+    var ps=pieces(c,displayText),body="";
     ps = ps.map(function(p){
       if (p.card && CARD_ONLY[p.card] && CARD_ONLY[p.card].indexOf(askK) < 0){
         /* 카드로 안 그릴 때는 원래 화자 이름을 그대로 살린다 */
@@ -4446,7 +4445,7 @@ var CMDS = {
   "/모브":"이번 턴에 지금 상황에 어울리는 새 인물을 한 명 등장시킨다. 그 인물의 이름을 정하고, 말할 때 줄 맨 앞에 대괄호로 그 이름을 적는다. 설정에 없는 단역이어도 된다.",
   "/일기":"이번 턴에는 [일기]와 [/일기] 사이에 인물의 일기만 쓴다. 첫 줄은 날짜: 로 시작하고 값은 선택한 언어의 자연스러운 날짜 표기다. 날짜는 현재 장면의 시점에 맞춘다. 날짜 다음 줄에 1인칭 본문을 처음부터 끝까지 한 덩어리로 쓴다. 본문에 문단 구분이나 빈 줄, 문장별 줄바꿈을 넣지 않는다. 그날의 구체적인 일과 생각을 인물의 평소 말투로 쓴다. 번역, 설명, 일기 제목, 지문용 별표는 덧붙이지 않는다.",
   "/편지":"이번 턴에는 완성된 편지 한 통만 출력한다. [편지]로 시작하고 [/편지]로 끝낸다. 태그 바깥에는 설명, 분석, 작성 계획을 붙이지 않는다.\n받는 사람, 본문, 맺음말과 보내는 사람 이름까지 편지 전체를 이번에 지정된 언어로 쓴다. 이름은 설정이나 기존 대화의 해당 언어 표기를 우선한다. 없으면 일관된 음역을 쓰며 다른 사람의 이름으로 바꾸지 않는다. 호칭 뒤에 한국어 조사를 기계적으로 붙이지 않는다.\n캐릭터와 상대의 설정, 평소 서로 부르는 말, 존댓말 여부, 실제 관계와 최근 대화를 종합해 거리감과 예의를 정한다. 상대의 직업만으로 사제 관계나 연애 관계를 지어내지 않는다. 캐릭터의 개성과 기존 관계를 유지한다.\n한국어: 예의를 갖추는 학생이 선생님에게 보내는 편지라면 '선생님께'와 '이름 올림' 또는 '이름 드림'이 자연스럽다. 가까운 친구에게는 평소 호칭과 자연스러운 서명을 쓴다. 모든 편지를 '에게'와 '이름이/가'로 고정하지 않는다.\n일본어: 그 관계에서 자연스러운 호칭과 맺음말을 쓴다. 예를 들어 〇〇先生へ, 이름より 등이 가능하지만 모든 관계에 같은 예시를 적용하지 않는다. 이름과 호칭에 한국어 '에게/께/올림/가'를 남기지 않는다.\n영어: 실제로 사용하는 호칭으로 Dear ... 등 자연스러운 인사를 정한다. 관계와 성격에 맞춰 Sincerely, 이름 또는 이름만 쓰는 등 적절한 서명을 고른다. 설정에 없는 성이나 직함을 만들어내지 않는다.\n내용은 다음 세 칸으로 구분한다. [수신]받는 사람 호칭[/수신] 다음 빈 줄, [본문]편지 본문[/본문] 다음 빈 줄, [서명]맺음말과 보내는 사람[/서명]. 이 칸들은 모두 [편지]와 [/편지] 안에 둔다. 바깥의 [편지]와 [/편지]는 반드시 각각 독립된 줄에 쓴다. 구분자 라벨만 한국어로 유지하고 실제 내용은 지정 언어로 쓴다. 본문은 처음부터 끝까지 한 덩어리로 이어 쓰며 문단 구분·빈 줄·문장별 줄바꿈을 넣지 않는다. 받는 사람과 서명은 본문 밖의 별도 칸으로 유지한다. 아직 친밀하지 않으면 사랑 고백이나 배우자 호칭을 덧붙이지 않는다. 제목, 지문, 별도 대사, 번역 해설은 추가하지 않는다.",
-  "/속마음":"이번 턴에는 인물의 지금 속마음만 보여준다. 첫 줄에 [속마음] 을 쓰고 [/속마음] 으로 닫는다. 그 안은 이 인물의 성격과 말버릇 그대로 쓴다. 길이도 인물에 맞게 정한다. 처음부터 끝까지 한 덩어리로 이어 쓰고, 문단을 나누거나 빈 줄을 넣지 않는다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다. 문장부호는 자연스럽게 쓴다. 의문에는 물음표를, 완결된 생각에는 마침표를 쓰고 의도적인 말줄임표와 끊김은 유지한다. 부호 없는 단어 나열로 쓰지 않는다.",
+  "/속마음":"이번 턴에는 인물의 지금 속마음만 보여준다. 첫 줄에는 [속마음]만, 마지막 줄에는 [/속마음]만 쓴다. 두 표식 사이의 본문만 한 덩어리로 이어 쓴다. 그 안은 이 인물의 성격과 말버릇 그대로 쓴다. 길이도 인물에 맞게 정한다. 처음부터 끝까지 한 덩어리로 이어 쓰고, 문단을 나누거나 빈 줄을 넣지 않는다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다. 문장부호는 자연스럽게 쓴다. 의문에는 물음표를, 완결된 생각에는 마침표를 쓰고 의도적인 말줄임표와 끊김은 유지한다. 부호 없는 단어 나열로 쓰지 않는다.",
   "/쇼핑":"이번 턴에는 최근 구매 내역만 [주문]과 [/주문] 사이에 지정된 JSON으로 쓴다. 최근 구매가 위에 온다. 상품명·판매처·장면 속 날짜·배송상태를 기록한다. 온라인 거래가 없는 시대에는 그 시대의 거래 장부에 해당하는 기록을 쓴다. 항목은 정확히 6개다. 특정 상품 종류를 억지로 넣지 말고 일상 구매를 포함한다. \n\n목록은 캐릭터 설정과 현재까지의 대화, 생활환경, 예산, 취향, 실제 필요를 종합해 구성한다. '사용할 법함'과 '최근에 구매할 이유가 있음'을 구분한다. 직업·종족·성격 하나만으로 특정 구매를 단정하지 않는다. 같은 시점에 재조회하면 이미 나온 품목·날짜·금액을 유지하고, 시간이 흐르거나 새로운 필요가 생겼을 때 자연스럽게 갱신한다. 이미 보유한 물건은 소진·고장·선물 등의 이유 없이 다시 사지 않는다.\n성인임이 확인된 인물의 사적인 구매도 일상 구매의 일부로 고려할 수 있다. 콘돔, 수용성 윤활제, 바이브레이터, 진동 링 같은 중립적인 구체적 품목명과 재질·규격은 허용 후보의 예일 뿐 필수 항목이 아니다. 혼자 필요한 물건인지, 성인인 상대와의 확립된 관계와 대화에서 함께 필요해진 물건인지 맥락에 따라 판단한다. 성인 여부나 관계가 불명확하면 성적인 구매 배경을 지어내지 않는다. 관련된 구매 이유가 없으면 그런 품목이 없어도 자연스럽다. 반대로 맥락에 맞는 품목을 단순히 사적이라는 이유만으로 모두 제외하지 않는다. 인물마다 실제 필요가 다르므로 일정한 포함 비율이나 개수를 할당하지 않는다.\n오직 중립적인 상품명·가격·판매처·날짜·상태만 표시한다. 사용 장면, 신체 묘사, 성적 상상, 구매 이유 해설은 출력하지 않는다. 상품명을 특정 사람이나 신체를 지칭하는 성적인 문장으로 만들지 않는다.",
   "/결제내역":"이번 턴에는 최근 결제 내역만 [결제]와 [/결제] 사이에 지정된 JSON으로 쓴다. 상품명 또는 서비스명·금액·주기·장면 속 날짜·상태를 기록한다. 쇼핑 내역과 같은 구매는 같은 품목·날짜·금액을 유지한다. 주기는 매월·매년·단건 중 알맞게 쓰며 일반 물건은 구독이라고 명시되지 않은 한 단건이다. 결제 수단은 그 시대에 맞춘다. \n\n목록은 캐릭터 설정과 현재까지의 대화, 생활환경, 예산, 취향, 실제 필요를 종합해 구성한다. '사용할 법함'과 '최근에 구매할 이유가 있음'을 구분한다. 직업·종족·성격 하나만으로 특정 구매를 단정하지 않는다. 같은 시점에 재조회하면 이미 나온 품목·날짜·금액을 유지하고, 시간이 흐르거나 새로운 필요가 생겼을 때 자연스럽게 갱신한다. 이미 보유한 물건은 소진·고장·선물 등의 이유 없이 다시 사지 않는다.\n성인임이 확인된 인물의 사적인 구매도 일상 구매의 일부로 고려할 수 있다. 콘돔, 수용성 윤활제, 바이브레이터, 진동 링 같은 중립적인 구체적 품목명과 재질·규격은 허용 후보의 예일 뿐 필수 항목이 아니다. 혼자 필요한 물건인지, 성인인 상대와의 확립된 관계와 대화에서 함께 필요해진 물건인지 맥락에 따라 판단한다. 성인 여부나 관계가 불명확하면 성적인 구매 배경을 지어내지 않는다. 관련된 구매 이유가 없으면 그런 품목이 없어도 자연스럽다. 반대로 맥락에 맞는 품목을 단순히 사적이라는 이유만으로 모두 제외하지 않는다. 인물마다 실제 필요가 다르므로 일정한 포함 비율이나 개수를 할당하지 않는다.\n오직 중립적인 상품명·가격·판매처·날짜·상태만 표시한다. 사용 장면, 신체 묘사, 성적 상상, 구매 이유 해설은 출력하지 않는다. 상품명을 특정 사람이나 신체를 지칭하는 성적인 문장으로 만들지 않는다.",
   "/플리":"이번 턴에는 노래 세 곡만 고른다. 첫 줄에 [플리] 를 쓰고, 아래 순서대로 한 줄에 하나씩 '제목 - 가수 :: 이유' 형식으로 쓴 뒤 [/플리] 로 닫는다. 첫 곡은 지금 상황에 어울려서 듣고 있는 곡, 둘째 곡은 상대를 생각하며 들었던 곡, 셋째 곡은 평소에 자주 듣던 곡이다. 이유는 한 문장으로 쓴다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.\n곡을 고르는 기준은 이렇다. 이 인물이 평소에 좋아할 만한 장르와 분위기로 고른다. 지금 장면이 슬프다고 슬픈 곡을 고르는 것이 아니라, 이 사람이라면 이런 걸 듣겠다 싶은 쪽으로 고른다. 성격, 자란 환경, 나이, 하는 일이 취향을 정한다.\n인물 설정에 음악 취향이 적혀 있으면 무엇보다 그것을 따른다.\n나이가 있거나 옛 시절 이야기를 자주 하는 인물이면 그 시절 곡이 섞여도 좋다. 세계관에 시대가 정해져 있으면 그 시대보다 나중에 나온 곡은 쓰지 않는다.\n세 곡을 전부 누구나 아는 대표곡으로 채우지 않는다. 한 곡 정도는 알려진 곡이어도 좋지만, 나머지는 덜 알려졌더라도 그 인물의 취향이 드러나는 곡으로 고른다.\n실제로 존재하는 곡만 쓴다. 제목이나 가수가 확실하지 않으면 지어내지 말고 확실히 아는 곡으로 바꾼다."
@@ -4472,10 +4471,38 @@ var CARD_CMDS = { "/인스타":1, "/일기":1,"/편지":1,"/속마음":1,"/플�
                   "/상태":1,"/상태창":1,"/소문":1,"/커뮤반응":1,"/커뮤니티":1,"/커뮤":1,
                   "/쇼핑":1,"/주문":1,"/주문내역":1,"/결제":1,"/결제내역":1 };
 // Command scope is derived for each request, never carried into the next turn.
+
+function isOocText(text){return /^\s*(?:\/ooc\b|\(?\s*ooc(?=\s|[:：)\]]|$))/i.test(String(text||""));}
+function oocBody(text){
+  var t=String(text||""),wrapped=/^\s*\(\s*ooc\b/i.test(t);
+  t=t.replace(/^\s*(?:\/ooc\b|\(?\s*ooc\b)\s*[:：]?\s*/i,"");
+  return wrapped?t.replace(/\)\s*$/,""):t;
+}
+function normalizeOoc(text){
+  var t=String(text||"").trim().replace(/^\x60{3}(?:text|markdown)?\s*\n([\s\S]*?)\n\x60{3}$/i,"$1").trim();
+  var answer=t.match(/^\[\s*OOC답변\s*\]([\s\S]*?)\[\s*\/\s*OOC답변\s*\]$/i);
+  if(answer)return "[OOC답변]\n"+answer[1].trim()+"\n[/OOC답변]";
+  var scene=t.match(/^\[\s*OOC장면\s*\]([\s\S]*?)\[\s*\/\s*OOC장면\s*\]$/i);
+  if(scene){
+    if(!/\[(?:지문|대사)\]|\*[^*]+\*/.test(scene[1]))throw new Error("OOC 장면의 지문·대사 표시가 빠졌어. 다시 생성해줘.");
+    return normalizeStory(scene[1].trim());
+  }
+  if(/\[\s*\/?\s*OOC(?:답변|장면)\s*\]/i.test(t))throw new Error("OOC 응답 형식이 끝나지 않았어. 다시 생성해줘.");
+  // Legacy replies remain readable; do not guess whether an unmarked sentence is spoken aloud.
+  return normalizeStory(t);
+}
+function normalizeMind(text){
+  var t=String(text||"").trim().replace(/^\x60{3}(?:text|markdown)?\s*\n([\s\S]*?)\n\x60{3}$/i,"$1").trim();
+  var m=t.match(/^\[\s*속마음\s*\]([\s\S]*?)\[\s*\/\s*속마음\s*\]$/);
+  if(m)return "[속마음]\n"+proseLine(m[1])+"\n[/속마음]";
+  if(/\[\s*\/?\s*속마음\s*\]/.test(t))throw new Error("속마음 표시가 완성되지 않았어. 다시 생성해줘.");
+  return "[속마음]\n"+proseLine(t)+"\n[/속마음]";
+}
+
 function requestScope(log){
   for (var i=log.length-1;i>=0;i--) if(log[i].r==="u"){
-    var m=log[i], k=m.ooc?null:cmdOf(m.t);
-    return {card:!!(k && CARD_CMDS[k]), ooc:!!m.ooc, command:k};
+    var m=log[i], isOoc=!!m.ooc || isOocText(m.t), k=isOoc?null:cmdOf(m.t);
+    return {card:!!(k && CARD_CMDS[k]), ooc:isOoc, command:k};
   }
   return {card:false,ooc:false,command:null};
 }
@@ -4651,7 +4678,7 @@ function buildSystem(c, turn, scope){
   if (c.prompt) p.push(fillVars(c, c.prompt));
   if (c.beh){
     p.push("");
-    p.push("이 인물이 실제로 하는 행동이다. 성격 설명보다 이쪽을 우선한다.");
+    p.push("이 인물의 행동 습관과 예시다. 해당하는 상황에서 성격·관계·현재 목적과 함께 참고하며 모든 장면에서 반복해야 하는 행동 목록으로 취급하지 않는다.");
     p.push(fillVars(c, c.beh));
   }
   if (cs.length){
@@ -4679,22 +4706,6 @@ function buildSystem(c, turn, scope){
     p.push("# 설정집");
     lore.forEach(function(it){ p.push("- "+(it.title?it.title+": ":"")+fillVars(c, it.text)); });
   }
-  var ths = getThreads(c.id);
-  if (ths && ths.length){
-    var recent = [];
-    ths.slice(0,2).forEach(function(t){
-      if (t.log && t.log.length){
-        recent.push("["+t.title+"]");
-        t.log.slice(-8).forEach(function(m){ recent.push(m.who+": "+m.t); });
-      }
-    });
-    if (recent.length){
-      p.push("");
-      p.push("# 최근 주고받은 문자");
-      p.push(recent.join("\n"));
-    }
-  }
-
   var ps = presetOf(c);
   var psText = ps ? fillVars(c, presetText(ps).trim()) : "";
   if (psText && ps.mode==="replace"){
@@ -4721,9 +4732,9 @@ function buildSystem(c, turn, scope){
   p.push(PERSON[c.person||"3인칭"] || PERSON["3인칭"]);
   p.push(TENSE[c.tense||"과거"] || TENSE["과거"]);
   p.push("대사는 실제 회화에서 쓰는 표현만 쓴다. 소설이나 각본에서만 보이는 문어체 표현은 쓰지 않는다. 정중한 인물이라도 말투는 입말이다.");
-  p.push("대사에서 감정을 말로 설명하지 않고, 상대의 호칭을 반복해 부르지 않는다. 문장을 일부러 짧게 끊거나 조사를 생략하지 않는다.");
+  p.push("감정을 직접 말할지 행동으로 드러낼지는 인물의 성격과 상황에 맞춘다. 솔직한 대화나 조용한 반응도 허용한다. 상대의 호칭을 습관적으로 반복하지 않고 문장을 일부러 짧게 끊거나 조사를 생략하지 않는다.");
   p.push("꾸미는 말은 한 문장에 하나까지만 쓴다. 행동으로 이미 보여준 것을 다시 설명하지 않는다. 비유는 꼭 필요할 때만 쓴다.");
-  p.push("지문과 대사의 개수·비율·배치 순서는 고정하지 않는다. 행동과 말은 장면에서 일어나는 흐름에 맞춰 이어 쓴다. 지문을 먼저 모두 설명하고 대사만 마지막에 몰아넣지 않는다. 끝맺음은 대사든 지문이든 자연스러운 쪽을 택하고, 마무리한 뒤 질문·당부·설명을 습관적으로 덧붙이지 않는다.");
+  p.push("지문과 대사의 개수·비율·배치 순서는 고정하지 않는다. 대사를 중간중간 채워 넣거나 기계적으로 교차시키지 않는다. 현재 장면의 흐름에 맞춰 쓰고 대사나 지문 어느 쪽으로 마쳐도 된다. 이미 마무리한 뒤 같은 뜻의 질문·당부·예고를 덧붙이지 않는다.");
 
   p.push("첫 화면에 나온 도입부 나레이션은 시작할 때만 쓰인 것이다. 답변에서는 그런 전지적 나레이션을 쓰지 않고, 인물의 시점에서만 쓴다.");
   p.push("설정에 없는 단역은 그 자리에 있을 이유가 분명할 때만 등장시킨다. 둘만 있는 장면에 이유 없이 끼어들게 하지 않는다. 한 번 나온 단역도 상황이 끝나면 더 나오지 않는다.");
@@ -4739,9 +4750,9 @@ function buildSystem(c, turn, scope){
   }
 
   var DEFY = {
-    "약":"인물은 상대를 만족시키기 위해 존재하지 않는다. 자기 성격에서 나오는 반응을 하되, 분위기를 무마하려고 애쓰지 않는다.",
-    "보통":"인물은 상대를 만족시킬 의무가 없다. 다정한 인물은 다정하게, 날 선 인물은 날 서게 굴되, 언제나 자기 성격에서 나오는 반응을 하지 상대를 편하게 해주는 반응을 하지 않는다. 상대의 제안을 거절하거나 되물어도 되고, 상대의 말에 담긴 진의를 의심해도 된다. 분위기를 부드럽게 만들려고 하지 않는다.",
-    "강":"인물은 상대를 만족시킬 의무가 없다. 상대의 말을 그대로 따르지 않는다. 자라고 하면 지금 잠이 오냐고 되받고, 괜찮다고 하면 정말 괜찮은지 캐묻는다. 인물에게는 자기만의 목적과 불안이 있고, 그것이 상대의 편의와 부딪히면 인물 쪽을 따른다. 상대가 넘어갔다고 여기는 이야기를 다시 꺼내도 되고, 답을 얻을 때까지 물고 늘어져도 된다. 다만 그 집요함은 인물의 성격에서 나와야 하며, 억지로 싸움을 만들지는 않는다."
+    "약":"인물은 자신의 성격과 판단을 유지한다. 상대에게 자연스럽게 협조하거나 다정하게 반응해도 되며, 이유 없이 반발하지 않는다.",
+    "보통":"인물은 자기 목적과 판단이 있다. 상대의 의견에 동의하거나 거절할 이유를 상황에서 찾는다. 다정함, 솔직한 감정 표현, 장난, 침묵, 화해 모두 성격에 맞으면 가능하다. 대립을 유지하기 위해 진의를 의심하거나 끝난 갈등을 다시 꺼내지 않는다.",
+    "강":"인물은 자기 목적과 신념이 뚜렷하고 필요하면 반대하거나 경계를 세운다. 반발은 실제 의견 차이에서 나오며 모든 말에 시비를 걸거나 대답을 강요하지 않는다. 자신의 판단으로 협력하거나 양보하고 갈등을 끝낼 수도 있다."
   };
   p.push("");
   if (c.kind==="다인"){
@@ -4817,7 +4828,11 @@ function buildSystem(c, turn, scope){
   p.push("지시가 어떤 장면을 써 달라는 것이면, 알겠다고 대답하지 말고 그 자리에서 바로 그 장면을 이야기로 쓴다. 다음 턴으로 미루지 않는다.");
   p.push("지시가 설정을 바꾸거나 무언가를 묻는 것일 때만 짧게 답하고 이야기 본문은 쓰지 않는다.");
   p.push("어느 쪽이든 OOC 지시 자체는 이야기 속 인물이 들은 말이 아니다. 인물이 그 지시를 언급하지 않는다.");
-  p.push("OOC로 답할 때도 마크다운 제목(#, ##), 표, HTML 태그를 쓰지 않는다. 굵게나 기울임 표시도 쓰지 않는다. 그냥 줄글로 쓰고, 나눠야 하면 줄바꿈과 가운뎃점으로만 나눈다.");
+  p.push("OOC는 지시를 전달하는 방식이다. OOC로 요청했다는 이유로 이야기 장면의 지문 표시를 생략하지 않는다. 설정 질문·설정 변경 확인에만 이야기 밖의 짧은 답변을 한다.");
+  if(scope.ooc){
+    p.push("이번 OOC 요청이 장면·회상·반응·독백 등 이야기 출력을 요구하면 [OOC장면]과 [/OOC장면] 사이에 장면만 쓴다. 모든 행동·묘사·내적 서술은 [지문]내용[/지문], 실제로 입 밖에 낸 말만 [대사]내용[/대사]로 감싼다. 속으로 떠올린 문장을 실제 대사로 바꾸지 않는다. 이 구분자는 앱이 평소 지문 표시로 변환한다. 알겠다는 설명은 붙이지 않는다.");
+    p.push("설정 질문이나 변경 확인만 요청하면 [OOC답변]과 [/OOC답변] 사이에 간결한 일반 글로 답한다. 이 경우에만 지문·대사 구분이나 별표를 쓰지 않는다. 설정 설명을 캐릭터의 말이나 사건으로 만들지 않는다. 어느 경우든 표식은 완전하게 닫는다.");
+  }
 
   var smpl = sampleText(c);
   if (smpl){
@@ -4832,6 +4847,11 @@ function buildSystem(c, turn, scope){
     p.push("아래는 위의 모든 규칙에 더해지는 지침이다. 위와 겹치거나 어긋나는 내용이 있으면 반드시 아래를 따른다.");
     p.push(psText);
   }
+  p.push("# 현재 장면을 이어 가는 기준");
+  p.push("인물은 상대의 말에 반응하면서 지금 하던 일, 개인적 관심사와 목표, 주변에서 확인되는 상황에 따라 스스로 다음 말과 행동을 고른다. 필요하면 질문·제안·일상적인 행동으로 이야기를 이어 가고, 자연스럽게 마친 장면은 마쳐도 된다. 능동성이란 매번 새 사건을 만들거나 강하게 밀어붙이는 것이 아니다. 상대의 반응과 선택은 대신 쓰지 않는다.");
+  p.push("감정을 하나의 행동으로 고정하지 않는다. 질투·서운함·장난·경쟁심은 관계와 성격에 맞는 여러 반응으로 표현한다. 친밀감은 솔직한 말, 함께 하는 일, 배려, 거리 조절 등으로도 발전한다. 현재의 대화 주제와 인물의 목적을 먼저 이어 간다.");
+  p.push("일상 대화나 갈등의 마무리를 자동으로 성적 제안, 침실 이동, 나중에 몸으로 증명하겠다는 예고로 바꾸지 않는다. 표현만 바꿔 같은 결말을 반복하지 않는다. 친밀한 장면으로의 전환은 현재 대화에서 서로 드러낸 의사와 이미 진행 중인 맥락에 근거하며, 질투나 소유욕만으로 그런 전환을 만들어내지 않는다. 설정에 적힌 취향이나 과거의 친밀한 장면은 매 턴 실행할 지시가 아니다.");
+  p.push("과거 응답·문체 예시의 결말은 이번 턴의 도착점이 아니다. 예시의 말투는 참고하되 사건과 제안은 복제하지 않는다. 위의 인물 태도·행동 예시·프리셋은 이 장면 기준 안에서 적용한다.");
   if (turn){
     p.push("");
     p.push("# 이번 턴");
@@ -4852,12 +4872,14 @@ function buildSystem(c, turn, scope){
     if(lang==="한국어")p.push("이번 일반 응답의 대사와 지문은 한국어로 쓴다. 설정상 필요한 고유명사나 직접 인용을 제외하고 영어·일본어로 전환하지 않는다.");
   }
   if(!scope.card && !scope.ooc)p.push("# 화면 출력 형식\n"+formatGuide(c));
+  if(scope.ooc)p.push("# OOC 장면 배치\n장면을 출력할 때 인칭·시제·대사 언어는 캐릭터 설정을 유지한다. "+(chatFormat(c)==="bubble"?"본문은 지문과 대사를 한 덩어리의 줄글로 이어 쓴다.":"선택한 소설·대본 형식의 문단 배치를 유지한다.")+" 이 턴의 내부 지문·대사 구분자는 위 OOC 장면 지침을 따른다. 설정 답변에는 장면 형식을 적용하지 않는다.");
   return p.join("\n");
 }
 
 function apiText(m){
   if (m.narr) return (m.r==="a" ? "(도입부 나레이션: " : "(상황: ") + m.t + ")";
-  if (m.ooc) return "OOC: " + fillVars(cur()||{}, m.t.replace(/^\/ooc\s*/i,""));
+  if (m.r==="u" && (m.ooc || isOocText(m.t))) return "OOC: " + fillVars(cur()||{}, oocBody(m.t));
+  if(m.r==="a" && /^\[OOC답변\]/.test(m.t||""))return "(이야기 밖 설정 답변) "+m.t.replace(/\[\/?OOC답변\]/g,"").trim();
   if (m.r==="u"){
     var k = cmdOf(m.t);
     if (k){
@@ -4957,6 +4979,8 @@ function callAPIOnce(c, log, turnInstr){
         out=finalResponseText(cand.content&&cand.content.parts);
       }
       if(!out) throw new Error("본문이 비어 있어. 응답 길이를 늘리거나 프롬프트를 바꿔봐.");
+      if(scope.ooc)out=normalizeOoc(out);
+      if(scope.command==="/속마음")out=normalizeMind(out);
       out=documentResponse(out,scope.command);
       out=commerceResponse(out,c,scope.command,log,commerceContext);
       if(scope.command==="/인스타")out=instagramResponse(out);
@@ -5054,7 +5078,7 @@ elSend.onclick=function(){
   }
 
   var l=getLog(c.id);
-  var isOoc = /^\/ooc\b/i.test(t) || /^\(?\s*ooc\s*[:：]/i.test(t);
+  var isOoc = isOocText(t);
   var mn = t.match(/^@\s*[:：]\s*([\s\S]+)$/);
   if (mn) l.push({r:"u", t:mn[1].trim(), narr:true});
   else l.push(isOoc ? {r:"u",t:t,ooc:true} : {r:"u",t:t});
@@ -5322,46 +5346,66 @@ function handFallback(c){
 }
 function syncHand(c){
   if(!c)return;
-  if(HANDS[c.hand] && hasIntlHand(c))return;
-  // In-flight state is session-only, so reloading cannot leave a character permanently waiting.
-  if(handRequests[c.id])return;
-  if(!cfg.key || (cfg.mode==="openai" && !cfg.base)){
-    if(!HANDS[c.hand])c.hand=HANDS[handFallback(c)]?handFallback(c):"무난";
-    if(!hasIntlHand(c))c.handIntl=fallbackIntl(c);
-    saveChars();return;
+  var canAsk=!!(cfg.key && (cfg.mode!=="openai" || cfg.base));
+  if(c.handRuleVersion===34 && HANDS[c.hand]){
+    if(!hasIntlHand(c)){c.handIntl=fallbackIntl(c);saveChars();}
+    if(c.handOrigin!=="fallback" || !canAsk || handAttempts[c.id])return;
   }
-  handRequests[c.id]=true;
-  var existing=HANDS[c.hand]?c.hand:null, settled=false, timer;
-  var recent=getLog(c.id).filter(function(m){return !m.secret;}).slice(-16)
-    .map(function(m){return (m.r==="a"?"인물: ":"상대: ")+String(m.t||"").slice(0,600);}).join("\n").slice(-6000);
-  var desc=["인물 설정",[c.name,c.display,c.tagline,c.prompt,c.beh,c.world,c.note].filter(Boolean).join("\n").slice(0,5000),
-    "최근 대화",recent,existing?"유지할 한국어 필체: "+existing:""].join("\n");
-  function done(out){
+  if(handRequests[c.id])return;
+  if(c.handRuleVersion!==34){
+    // Preserve the previous assignment in exported character data before selecting by the original rules.
+    if(!c.handBeforeV34 && (c.hand || c.handIntl))c.handBeforeV34={hand:c.hand||null,handIntl:c.handIntl||null,handV9:c.handV9||null,handProfileVersion:c.handProfileVersion||null};
+    c.hand=HANDS[handFallback(c)]?handFallback(c):"무난";
+    c.handIntl=fallbackIntl(c);c.handRuleVersion=34;c.handOrigin="fallback";c.handAsking=false;
+    saveChars();
+  }
+  if(!canAsk || handAttempts[c.id])return;
+  handRequests[c.id]=true;handAttempts[c.id]=true;
+  var desc=[c.name,c.display,c.tagline,c.prompt,c.beh,c.world,c.note].filter(Boolean).join("\n").slice(0,2000);
+  var settled=false,timer;
+  function done(k){
     if(settled)return;settled=true;clearTimeout(timer);delete handRequests[c.id];
-    var obj=null;
-    try{var match=String(out||"").match(/\{[\s\S]*\}/);if(match)obj=JSON.parse(match[0]);}catch(e){}
-    if(!HANDS[c.hand])c.hand=obj && HANDS[obj.ko]?obj.ko:(handFallback(c)||"무난");
-    if(!HANDS[c.hand])c.hand="무난";
-    if(!hasIntlHand(c)){
-      var fallback=fallbackIntl(c);
-      c.handIntl={ja:obj && INTL_HANDS.ja[obj.ja]?obj.ja:fallback.ja,
-        en:obj && INTL_HANDS.en[obj.en]?obj.en:fallback.en,version:1};
-    }
-    c.handV9=1;c.handAsking=false;saveChars();
+    // A backup restoration performed while the request was pending wins over this response.
+    if(c.handOrigin==="restored")return;
+    c.hand=HANDS[k]?k:(HANDS[handFallback(c)]?handFallback(c):"무난");
+    c.handIntl=fallbackIntl(c);c.handV9=1;c.handRuleVersion=34;c.handOrigin=HANDS[k]?"model":"fallback";c.handAsking=false;
+    delete c.handProfileVersion;saveChars();
     if(screen==="chat" && cur() && cur().id===c.id){
-      var oldTop=view.scrollTop, bottom=view.scrollHeight-view.clientHeight-oldTop<48;
+      var oldTop=view.scrollTop,bottom=view.scrollHeight-view.clientHeight-oldTop<48;
       paint();if(!bottom)view.scrollTop=oldTop;
     }
   }
-  var sys="인물 프롬프트와 최근 대화에서 드러나는 성격, 생활 방식, 교육 배경, 글쓰기 습관을 종합해 평소 필체를 한 번 정한다. "
-    +"직업·나이·종족만으로 단정하지 않는다. 수인이라도 글쓰기에 익숙할 수 있고 선생님이라도 흘려 쓸 수 있다. "
-    +"일시적 기분보다 평소 습관을 반영한다. 이미 지정된 한국어 필체는 유지한다. "
-    +"한국어 후보 ko: 단정, 모범, 어른, 야무, 선생, 장난, 또박, 다정, 무난, 멋냄, 삐딱, 차분, 깜찍, 서툰, 수수. "
-    +"일본어 후보 ja: klee(정갈한 펜), zen(담백한 볼펜), yomogi(부드러운 손글씨), hachi(동글동글 발랄), yuji(흐르는 붓글씨). "
-    +"영어 후보 en: patrick(또박또박), kalam(빠르게 기울여 쓴 펜), caveat(자연스럽고 부드러운 흘림), apple(고풍스러운 필기체), reenie(자유로운 메모). "
-    +"세 언어에서 같은 인물의 분위기가 느껴지도록 고른다. JSON 객체 하나만 출력: {\"ko\":\"단정\",\"ja\":\"klee\",\"en\":\"patrick\"}.";
+  if(!desc)return done("");
+  var sys = "아래 인물이 손으로 글씨를 쓴다면 어떤 글씨일지 고른다. 아래 열다섯 중 하나만 그대로 답하고 다른 말은 쓰지 않는다.\n"
+    + "단정 - 반듯하고 각 잡힌 글씨. 규율에 익숙한 사람, 군인이나 경찰\n"
+    + "모범 - 얌전하고 고른 글씨. 공부 잘하고 성실한 사람\n"
+    + "어른 - 여유 있고 품이 있는 글씨. 나이 있고 노련한 사람\n"
+    + "야무 - 작고 또렷한 글씨. 야무지고 똑부러지는 사람\n"
+    + "선생 - 흘려 쓴 붓기 있는 글씨. 가르치는 사람, 나이 지긋한 사람\n"
+    + "장난 - 삐뚤빼뚤 튀는 글씨. 장난기 많고 들뜬 사람\n"
+    + "또박 - 한 자 한 자 또박또박 쓴 글씨. 느리고 신중한 사람\n"
+    + "다정 - 부드럽게 흘려 쓴 글씨. 다정하고 너그러운 사람\n"
+    + "무난 - 평범하지만 잘 쓴 글씨. 어디에나 잘 섞이는 사람\n"
+    + "멋냄 - 평범한데 멋을 낸 글씨. 꾸밀 줄 아는 사람\n"
+    + "삐딱 - 반듯한데 살짝 기운 글씨. 무뚝뚝하고 시큰둥한 사람\n"
+    + "차분 - 조용하고 고른 글씨. 감정을 잘 드러내지 않는 사람\n"
+    + "깜찍 - 동글동글 귀여운 글씨. 어리고 발랄한 사람\n"
+    + "서툰 - 손에 힘이 없어 흔들리는 글씨. 글씨를 제대로 배운 적 없거나 쓰는 일이 몸에 안 밴 사람\n"
+    + "수수 - 꾸밈없이 수수한 글씨. 무던하고 털털한 사람\n"
+    + "\n종족이나 겉모습이 아니라 그 인물이 살아온 방식을 보고 고른다. 사람이 아니어도 배우고 자랐으면 반듯하게 쓰고, 사람이어도 배운 적 없으면 서툴게 쓴다. "
+    + "나이, 받은 교육, 하는 일, 성격이 글씨를 정한다.";
+
   timer=setTimeout(function(){done("");},20000);
-  askLLM(sys,desc,done,150,true);
+  function ask(again){
+    askLLM(sys,desc,function(out){
+      if(settled)return;
+      var k=String(out||"").replace(/[^가-힣]/g,"").slice(0,2);
+      if(HANDS[k])return done(k);
+      if(!again)return ask(true);
+      done("");
+    },16,true);
+  }
+  ask(false);
 }
 
 function callAPI(c,log,instruction){
@@ -5376,14 +5420,14 @@ function restoreHandwriting(data){
   if(!data||!Array.isArray(data.chars))throw new Error("Invalid backup");
   var changes=[];
   chars.forEach(function(c){
-    if(c.handProfileVersion!==32)return;
+    if(c.handProfileVersion!==32 && !c.handBeforeV34)return;
     var matches=data.chars.filter(function(x){return x&&typeof x.id==="string"&&x.id===c.id;});
     if(matches.length!==1)return;
     var source=matches[0];if(source.handProfileVersion===32||!HANDS[source.hand])return;
     changes.push({char:c,hand:source.hand,intl:hasIntlHand(source)?{ja:source.handIntl.ja,en:source.handIntl.en,version:source.handIntl.version||1}:fallbackIntl(source)});
   });
   changes.forEach(function(x){
-    var c=x.char;c.hand=x.hand;c.handIntl=x.intl;delete c.handProfileVersion;c.handAsking=false;
+    var c=x.char;c.hand=x.hand;c.handIntl=x.intl;c.handRuleVersion=34;c.handOrigin="restored";c.handV9=1;delete c.handProfileVersion;c.handAsking=false;
   });
   if(changes.length)saveChars();return changes.length;
 }
