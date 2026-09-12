@@ -409,7 +409,7 @@
   .phone{background:var(--field);border-radius:20px;padding:12px;margin:10px 0}
   .phone .ph{display:flex;align-items:center;gap:8px;padding:2px 4px 10px;border-bottom:1px solid var(--line);margin-bottom:10px;font-weight:600;font-size:14px}
   .sm .b .tr, .phone .pm .tr{color:var(--stime,var(--muted));font-size:.88em}
-  .sm .b em, .phone .pm em, .mind em, .paper em{font-family:var(--f-nar);font-style:italic;
+  .sm .b em, .phone .pm em, .mind em{font-family:var(--f-nar);font-style:italic;
     font-weight:300;opacity:.82}
   .phone .pm{background:var(--panel);border-radius:14px;padding:9px 13px;margin-bottom:7px;max-width:86%;
     font-family:var(--f-sms, var(--f-body));font-size:var(--sfs,15px);line-height:1.6}
@@ -441,6 +441,7 @@
     font-family:inherit;font-weight:400;font-size:.92em;color:var(--muted);
     padding-bottom:9px;margin-bottom:11px;border-bottom:1.5px solid var(--paper-line)}
   .paper.diary .dhead .wd{font-weight:400;font-size:12px}
+  .paper.letter em, .paper.diary em{font-family:inherit;font-style:inherit;font-weight:inherit}
   .udot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#E0524F;margin-right:6px;vertical-align:middle}
   .ping{display:flex;align-items:center;gap:10px;margin:12px 0;padding:12px 14px;
     background:var(--field);border:1px solid var(--line);border-radius:14px;cursor:pointer}
@@ -936,6 +937,7 @@ function handFallback(c){
   return HAND_KEYS[n % HAND_KEYS.length];
 }
 function handOf(c){
+  if (c && c.handMode && c.handMode!=="auto" && HANDS[c.handMode]) return HANDS[c.handMode];
   /* 예전에 잘못 배정된 것은 한 번 비우고 다시 고르게 한다 */
   if (c && c.hand && !c.handV9){
     c.hand = null; c.handAsking = false; c.handV9 = 1;
@@ -1045,7 +1047,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-11 v37";
+var APP_VER = "2026-09-12 v38";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -1927,6 +1929,10 @@ function viewEdit(){
      + ['켬','끔'].map(function(o){
          return '<option'+((c.narrOn||"켬")===o?" selected":"")+'>'+o+'</option>'; }).join("")
      + '</select>';
+  h += '<label>편지·일기 필체</label><select data-k="handMode">'
+     + '<option value="auto"'+((c.handMode||"auto")==="auto"?' selected':'')+'>자동 선택</option>'
+     + HAND_KEYS.map(function(o){return '<option value="'+o+'"'+(c.handMode===o?' selected':'')+'>'+o+'</option>';}).join("")
+     + '</select>';
 
   h += '<div class="sec">프리셋</div>';
   var gps = cfg.preset ? presetById(cfg.preset) : null;
@@ -1955,6 +1961,12 @@ function viewEdit(){
     el.oninput = el.onchange = function(){
       var k=el.getAttribute("data-k"), v=el.value;
       if (k==="romaji"){ c.romaji = (v==="on"); saveChars(); return; }
+      if (k==="handMode"){
+        c.handMode=v;
+        if(v==="auto"){c.hand=null;delete c.handV9;c.handAsking=false;}
+        else{c.hand=v;c.handV9=1;c.handAsking=false;}
+        saveChars(); render(); return;
+      }
       if(k==="currency"){c.currency=v;if(!v && curRoom(c))delete curRoom(c).currency;saveChars();return;}
       if (k==="length" || k==="lang"){ c[k]=v; saveChars(); return; }
       if ((k==="avatar"||k==="userAvatar") && /^data:image/.test(c[k]||"") && !v) return;
@@ -4513,12 +4525,12 @@ function chatFormat(c){
 function lengthGuide(c){
   var story=chatFormat(c)!=="bubble", key=c.length||"보통";
   var ranges=story ? {"한마디":"100~220","짧게":"350~650","보통":"800~1300","길게":"1400~2000","장문":"2000~2800","자동":"650~1400"}
-    : {"한마디":"40~100","짧게":"120~220","보통":"300~550","길게":"450~700","장문":"750~1100","자동":"220~450"};
-  return "이번 응답 분량: "+key+". "+(story?"스토리챗":"말풍선")+" 기준 대략 "+(ranges[key]||ranges["보통"])+"자 정도의 호흡을 목표로 한다. "
+    : {"한마디":"40~100","짧게":"100~200","보통":"180~380","길게":"350~600","장문":"650~950","자동":"140~360"};
+  return "이번 응답 분량: "+key+". "+(story?"스토리챗":"말풍선")+" 기준 보통 "+(ranges[key]||ranges["보통"])+"자 안에서 필요한 만큼 쓴다. 이 범위는 반드시 채울 목표가 아니다. 현재 장면에 필요한 내용이 적으면 훨씬 짧게 끝내도 된다. "
     +"화면에 보이는 지문·대사·외국어 원문·번역·발음을 합친 전체 분량 기준이다. 구분자만 제외한다. 이는 문장 수 할당이 아니며 문장을 잘라 맞추지 않는다. "
-    +"말투, 어휘, 문장 호흡을 유지하고 자연스럽게 마무리하려면 조금 더 길어져도 괜찮다. 길이를 맞추려고 대사를 축약하거나 문장을 자르지 않는다. "
+    +"말투, 어휘, 문장 호흡을 유지하고 자연스럽게 마무리하려면 조금 더 길어져도 괜찮다. 길이를 맞추려고 대사를 축약하거나 문장을 자르지 않는다. 분량을 늘리려고 새로운 욕구·질문·부탁·신체 접촉·음식·사건을 추가하지 않는다. "
     +"여러 인물이 등장해도 답변 전체의 분량이다. 직전 답이 길었다고 다음 답의 기준까지 늘리지 않는다. "
-    +(story?"한 장면의 행동·대사·심리를 충분히 전개하되 상대가 반응해야 할 지점에서 멈춘다. 문단 개수를 억지로 채우지 않는다.":"현재 사용자 말에 반응하고 상대가 이어갈 여지를 남긴다. 분량을 채우기 위한 반복이나 새 화제를 덧붙이지 않는다.");
+    +(story?"한 장면의 행동·대사·심리를 필요한 만큼 전개하되 사용자의 결정이 반드시 필요한 지점에서만 멈춘다. 문단 개수를 억지로 채우지 않는다.":"현재 사용자 말에 반응한다. 상대가 이어갈 여지를 남긴다는 이유로 질문이나 요구를 덧붙이지 않는다. 분량을 채우기 위한 반복이나 새 화제를 덧붙이지 않는다.");
 }
 function formatGuide(c){
   var mode=chatFormat(c);
@@ -4658,6 +4670,7 @@ function buildSystem(c, turn, scope){
   p.push("# "+name);
   if (c.tagline) p.push(c.tagline);
   if (c.prompt) p.push(fillVars(c, c.prompt));
+  p.push("인물의 고정 성격·식성·취향·말버릇·애정 표현은 매 순간 활성화된 욕구가 아니다. 현재 장면과 직접 관련될 때만 자연스럽게 드러내며, 캐릭터다움을 증명하려고 매 응답에 꺼내지 않는다.");
   if (c.beh){
     p.push("");
     p.push("이 인물의 행동 습관과 예시다. 해당하는 상황에서 성격·관계·현재 목적과 함께 참고하며 모든 장면에서 반복해야 하는 행동 목록으로 취급하지 않는다.");
@@ -4717,6 +4730,7 @@ function buildSystem(c, turn, scope){
   p.push("감정을 직접 말할지 행동으로 드러낼지는 인물의 성격과 상황에 맞춘다. 솔직한 대화나 조용한 반응도 허용한다. 상대의 호칭을 습관적으로 반복하지 않고 문장을 일부러 짧게 끊거나 조사를 생략하지 않는다.");
   p.push("꾸미는 말은 한 문장에 하나까지만 쓴다. 행동으로 이미 보여준 것을 다시 설명하지 않는다. 비유는 꼭 필요할 때만 쓴다.");
   p.push("지문과 대사의 개수·비율·배치 순서는 고정하지 않는다. 대사를 중간중간 채워 넣거나 기계적으로 교차시키지 않는다. 현재 장면의 흐름에 맞춰 쓰고 대사나 지문 어느 쪽으로 마쳐도 된다. 이미 마무리한 뒤 같은 뜻의 질문·당부·예고를 덧붙이지 않는다.");
+  p.push("상대가 이어갈 여지를 남긴다는 것은 매번 질문하거나 부탁하라는 뜻이 아니다. 밥·칭찬·보상·애정 확인·쓰다듬기·성적 접촉을 기본적인 대화 마무리로 사용하지 않는다. 인물 자신의 결정·행동·침묵·관찰·감정 변화나 주변 상황으로 끝내도 된다.");
 
   p.push("첫 화면에 나온 도입부 나레이션은 시작할 때만 쓰인 것이다. 답변에서는 그런 전지적 나레이션을 쓰지 않고, 인물의 시점에서만 쓴다.");
   p.push("설정에 없는 단역은 그 자리에 있을 이유가 분명할 때만 등장시킨다. 둘만 있는 장면에 이유 없이 끼어들게 하지 않는다. 한 번 나온 단역도 상황이 끝나면 더 나오지 않는다.");
@@ -4726,7 +4740,7 @@ function buildSystem(c, turn, scope){
   p.push("");
   p.push("# 절대 하지 않는 것");
   p.push("{{user}} 의 말과 행동과 생각은 절대 쓰지 않는다. {{user}} 가 무엇을 했다거나 무슨 말을 했다고 대신 적지 않는다. {{user}} 의 대사를 지어내지 않는다.");
-  p.push("{{user}} 가 직접 쓴 것만이 {{user}} 가 한 일이다. 그 앞까지만 쓰고 멈춘다. {{user}} 의 반응이 궁금해도 기다린다.");
+  p.push("{{user}} 가 직접 쓴 것만이 {{user}} 가 한 일이다. 다만 인물은 자신의 대사와 행동을 끝까지 수행하고, 주변 인물·환경·사건과 자기 행동에서 생기는 결과를 진행할 수 있다. {{user}} 의 결정이 반드시 필요한 순간에만 그 직전에 멈춘다.");
   p.push("{{user}} 의 겉모습이나 표정을 묘사하는 것은 인물의 눈에 비친 것이므로 괜찮다. 다만 {{user}} 가 무엇을 느끼거나 생각했는지는 쓰지 않는다.");
   p.push("상대역의 대사와 행동, 속마음은 대신 쓰지 않는다. AI나 설정에 대한 메타 발언도 하지 않는다.");
   }
@@ -4830,9 +4844,13 @@ function buildSystem(c, turn, scope){
     p.push(psText);
   }
   p.push("# 현재 장면을 이어 가는 기준");
-  p.push("인물은 상대의 말에 반응하면서 지금 하던 일, 개인적 관심사와 목표, 주변에서 확인되는 상황에 따라 스스로 다음 말과 행동을 고른다. 필요하면 질문·제안·일상적인 행동으로 이야기를 이어 가고, 자연스럽게 마친 장면은 마쳐도 된다. 능동성이란 매번 새 사건을 만들거나 강하게 밀어붙이는 것이 아니다. 상대의 반응과 선택은 대신 쓰지 않는다.");
-  p.push("감정을 하나의 행동으로 고정하지 않는다. 질투·서운함·장난·경쟁심은 관계와 성격에 맞는 여러 반응으로 표현한다. 친밀감은 솔직한 말, 함께 하는 일, 배려, 거리 조절 등으로도 발전한다. 현재의 대화 주제와 인물의 목적을 먼저 이어 간다.");
-  p.push("일상 대화나 갈등의 마무리를 자동으로 성적 제안, 침실 이동, 나중에 몸으로 증명하겠다는 예고로 바꾸지 않는다. 표현만 바꿔 같은 결말을 반복하지 않는다. 친밀한 장면으로의 전환은 현재 대화에서 서로 드러낸 의사와 이미 진행 중인 맥락에 근거하며, 질투나 소유욕만으로 그런 전환을 만들어내지 않는다. 설정에 적힌 취향이나 과거의 친밀한 장면은 매 턴 실행할 지시가 아니다.");
+  p.push("먼저 이번 사용자 메시지에서 가장 중요한 사건·감정·질문을 하나 정하고 응답이 끝날 때까지 그것을 중심으로 유지한다. 죽음·부상·이별·위험·배신·중대한 고백 같은 큰 사건은 식욕·장난·칭찬·접촉·성적 욕구 같은 일상적 특성보다 우선한다. 큰 사건을 익숙한 말버릇이나 가벼운 요구로 돌려 마무리하지 않는다.");
+  p.push("인물은 상대의 말에 반응하면서 지금 하던 일, 개인적 관심사와 목표, 주변에서 이미 확인된 상황에 따라 스스로 다음 말과 행동을 고른다. 자신의 행동을 실행하고 그에 따른 결과까지 한두 단계 진행할 수 있다. 매번 새 사건을 만들거나 강하게 밀어붙일 필요는 없지만 질문과 허락 요청만 하고 멈추지도 않는다. 상대의 반응과 선택은 대신 쓰지 않는다.");
+  p.push("특징을 보여주기 위한 명분을 새로 만들지 않는다. 식성을 꺼내려고 없던 음식·냄새·식사 시간·허기를 만들지 않고, 칭찬이나 접촉을 요구하려고 없던 공로나 보상 상황을 만들지 않는다. 한 응답에 대표 특징을 모두 넣지 말고 현재 장면에 필요한 면만 드러낸다.");
+  p.push("감정을 하나의 행동으로 고정하지 않는다. 질투·서운함·장난·경쟁심은 관계와 성격에 맞는 여러 반응으로 표현한다. 친밀감은 솔직한 말, 함께 하는 일, 배려, 거리 조절 등으로도 발전한다. 최근 답변에서 사용한 핵심 요구·행동·감정 전환·결말은 현재 상황이 실제로 다시 발생하지 않았다면 표현만 바꾸어 반복하지 않는다.");
+  p.push("분노·질투·말대꾸·도발·웃음·가까운 거리·신체적 매력은 그 자체로 성적 의사나 성적 장면의 시작이 아니다. 군사적 갈등·업무·다툼·부상·위험·일상 대화에서는 원래 문제를 먼저 이어 간다. 성격이나 취향을 보여주려고 흥분·성적 제안·침실 이동·강압적 접촉으로 전환하지 않는다.");
+  p.push("친밀하거나 성적인 전개는 현재 메시지에서 사용자가 명확히 시작하거나, 현재 장면에서 서로의 의사가 이미 확인된 경우에만 이어 간다. 과거의 친밀한 관계만으로 이번 장면의 의사를 가정하지 않는다. 인물이 접촉을 시도할 수는 있지만 사용자의 반응이 필요한 접촉의 성공을 단정하거나, 사용자의 몸을 옮기고 눕히고 옷을 벗기는 여러 단계를 한 응답에서 확정하지 않는다.");
+  p.push("일상 대화나 갈등의 마무리를 자동으로 성적 제안, 침실 이동, 나중에 몸으로 증명하겠다는 예고로 바꾸지 않는다. 입술을 핥기·턱을 붙잡기·몸으로 누르기·번쩍 들어 옮기기·입술을 집어삼키기·옷이나 벨트를 풀기·성적인 위협으로 끝내기를 대표 행동 세트처럼 반복하지 않는다. 설정에 적힌 취향이나 과거의 친밀한 장면은 매 턴 실행할 지시가 아니다.");
   p.push("과거 응답·문체 예시의 결말은 이번 턴의 도착점이 아니다. 예시의 말투는 참고하되 사건과 제안은 복제하지 않는다. 위의 인물 태도·행동 예시·프리셋은 이 장면 기준 안에서 적용한다.");
   if (turn){
     p.push("");
@@ -5003,10 +5021,22 @@ function turn(){
 }
 function turnGo(c, lg, ti){
   callAPI(c,lg,ti).then(function(text){
-    var l=getLog(c.id); l.push({r:"a",t:text}); setLog(c.id,l);
+    var l=getLog(c.id);
+    if(regenAlt){
+      var ri=-1;
+      for(var j=l.length-1;j>=0;j--)if(l[j].r==="a"&&!l[j].narr){ri=j;break;}
+      if(ri>=0){
+        var old=l[ri], alts=isArr(old.alts)?old.alts.slice():[old.t];
+        if(alts.indexOf(text)<0)alts.push(text);
+        old.alts=alts;old.ai=alts.indexOf(text);old.t=text;
+      }else l.push({r:"a",t:text});
+      regenAlt=false;
+    }else l.push({r:"a",t:text});
+    setLog(c.id,l);
     busy=false; elSend.disabled=false; paint();
     if (/\[\s*(?:편지|일기)\s*\]/.test(text)) syncHand(c);
   }).catch(function(e){
+    regenAlt=false;
     busy=false; elSend.disabled=false;
     paint(e.message||"연결에 실패했어.");
   });
@@ -5301,6 +5331,7 @@ function bubbleFlow(text){
 
 function syncHand(c){
   if (!c || !cfg.key) return;
+  if (c.handMode && c.handMode!=="auto" && HANDS[c.handMode]) return;
   if (c.hand && c.handV9) return;
   if (c.handAsking) return;
   c.hand = null; c.handAsking = true;
