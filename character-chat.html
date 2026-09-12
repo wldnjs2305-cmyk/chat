@@ -1047,7 +1047,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-12 v41c";
+var APP_VER = "2026-09-12 v41d";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -1899,7 +1899,7 @@ function viewEdit(){
   h += field("내 캐릭터 프롬프트","userPrompt",c.userPrompt,140);
 
   h += '<div class="sec">응답</div>';
-  h += '<label>대화 형식</label><select data-k="chatFormat">'+[["bubble","말풍선"],["novel","소설"],["script","대본"]].map(function(o){return '<option value="'+o[0]+'"'+(chatFormat(c)===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';
+  h += '<label>대화 형식</label><select data-k="chatFormat">'+[["bubble","말풍선"]].map(function(o){return '<option value="'+o[0]+'"'+(chatFormat(c)===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';
   h += '<label>길이</label><select data-k="length">'
      + ["자동","한마디","짧게","보통","길게","장문"].map(function(o){
          var def = c.length || (c.kind==="다인" ? "자동" : "보통");
@@ -4520,7 +4520,9 @@ function fillVars(c, t){
 }
 /* Character format, document fields, and world-specific purchase records. */
 function chatFormat(c){
-  return c && ["bubble","novel","script"].indexOf(c.chatFormat)>=0 ? c.chatFormat : "bubble";
+  /* 소설·대본 제거: 항상 말풍선. 되살리려면 아래 한 줄을 원래대로 되돌리면 된다.
+     원래: return c && ["bubble","novel","script"].indexOf(c.chatFormat)>=0 ? c.chatFormat : "bubble"; */
+  return "bubble";
 }
 function lengthGuide(c){
   var story=chatFormat(c)!=="bubble", key=c.length||"보통";
@@ -4533,9 +4535,9 @@ function lengthGuide(c){
 /* v41: default voice guidance lives here, separately from card and display rules. */
 function conversationGuide(){
   return [
-    "인물의 어휘·호칭·말버릇·문장 호흡·말수·애정 표현은 캐릭터 설정과 해당 인물의 문체 예시를 따른다. 생략, 짧은 말, 긴 말, 거친 표현, 장난은 그 인물답게 쓴다.",
+    "인물의 어휘·호칭·말버릇·문장 호흡·말수·애정 표현은 캐릭터 설정과 해당 인물의 문체 예시를 따른다. 생략, 짧은 말, 긴 말, 거친 표현, 장난은 그 인물답게 쓴다. 상대를 부르는 호칭은 캐릭터 설정에 적힌 형태 그대로 쓴다. 변화를 주려고 호칭에 이름을 붙이거나 다른 말로 바꾸지 않는다.",
     "이번 상대의 말과 행동에서 구체적으로 무엇을 받아 이야기하는지 드러나게 한다. 인물 자신의 생각·경험·농담·입장과 현재 하던 일을 보태어 화제를 주고받는다. 먼저 말하거나 행동하고 새 화제를 꺼내는 것도 성격과 상황에 맞게 선택한다. 매번 질문하거나 새 사건을 만들 의무는 없다.",
-    "인물의 습관과 욕구는 그대로 유지된다. 다만 같은 욕구를 매 턴 같은 방식으로 표현하지 않는다. 말로 조르는 것 말고도 혼자 해결하려 들거나, 티만 내거나, 참거나, 다른 일에 정신이 팔려 잊거나, 이미 받은 것에 만족해 한동안 꺼내지 않을 수 있다. 붙어 있는 자세나 이어지는 감정, 말버릇처럼 지속되는 상태는 그대로 유지해도 된다. 행동 습관을 유지하면서 상대가 꺼낸 이야기를 함께 이어갈 수 있다.",
+    "인물의 습관과 욕구는 그대로 유지된다. 다만 같은 욕구를 매 턴 같은 방식으로 표현하지 않는다. 말로 조르는 것 말고도 혼자 해결하려 들거나, 티만 내거나, 참거나, 다른 일에 정신이 팔려 잊거나, 이미 받은 것에 만족해 한동안 꺼내지 않을 수 있다. 붙어 있는 자세나 이어지는 감정, 말버릇처럼 지속되는 상태는 그대로 유지해도 된다. 행동 습관을 유지하면서 상대가 꺼낸 이야기를 함께 이어갈 수 있다. 이 변화는 행동과 용건에만 적용한다. 호칭, 말버릇, 말투, 어미는 바꾸지 않고 그대로 유지한다.",
     "최근 대화와 비교할 때 피할 반복은 현재 화제와 무관하게 같은 요구·제안으로 되돌아가 끝내는 패턴이다. 표현만 바꾸어 같은 용건을 덧붙이지 않는다. 현재 장면에서 실제로 이어지는 화제라면 계속 나눌 수 있다. 매번 요구나 부탁, 조르는 말로 답을 끝내지 않는다. 직전 답과 같은 소재로 마무리하지 않는다. 과거 대화와 예시는 말투와 사건의 맥락으로 참고하고 그 결말을 이번 답의 목적지로 삼지 않는다.",
     "말과 그에 관련된 행동은 실제로 일어나는 순간에 함께 배치한다. 긴 대사도 허용한다. 본문 끝에 서로 다른 요구나 제안을 몰아서 처리하지 않는다. 이미 충분히 반응했다면 별개의 용건을 덧붙이지 않고 마칠 수 있다."
   ].join("\n");
