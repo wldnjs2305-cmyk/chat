@@ -737,6 +737,12 @@
   .ig-photo{min-height:190px;display:flex;flex-direction:column;justify-content:center;align-items:center;background:var(--field);padding:25px;text-align:center;color:var(--muted)}
   .ig-photo>span{font-size:32px;line-height:1}
   .ig-photo p{max-width:32em;margin:12px 0 0}
+  .ig-photo.has-img{padding:0;min-height:0;display:block}
+  .ig-photo.has-img img{display:block;width:100%;height:auto}
+  .ig-act{display:flex;gap:8px;padding:10px 16px 0;flex-wrap:wrap}
+  .ig-act button{background:var(--field);border:1px solid var(--line);color:var(--text);font-family:inherit;font-size:13px;padding:7px 12px;border-radius:10px;cursor:pointer}
+  .ig-act button:disabled{opacity:.5}
+  .ig-act .ig-st{font-size:12px;color:var(--muted);align-self:center}
   .ig-caption{padding:14px 16px 18px}
   .ig-caption p{margin:8px 0;white-space:pre-wrap}
   .ig-comment{margin-top:6px}
@@ -1047,7 +1053,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-12 v41i";
+var APP_VER = "2026-09-12 v41k";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -2123,6 +2129,13 @@ function viewCfg(){
   h += '<label>최대 응답 길이</label><input id="t" value="'+esc(cfg.maxTokens)+'" inputmode="numeric">';
   h += '<button class="btn" id="ping">연결 테스트</button>';
   h += '<div class="hint" id="pingout"></div>';
+  h += '<div class="sec">인스타 사진</div>';
+  h += '<label>이미지 서버 주소</label><input id="imgsv" value="'+esc(cfg.imgServer||"")+'" autocapitalize="off" spellcheck="false" placeholder="https://...ts.net/chat2img-codex">';
+  h += '<div class="hint">PC에서 Chat2Img 서버를 켜두고 그 주소를 넣어. 인스타 카드에 사진 만들기 버튼이 생겨. 서버가 꺼져 있으면 버튼만 안 눌릴 뿐 나머지는 그대로 돼.</div>';
+  h += '<button class="btn" id="imgping">서버 확인</button>';
+  h += '<div class="hint" id="imgout"></div>';
+  var igs = igStats();
+  h += '<div class="hint">앱에 저장된 사진 '+igs.n+'장 · 약 '+igs.mb.toFixed(2)+'MB. 한 장에 400px로 줄여서 넣기 때문에 PC를 꺼도 계속 보여. 꽉 차면 인스타 카드의 사진 빼기로 지우면 돼.</div>';
   }
   h += '<div class="sec'+(cfgFromChat?" first":"")+'">화면</div>';
   h += '<label>테마</label><select id="th">'
@@ -2220,6 +2233,19 @@ function viewCfg(){
   });
   on("#m","oninput",function(){ cfg.model=this.value.trim(); saveCfg(); setHome(); });
   on("#t","oninput",function(){ cfg.maxTokens=parseInt(this.value,10)||2600; saveCfg(); });
+  on("#imgsv","oninput",function(){ cfg.imgServer=this.value.trim().replace(/\/+$/,""); saveCfg(); });
+  on("#imgping","onclick",function(){
+    var out=$("#imgout"), btn=this, base=igServer();
+    if(!base){ out.textContent="주소가 비어 있어."; return; }
+    btn.disabled=true; out.textContent="확인하는 중…";
+    fetch(base+"/health").then(function(r){ return r.text(); })
+    .then(function(tx){
+      var d=null; try{ d=JSON.parse(tx); }catch(e){}
+      out.textContent = (d&&d.ok) ? "서버 연결됨" : ("응답이 이상해 · "+tx.slice(0,80));
+    })
+    .catch(function(){ out.textContent="연결 안 됨. PC에서 서버가 켜져 있는지, 주소가 맞는지 확인해줘."; })
+    .then(function(){ btn.disabled=false; });
+  });
   on("#ping","onclick",function(){
     var out=$("#pingout"), btn=this;
     if (!cfg.key){ out.textContent="API 키가 비어 있어."; return; }
@@ -4379,6 +4405,25 @@ function paint(err, thinking){
       m.ai=n; m.t=m.alts[n]; setLog(c.id,lg); paint();
     }, {passive:true});
   });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-igmake],[data-igcopy],[data-igdrop]"), function(el){
+    el.onclick=function(ev){
+      ev.stopPropagation();
+      var host=el.closest("[data-i]"); if(!host) return;
+      var mi=+host.getAttribute("data-i");
+      if (el.hasAttribute("data-igcopy")){
+        var p=igPost(c,mi,+el.getAttribute("data-igcopy"));
+        if(p) copyText(String(p.photo||""));
+        el.textContent="복사됨";
+        setTimeout(function(){ el.textContent="묘사 복사"; },1200);
+        return;
+      }
+      if (el.hasAttribute("data-igdrop")){
+        igEditPost(c,mi,+el.getAttribute("data-igdrop"),function(pp){ delete pp.image; });
+        paint(); return;
+      }
+      igMake(c, mi, +el.getAttribute("data-igmake"), el);
+    };
+  });
   Array.prototype.forEach.call(view.querySelectorAll("[data-cp]"), function(el){
     el.onclick=function(){ copyText(getLog(c.id)[+el.getAttribute("data-cp")].t); selIdx=-1; paint(); };
   });
@@ -4652,15 +4697,106 @@ function instagramHTML(body,c){
   var posts=Array.isArray(data.posts)?data.posts.slice(0,3):[], name=String(data.handle||c.name||"profile");
   var h='<section class="insta"><div class="ig-profile">'+avaHTML(c.avatar,"◎")+'<div><b>'+esc(name)+'</b><div>'+esc(data.bio||"")+'</div></div></div>';
   if(data.private)h+='<div class="ig-private">비공개 계정</div>';
-  posts.forEach(function(p){
+  posts.forEach(function(p,pi){
     if(!p || typeof p!=="object")return;
-    h+='<article class="ig-post"><div class="ig-photo" role="img" aria-label="사진 묘사"><span aria-hidden="true">▧</span><p>'+esc(p.photo||"사진 없음")+'</p></div>';
+    h+='<article class="ig-post">';
+    if(p.image){
+      h+='<div class="ig-photo has-img"><img src="'+esc(p.image)+'" alt="'+esc(p.photo||"")+'"></div>';
+    }else{
+      h+='<div class="ig-photo" role="img" aria-label="사진 묘사"><p>'+esc(p.photo||"사진 없음")+'</p></div>';
+    }
+    h+='<div class="ig-act"><button data-igmake="'+pi+'">'+(p.image?"사진 다시 만들기":"사진 만들기")+'</button>'
+      +'<button data-igcopy="'+pi+'">묘사 복사</button>'
+      +(p.image?'<button data-igdrop="'+pi+'">사진 빼기</button>':"")+'</div>';
     h+='<div class="ig-caption"><div class="ig-meta">'+esc(p.date||"")+(p.likes!=null?' · 좋아요 '+esc(p.likes):'')+'</div><p><b>'+esc(name)+'</b> '+esc(p.caption||"")+'</p>';
     (Array.isArray(p.comments)?p.comments.slice(0,4):[]).forEach(function(q){if(q)h+='<div class="ig-comment"><b>'+esc(q.who||"익명")+'</b> '+esc(q.text||"")+'</div>';});
     h+='</div></article>';
   });
   if(!posts.length)h+='<div class="ig-private">게시물 없음</div>';
   return h+'</section>';
+}
+function igParse(c,msgIdx){
+  var lg=getLog(c.id), m=lg[msgIdx]; if(!m) return null;
+  var mm=String(m.t||"").match(/\[인스타\]([\s\S]*?)\[\/인스타\]/); if(!mm) return null;
+  var d=null; try{ d=JSON.parse(mm[1].trim()); }catch(e){ return null; }
+  if(!d || !Array.isArray(d.posts)) return null;
+  return { lg:lg, m:m, d:d };
+}
+function igPost(c,msgIdx,postIdx){
+  var r=igParse(c,msgIdx);
+  return r ? (r.d.posts[postIdx]||null) : null;
+}
+function igEditPost(c,msgIdx,postIdx,fn){
+  var r=igParse(c,msgIdx); if(!r) return null;
+  var p=r.d.posts[postIdx]; if(!p) return null;
+  fn(p);
+  r.m.t="[인스타]\n"+JSON.stringify(r.d)+"\n[/인스타]";
+  setLog(c.id,r.lg);
+  return p;
+}
+function igServer(){ return String(cfg.imgServer||"").trim().replace(/\/+$/,""); }
+function igStats(){
+  var n=0, bytes=0;
+  chars.forEach(function(c){
+    getLog(c.id).forEach(function(m){
+      var t=String(m.t||"");
+      if (t.indexOf("[인스타]")<0) return;
+      (t.match(/"image":"data:image[^"]*"/g)||[]).forEach(function(s){ n++; bytes+=s.length; });
+    });
+  });
+  return { n:n, mb:(bytes/1048576) };
+}
+function igShrink(url, done, fail){
+  var img=new Image();
+  img.crossOrigin="anonymous";
+  img.onload=function(){
+    var M=400, w=img.width, h=img.height, r=Math.min(1, M/Math.max(w,h));
+    var cv=document.createElement("canvas");
+    cv.width=Math.round(w*r); cv.height=Math.round(h*r);
+    cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+    try{ done(cv.toDataURL("image/jpeg",0.82)); }catch(e){ fail(e); }
+  };
+  img.onerror=function(){ fail(new Error("사진을 받아오지 못했어.")); };
+  img.src=url;
+}
+function igMake(c,msgIdx,postIdx,btn){
+  var base=igServer();
+  if(!base){ alert("설정에서 이미지 서버 주소부터 넣어줘."); return; }
+  var p=igPost(c,msgIdx,postIdx);
+  if(!p){ alert("이 게시물을 찾지 못했어."); return; }
+  var desc=String(p.photo||"").trim();
+  if(!desc){ alert("사진 묘사가 비어 있어."); return; }
+  var prompt="휴대폰으로 찍은 인스타그램 게시물 사진. 정사각형. 자연광, 약간 흔들린 스냅 느낌. 글자나 로고는 넣지 않는다.\n"+desc;
+  var st=btn.parentNode.querySelector(".ig-st");
+  if(!st){ st=document.createElement("span"); st.className="ig-st"; btn.parentNode.appendChild(st); }
+  btn.disabled=true; st.textContent="만드는 중… 1~3분 걸려";
+  fetch(base+"/generate",{ method:"POST", headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({ prompt:prompt, mode:"scene", sizeHint:"auto", qualityHint:"auto" }) })
+  .then(function(r){ return r.text().then(function(tx){
+    var d=null; try{ d=JSON.parse(tx); }catch(e){}
+    if(!r.ok || !d || !d.ok) throw new Error((d&&d.error) || ("서버가 "+r.status+" 로 응답했어."));
+    if(!d.imageUrl) throw new Error("이미지 주소를 받지 못했어.");
+    return d;
+  });})
+  .then(function(d){
+    st.textContent="사진 받는 중…";
+    igShrink(base + d.imageUrl, function(dataUrl){
+      igEditPost(c,msgIdx,postIdx,function(pp){ pp.image = dataUrl; });
+      if (!put(logKey(c.id), getLog(c.id))){
+        btn.disabled=false;
+        st.textContent="저장 공간이 부족해. 사진 빼기로 몇 장 지우고 다시 해줘.";
+        return;
+      }
+      paint();
+    }, function(e){
+      btn.disabled=false;
+      st.textContent="실패 · "+(e.message||"사진을 못 받았어");
+    });
+  })
+  .catch(function(e){
+    btn.disabled=false;
+    st.textContent="실패 · "+(e.message||"서버에 연결 안 됨");
+  });
 }
 function instagramResponse(text){
   var m=String(text).match(/\[인스타\]([\s\S]*?)\[\/인스타\]/);
