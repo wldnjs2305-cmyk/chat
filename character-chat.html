@@ -1053,7 +1053,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-13 v41q";
+var APP_VER = "2026-09-13 v41r";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -4905,7 +4905,7 @@ function igMake(c,msgIdx,postIdx,btn){
       + "Real human skin with visible pores, fine texture and uneven tone. Individual hair strands. Real fabric weave.\n"
       + "Uneven natural light, ordinary shadows, slight motion blur, casual off-center framing like a snapshot someone actually took.\n"
       + "STRICTLY AVOID: anime, manga, cel shading, digital painting, illustration, 3D render, CG, airbrushed or plastic skin, glowing or oversized eyes, perfect symmetry, dramatic rim lighting.\n"
-      + "If a reference image is drawn or rendered, convert the person into a real human photograph. Keep only face structure, hair colour and length, and eye colour. Do not copy the drawing's rendering style.\n"
+      + "IDENTITY IS FIXED. If the character reference is a drawing, change ONLY the rendering — surface texture, lighting and material — into photographic. Do NOT redesign the face. Keep the exact same face shape, jawline, eye shape and spacing, eyebrow shape, nose shape, mouth shape, hair colour, hair length and hair parting as the reference. The result must be recognisably the same individual. Never substitute a generic or stock-looking face.\n"
       + "No text, no logos, no watermark.\n"
     : "인스타그램 게시물에 올라온 그림. 정사각형. 글자나 로고는 넣지 않는다.\n";
   var look = String(c.look||"").trim();
