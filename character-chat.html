@@ -1733,6 +1733,38 @@ function go(s,id){
 function cur(){ for (var i=0;i<chars.length;i++) if (chars[i].id===curId) return chars[i]; return null; }
 /* 하나가 없어도 나머지가 멈추지 않게 */
 function on(sel, ev, fn){ var el=$(sel); if (el) el[ev]=fn; }
+/* 맨 아래로. 사진과 글꼴이 늦게 떠서 높이가 커지므로 잠깐 따라 내려간다 */
+var btmTick = 0, btmAt = -1;
+function toBottom(){
+  if (!view) return;
+  var my = ++btmTick;
+  function drop(){
+    if (my!==btmTick || !view) return;
+    view.scrollTop = view.scrollHeight;
+    btmAt = view.scrollTop;
+  }
+  /* 손으로 올렸으면 더는 따라가지 않는다 */
+  function guard(){
+    if (my!==btmTick) return;
+    if (btmAt>=0 && Math.abs(view.scrollTop - btmAt) > 8) btmTick++;
+  }
+  function stop(){
+    if (my===btmTick) btmTick++;
+    if (view) view.removeEventListener("scroll", guard);
+  }
+  drop();
+  view.addEventListener("scroll", guard);
+  requestAnimationFrame(function(){ drop(); requestAnimationFrame(drop); });
+  Array.prototype.forEach.call(view.querySelectorAll("img"), function(im){
+    if (im.complete) return;
+    im.addEventListener("load", drop, {once:true});
+    im.addEventListener("error", drop, {once:true});
+  });
+  try{ if (document.fonts && document.fonts.ready) document.fonts.ready.then(drop); }catch(e){}
+  setTimeout(drop, 150);
+  setTimeout(drop, 500);
+  setTimeout(stop, 1800);
+}
 function render(){
   view.className=""; dock.style.display="none";
   document.body.removeAttribute("data-sms");
@@ -3845,7 +3877,7 @@ function paintSms(err, thinking){
     };
   });
   if (smsKeep){ view.scrollTop = smsKeep; smsKeep = 0; }
-  else view.scrollTop = view.scrollHeight;
+  else toBottom();
 }
 var smsSel=-1, smsKeep=0;
 function smsMenu(i){
@@ -4490,7 +4522,7 @@ function paint(err, thinking){
   Array.prototype.forEach.call(view.querySelectorAll("[data-cancel]"), function(el){
     el.onclick=function(){ editIdx=-1; paint(); };
   });
-  if (editIdx<0 && selIdx<0 && !keepScroll) view.scrollTop = view.scrollHeight;
+  if (editIdx<0 && selIdx<0 && !keepScroll) toBottom();
   if (keepScroll) view.scrollTop = keepScroll;
   keepScroll = 0;
 }
@@ -4789,6 +4821,18 @@ function storeStats(){
   return { rows:rows, total:total, orig:orig, origN:origN };
 }
 function fmtKB(n){ return n<1048576 ? Math.round(n/1024)+"KB" : (n/1048576).toFixed(1)+"MB"; }
+/* 얼굴 유지용 참조 사진. 서버가 최대 3장까지 받는다 */
+function igRefs(c){
+  var out=[];
+  function add(slot, src){
+    if (out.length>=3) return;
+    if (!src || !/^data:image\/(png|jpe?g|webp);base64,/i.test(src)) return;
+    out.push({ slot:slot, dataUrl:src });
+  }
+  add("char", (c && c.refPhoto) || get(origKey(c.id,"avatar"), null) || (c && c.avatar));
+  add("persona", get(origKey(c.id,"userAvatar"), null) || (c && c.userAvatar));
+  return out;
+}
 function igShrink(url, done, fail){
   var img=new Image(), settled=false;
   var tm=setTimeout(function(){ if(!settled){ settled=true; fail(new Error("사진을 받는 데 너무 오래 걸려")); } }, 60000);
@@ -4821,9 +4865,10 @@ function igMake(c,msgIdx,postIdx,btn){
   var prompt="휴대폰으로 찍은 인스타그램 게시물 사진. 정사각형. 자연광, 약간 흔들린 스냅 느낌. 글자나 로고는 넣지 않는다.\n"+desc;
   var st=btn.parentNode.querySelector(".ig-st");
   if(!st){ st=document.createElement("span"); st.className="ig-st"; btn.parentNode.appendChild(st); }
-  btn.disabled=true; st.textContent="만드는 중… 1~3분 걸려";
+  var refs=igRefs(c);
+  btn.disabled=true; st.textContent="만드는 중… 1~3분 걸려"+(refs.length?" (사진 참고 "+refs.length+"장)":"");
   fetch(base+"/generate",{ method:"POST", headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({ prompt:prompt, mode:"scene", sizeHint:"auto", qualityHint:"auto" }) })
+    body:JSON.stringify({ prompt:prompt, mode:"scene", sizeHint:"auto", qualityHint:"auto", refs:refs }) })
   .then(function(r){ return r.text().then(function(tx){
     var d=null; try{ d=JSON.parse(tx); }catch(e){}
     if(!r.ok || !d || !d.ok) throw new Error((d&&d.error) || ("서버가 "+r.status+" 로 응답했어."));
