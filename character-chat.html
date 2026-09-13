@@ -1065,7 +1065,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-13 v42e";
+var APP_VER = "2026-09-13 v42f";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -1966,8 +1966,7 @@ function igReply(c, msgIdx, postIdx, mine){
           + (had.length ? "\n\n이 게시물에 이미 달린 댓글이야.\n"+had.join("\n") : "")
           + "\n\n"+me+"가 방금 이렇게 댓글을 달았어.\n"+mine+"\n\n뭐라고 답해줄래?";
 
-  function done(out){
-    delete igReplying[tag];
+  function done(out, again){
     var t = String(out||"").split("\n").map(function(x){return x.trim();})
              .filter(Boolean)[0] || "";
     t = t.replace(/^["'`]+|["'`]+$/g,"").trim();
@@ -1975,15 +1974,25 @@ function igReply(c, msgIdx, postIdx, mine){
          .replace(new RegExp("^"+me.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*[,:]?\\s*","i"), "")
          .replace(/^[,:\s]+/, "").trim();
     if (t.length > 160) t = t.slice(0,160);
-    /* 말이 끊긴 채로 온 답글은 버린다 */
-    if (!t || /[,·‧、]$/.test(t)) return;
+    /* 말이 끊긴 답글, 한국어인데 한글이 하나도 없는 답글은 버린다 */
+    var ko = (c.lang||"한국어").indexOf("한국") >= 0;
+    var bad = !t || /[,·‧、]$/.test(t) || (ko && !/[가-힣]/.test(t));
+    if (bad) {
+      if (!again) return fire(true);   /* 한 번은 다시 물어본다 */
+      delete igReplying[tag];
+      return;
+    }
+    delete igReplying[tag];
     igEditPost(c, msgIdx, postIdx, function(pp){
       if(!isArr(pp.comments)) pp.comments=[];
       pp.comments.push({ who:owner, text:"@"+me+" "+t });
     });
     paint();
   }
-  askLLM(sys, msg, done, 400);
+  function fire(again){
+    askLLM(sys, msg, function(out){ done(out, again); }, 400);
+  }
+  fire(false);
 }
 /* 새로고침: 주변 사람들 댓글을 더 받아온다 */
 function igMoreComments(c, msgIdx, postIdx, btn){
@@ -2590,7 +2599,7 @@ function viewCfg(){
         o=ch?((ch.message&&ch.message.content)||ch.text||""):"";
       } else {
         var cd=d&&d.candidates&&d.candidates[0];
-        o=cd?((cd.content&&cd.content.parts)||[]).map(function(x){return x.text||"";}).join(""):"";
+        o=cd?finalResponseText(cd.content&&cd.content.parts):"";
       }
       o=(o||"").trim();
       out.textContent = o ? ("연결 성공 · "+ms+"ms · 응답: "+o.slice(0,60))
@@ -3596,7 +3605,7 @@ function makeRecap(c, done){
       out=ch?((ch.message&&ch.message.content)||""):"";
     } else {
       var cd=d&&d.candidates&&d.candidates[0];
-      out=cd?((cd.content&&cd.content.parts)||[]).map(function(x){return x.text||"";}).join(""):"";
+      out=cd?finalResponseText(cd.content&&cd.content.parts):"";
     }
     var v = out.trim();
     /* 마지막 줄이 뚝 끊긴 요약은 버린다. 그걸 저장하면 앞 이야기가 통째로 날아간다 */
@@ -4336,7 +4345,7 @@ function smsTurn2(c, t){
       out=ch?((ch.message&&ch.message.content)||ch.text||""):"";
     } else {
       var cand=data&&data.candidates&&data.candidates[0];
-      out=cand?((cand.content&&cand.content.parts)||[]).map(function(x){return x.text||"";}).join(""):"";
+      out=cand?finalResponseText(cand.content&&cand.content.parts):"";
     }
     return out.trim();
   });})
@@ -4448,7 +4457,7 @@ function askLLM(sys, content, cb, lim, plain){
         out=ch?((ch.message&&ch.message.content)||ch.text||""):"";
       } else {
         var cd=d&&d.candidates&&d.candidates[0];
-        out=cd?((cd.content&&cd.content.parts)||[]).map(function(x){return x.text||"";}).join(""):"";
+        out=cd?finalResponseText(cd.content&&cd.content.parts):"";
       }
       cb(String(out||"").trim());
     })
