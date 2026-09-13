@@ -748,7 +748,12 @@
   .ig-comment{margin-top:6px}
   .ig-comment b{margin-right:6px}
   .ig-comment.mine b{color:var(--accent)}
-  .ig-cdel{margin-left:6px;border:0;background:none;color:var(--muted);font-size:15px;line-height:1;padding:0 3px;cursor:pointer}
+  .ig-when{font-size:11px;color:var(--muted);margin:6px 0 0;letter-spacing:.02em}
+  .ig-chead{display:flex;align-items:center;gap:8px;margin:14px 0 4px;font-size:12px;color:var(--muted)}
+  .ig-chead span{flex:1}
+  .ig-cnew{border:1px solid var(--line);background:var(--field);color:var(--muted);font-family:inherit;font-size:11px;padding:3px 9px;border-radius:9px;cursor:pointer}
+  .ig-cnew:disabled{opacity:.5}
+  .ig-comment{-webkit-touch-callout:none}
   .ig-cbox{display:flex;gap:6px;margin-top:11px}
   .ig-cbox input{flex:1;min-width:0;padding:8px 11px;border:1px solid var(--line);border-radius:14px;background:var(--field);color:var(--text);font-family:inherit;font-size:13px}
   .ig-cbox button{flex:0 0 auto;padding:8px 13px;border:1px solid var(--line);border-radius:14px;background:var(--field);color:var(--text);font-family:inherit;font-size:13px;cursor:pointer}
@@ -1058,7 +1063,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-13 v42b";
+var APP_VER = "2026-09-13 v42d";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -1946,17 +1951,24 @@ function igReply(c, msgIdx, postIdx, mine){
   }).join("\n");
 
   var sys = "너는 '"+(c.name||"캐릭터")+"' 본인이고, 인스타 계정 "+owner+"의 주인이다.\n"
-          + "네 게시물에 달린 댓글에 다는 답글 딱 한 줄만 출력한다.\n"
-          + "출력은 답글 내용 그 자체여야 한다. 설명, 말투 분석, 영어 지시어, 따옴표, 아이디, 따옴표는 절대 쓰지 않는다.\n"
-          + "인스타 댓글처럼 짧고 가볍게, 캐릭터 말투로 쓴다.";
+          + "네 게시물에 달린 댓글에 답글을 단다.\n"
+          + "JSON만 출력한다. 형식: {\"reply\":\"답글 내용\"}\n"
+          + "reply 안에는 답글 문장만 넣는다. 아이디(@...), 말투 설명, 영어 지시어, 코드블록은 넣지 않는다.\n"
+          + "인스타 댓글처럼 짧고 가볍게, 캐릭터 말투로.";
   var msg = "내 게시물\n사진: "+String(p.photo||"")+"\n캡션: "+String(p.caption||"")+"\n\n"
           + "지금까지 달린 댓글\n"+prev+"\n\n"
-          + igHandle(c)+"님이 방금 이렇게 댓글을 남겼다: \""+mine+"\"\n\n"
-          + "여기에 뭐라고 답글을 달래? 답글 내용만 한 줄로.";
+          + igHandle(c)+"님이 방금 남긴 댓글: "+mine;
 
   askLLM(sys, msg, function(out){
     delete igReplying[tag];
-    var t = String(out||"").split("\n")[0].trim().replace(/^["'`]+|["'`]+$/g,"");
+    var raw = String(out||"").replace(/^```(?:json)?\s*|\s*```$/g,"").trim();
+    var t = "";
+    try { var j = JSON.parse(raw); if (j && j.reply) t = String(j.reply); } catch(e){}
+    if (!t){
+      var mm = raw.match(/"reply"\s*:\s*"([^"]*)"/);
+      t = mm ? mm[1] : raw;
+    }
+    t = t.split("\n")[0].trim().replace(/^["'`]+|["'`]+$/g,"");
     /* 모델이 아이디를 이미 붙였으면 떼고, 앱이 한 번만 붙인다 */
     t = t.replace(/^@+\s*/, "").replace(new RegExp("^"+igHandle(c).replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*[,:]?\\s*","i"), "").trim();
     t = t.replace(/^[,:\s]+/, "");
@@ -1968,6 +1980,55 @@ function igReply(c, msgIdx, postIdx, mine){
     });
     paint();
   }, 160);
+}
+/* 새로고침: 유저를 뺀 제3자 댓글을 한두 개 더 받아온다 */
+function igMoreComments(c, msgIdx, postIdx, btn){
+  if (!cfg.key) return;
+  var r = igParse(c, msgIdx); if(!r) return;
+  var p = r.d.posts[postIdx]; if(!p) return;
+  var owner = r.d.handle || dispOf(c) || c.name || "계정 주인";
+  var prev = (isArr(p.comments)?p.comments:[]).slice(-8).map(function(q){
+    return (q&&q.who||"")+": "+(q&&q.text||"");
+  }).join("\n");
+  var mine = igHandle(c);
+  btn.disabled = true; btn.textContent = "…";
+  var sys = "너는 '"+(c.name||"캐릭터")+"'의 인스타 게시물에 댓글을 다는 주변 사람들을 연기한다.\n"
+          + "JSON 배열만 출력한다. 형식: [{\"who\":\"아이디\",\"text\":\"댓글\"}]\n"
+          + "댓글은 1~2개. 친구, 지인, 팔로워 등 제3자가 쓴다. 계정 주인 "+owner+"이 직접 답글을 달아도 된다.\n"
+          + "'"+mine+"' 아이디로는 절대 쓰지 않는다. 그 사람의 댓글을 지어내지 않는다.\n"
+          + "이미 있는 댓글과 겹치지 않게. 설명이나 코드블록 없이 JSON만.";
+  var msg = "게시물\n사진: "+String(p.photo||"")+"\n캡션: "+String(p.caption||"")+"\n\n"
+          + "이미 달린 댓글\n"+prev;
+  askLLM(sys, msg, function(out){
+    btn.disabled = false; btn.textContent = "새로고침";
+    var txt = String(out||"").replace(/^```(?:json)?\s*|\s*```$/g,"").trim();
+    var arr = null; try { arr = JSON.parse(txt); } catch(e){}
+    if (!isArr(arr) || !arr.length) return;
+    igEditPost(c, msgIdx, postIdx, function(pp){
+      if(!isArr(pp.comments)) pp.comments=[];
+      arr.slice(0,2).forEach(function(q){
+        if (!q || !q.text) return;
+        var who = String(q.who||"").replace(/^@+/,"").trim();
+        if (!who || who.toLowerCase()===mine.toLowerCase()) return;
+        pp.comments.push({ who:who, text:String(q.text) });
+      });
+    });
+    paint();
+  }, 300);
+}
+/* 게시 시각 표기. 모델이 준 날짜를 그대로 쓰되, 실제 시각이 있으면 상대 시간으로 */
+function igWhen(p){
+  var at = p && p.at;
+  if (at){
+    var d = Math.floor((Date.now()-at)/1000);
+    if (d < 60) return "방금 전";
+    if (d < 3600) return Math.floor(d/60)+"분 전";
+    if (d < 86400) return Math.floor(d/3600)+"시간 전";
+    if (d < 604800) return Math.floor(d/86400)+"일 전";
+    var t = new Date(at);
+    return (t.getMonth()+1)+"월 "+t.getDate()+"일";
+  }
+  return String((p && p.date) || "");
 }
 function igHandle(c){
   return String((c && c.igHandle) || (c && c.userName) || "나").trim() || "나";
@@ -4678,15 +4739,23 @@ function paint(err, thinking){
     };
   });
   Array.prototype.forEach.call(view.querySelectorAll("[data-igcdel]"), function(el){
-    el.onclick=function(ev){
-      ev.stopPropagation();
+    bindHold(el, function(){
       var host=el.closest("[data-i]"); if(!host) return;
       var mi=+host.getAttribute("data-i");
       var v=el.getAttribute("data-igcdel").split(":");
+      if(!confirm("이 댓글을 지울까?")) return;
       igEditPost(c,mi,+v[0],function(pp){
         if(isArr(pp.comments)) pp.comments.splice(+v[1],1);
       });
       paint();
+    });
+    el.onclick=function(ev){ ev.stopPropagation(); };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-igcnew]"), function(el){
+    el.onclick=function(ev){
+      ev.stopPropagation();
+      var host=el.closest("[data-i]"); if(!host) return;
+      igMoreComments(c, +host.getAttribute("data-i"), +el.getAttribute("data-igcnew"), el);
     };
   });
   Array.prototype.forEach.call(view.querySelectorAll("[data-igcin]"), function(el){
@@ -5001,11 +5070,16 @@ function instagramHTML(body,c){
     h+='<div class="ig-act"><button data-igmake="'+pi+'">'+(src?"사진 다시 만들기":"사진 만들기")+'</button>'
       +'<button data-igcopy="'+pi+'">묘사 복사</button>'
       +(src?'<button data-igdrop="'+pi+'">사진 빼기</button>':"")+'</div>';
-    h+='<div class="ig-caption"><div class="ig-meta">'+esc(p.date||"")+(p.likes!=null?' · 좋아요 '+esc(p.likes):'')+'</div><p><b>'+esc(name)+'</b> '+esc(p.caption||"")+'</p>';
-    (Array.isArray(p.comments)?p.comments:[]).forEach(function(q,qi){
+    var cms = Array.isArray(p.comments)?p.comments:[];
+    h+='<div class="ig-caption">'
+     + (p.likes!=null?'<div class="ig-meta">좋아요 '+esc(p.likes)+'</div>':'')
+     + '<p><b>'+esc(name)+'</b> '+esc(p.caption||"")+'</p>'
+     + '<div class="ig-when">'+esc(igWhen(p))+'</div>';
+    h+='<div class="ig-chead"><span>댓글</span>'
+     + '<button class="ig-cnew" data-igcnew="'+pi+'">새로고침</button></div>';
+    cms.forEach(function(q,qi){
       if(!q)return;
-      h+='<div class="ig-comment'+(q.me?" mine":"")+'"><b>'+esc(q.who||"익명")+'</b> '+esc(q.text||"")
-       + '<button class="ig-cdel" data-igcdel="'+pi+':'+qi+'">×</button></div>';
+      h+='<div class="ig-comment'+(q.me?" mine":"")+'" data-igcdel="'+pi+':'+qi+'"><b>'+esc(q.who||"익명")+'</b> '+esc(q.text||"")+'</div>';
     });
     h+='<div class="ig-cbox"><input data-igcin="'+pi+'" placeholder="'+esc(igHandle(c))+' (으)로 댓글 달기"><button data-igcadd="'+pi+'">달기</button></div>';
     h+='</div></article>';
@@ -5165,6 +5239,8 @@ function instagramResponse(text){
   var d;
   try{d=JSON.parse(m[1].trim().replace(/^```(?:json)?\s*|\s*```$/g,""));}catch(e){throw new Error("인스타 게시물 형식이 불완전해. 다시 생성해줘.");}
   if(!d || !Array.isArray(d.posts))throw new Error("인스타 게시물 목록을 확인하지 못했어. 다시 생성해줘.");
+  var now = Date.now();
+  d.posts.forEach(function(q,i){ if(q && !q.at) q.at = now - i*3600000; });
   return "[인스타]\n"+JSON.stringify(d)+"\n[/인스타]";
 }
 function detailCard(kind,body){
