@@ -1950,15 +1950,23 @@ function igReply(c, msgIdx, postIdx, mine){
   var owner = r.d.handle || dispOf(c) || c.name || "계정 주인";
   var me = igHandle(c);
 
+  var had = (isArr(p.comments)?p.comments:[]).map(function(q){
+    return (q&&q.who||"")+" "+(q&&q.text||"");
+  }).filter(function(x){ return x.trim(); });
+
   var sys = "너는 "+(c.name||"캐릭터")+"다. 인스타 계정 "+owner+"의 주인이고, "
           + "네 게시물에 달린 댓글에 답글을 단다. "
           + (c.prompt ? fillVars(c, c.prompt)+" " : "")
-          + "답글 한 줄만 말해.";
+          + "\n반드시 "+(c.lang||"한국어")+"로만 쓴다. 다른 언어를 섞지 않는다."
+          + "\n설명하거나 지문을 쓰지 말고 답글 한 줄만 출력한다. 40자 이내로 짧게 쓴다."
+          + "\n@아이디를 앞에 붙이지 않는다. 말만 쓴다.";
   var story = "네가 올린 사진은 이런 모습이야. "+String(p.photo||"")+" "
             + (p.caption ? "캡션은 이렇게 썼어. "+String(p.caption) : "");
-  var msg = story+"\n\n"+me+"가 방금 이렇게 댓글을 달았어.\n"+mine+"\n\n뭐라고 답해줄래?";
+  var msg = story
+          + (had.length ? "\n\n이 게시물에 이미 달린 댓글이야.\n"+had.join("\n") : "")
+          + "\n\n"+me+"가 방금 이렇게 댓글을 달았어.\n"+mine+"\n\n뭐라고 답해줄래?";
 
-  askLLM(sys, msg, function(out){
+  function done(out){
     delete igReplying[tag];
     var t = String(out||"").split("\n").map(function(x){return x.trim();})
              .filter(Boolean)[0] || "";
@@ -1966,13 +1974,16 @@ function igReply(c, msgIdx, postIdx, mine){
     t = t.replace(/^@+\s*/, "")
          .replace(new RegExp("^"+me.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*[,:]?\\s*","i"), "")
          .replace(/^[,:\s]+/, "").trim();
-    if (!t || t.length > 160) return;
+    if (t.length > 160) t = t.slice(0,160);
+    /* 말이 끊긴 채로 온 답글은 버린다 */
+    if (!t || /[,·‧、]$/.test(t)) return;
     igEditPost(c, msgIdx, postIdx, function(pp){
       if(!isArr(pp.comments)) pp.comments=[];
       pp.comments.push({ who:owner, text:"@"+me+" "+t });
     });
     paint();
-  }, 200, true);
+  }
+  askLLM(sys, msg, done, 400);
 }
 /* 새로고침: 주변 사람들 댓글을 더 받아온다 */
 function igMoreComments(c, msgIdx, postIdx, btn){
@@ -4424,7 +4435,9 @@ function askLLM(sys, content, cb, lim, plain){
     body={ systemInstruction:{parts:[{text:sys}]},
            contents:[{role:"user",parts:[{text:content}]}],
            generationConfig:{ maxOutputTokens:cap } };
-    if (!plain) body.generationConfig.thinkingConfig = { thinkingBudget:0 };
+    /* 제미나이는 생각이 켜져 있으면 maxOutputTokens를 생각이 먼저 다 먹는다.
+       그래서 이 짧은 요청들은 plain 여부와 상관없이 항상 생각을 끈다 */
+    body.generationConfig.thinkingConfig = { thinkingBudget:0 };
   }
   fetch(url,{method:"POST",headers:headers,body:JSON.stringify(body)})
     .then(function(r){ return r.json(); })
