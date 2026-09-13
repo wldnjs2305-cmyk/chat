@@ -2170,6 +2170,16 @@ function viewCfg(){
   h += '<div class="hint">지금 버전 '+esc(APP_VER)+'</div>';
   h += '<button class="btn" id="upd">업데이트 확인</button>';
   h += '<button class="btn" id="dump">지금 나가는 프롬프트 보기</button>';
+  h += '<div class="sec">저장 공간</div>';
+  var ss = storeStats();
+  h += '<p class="hint">전체 '+fmtKB(ss.total)+' 사용 중 · 한도는 약 5MB야</p>';
+  if (ss.origN) h += '<button class="btn" id="clrorig">원본 사진 캐시 지우기 ('+ss.origN+'장 · '+fmtKB(ss.orig)+')</button>';
+  h += '<details><summary>어디에 쌓였는지 보기</summary>'
+     + ss.rows.slice(0,30).map(function(r){
+         return '<p class="hint">'+esc(r.k)+' — '+fmtKB(r.n)+'</p>';
+       }).join("")
+     + (ss.rows.length>30 ? '<p class="hint">…그 외 '+(ss.rows.length-30)+'개</p>' : '')
+     + '</details>';
   h += '<div class="sec">백업</div>';
   h += '<button class="btn" id="exp">전체 내보내기</button>';
   h += '<label>불러오기</label><textarea id="impbox"></textarea>';
@@ -2319,6 +2329,22 @@ function viewCfg(){
     box.select();
     try { document.execCommand("copy"); alert("복사했어. 메모장에 붙여넣어 둬."); }
     catch(e){ alert("아래 칸을 길게 눌러서 복사해줘."); }
+  });
+  on("#clrorig","onclick",function(){
+    if (!confirm("원본 사진 캐시를 지울까?\n\n사진은 그대로 있고 '다시 조정'만 못 쓰게 돼. 조정하고 싶으면 사진을 다시 고르면 다시 생겨.")) return;
+    var ks=[], freed=0;
+    try{
+      for (var i=0;i<localStorage.length;i++){
+        var k=localStorage.key(i);
+        if (k && k.indexOf("gz.orig.")===0) ks.push(k);
+      }
+      ks.forEach(function(k){
+        freed += (localStorage.getItem(k)||"").length*2;
+        localStorage.removeItem(k);
+      });
+    }catch(e){}
+    alert(ks.length ? (ks.length+"장 지워서 "+fmtKB(freed)+" 비웠어.") : "지울 게 없었어.");
+    go("cfg");
   });
   on("#handrestore","onclick",function(){
     var bx=$("#impbox");if(!bx||!bx.value.trim())return alert("위 칸에 변경 전 전체 백업을 붙여 넣어줘.");
@@ -4745,6 +4771,24 @@ function igStats(){
   });
   return { n:n, mb:(bytes/1048576) };
 }
+/* 저장 공간. 사파리는 글자 하나를 2바이트로 센다 */
+function storeStats(){
+  var rows=[], total=0;
+  try{
+    for (var i=0;i<localStorage.length;i++){
+      var k=localStorage.key(i);
+      if (!k || k.indexOf("gz.")!==0) continue;
+      var n=(localStorage.getItem(k)||"").length*2;
+      total+=n;
+      rows.push({k:k, n:n});
+    }
+  }catch(e){}
+  rows.sort(function(a,b){ return b.n-a.n; });
+  var orig=0, origN=0;
+  rows.forEach(function(r){ if(r.k.indexOf("gz.orig.")===0){ orig+=r.n; origN++; } });
+  return { rows:rows, total:total, orig:orig, origN:origN };
+}
+function fmtKB(n){ return n<1048576 ? Math.round(n/1024)+"KB" : (n/1048576).toFixed(1)+"MB"; }
 function igShrink(url, done, fail){
   var img=new Image(), settled=false;
   var tm=setTimeout(function(){ if(!settled){ settled=true; fail(new Error("사진을 받는 데 너무 오래 걸려")); } }, 60000);
