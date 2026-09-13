@@ -749,10 +749,12 @@
   .ig-comment b{margin-right:6px}
   .ig-comment.mine b{color:var(--accent)}
   .ig-when{font-size:11px;color:var(--muted);margin:6px 0 0;letter-spacing:.02em}
-  .ig-chead{display:flex;align-items:center;gap:8px;margin:14px 0 4px;font-size:12px;color:var(--muted)}
-  .ig-chead span{flex:1}
-  .ig-cnew{border:1px solid var(--line);background:var(--field);color:var(--muted);font-family:inherit;font-size:11px;padding:3px 9px;border-radius:9px;cursor:pointer}
-  .ig-cnew:disabled{opacity:.5}
+  .ig-chead{display:flex;align-items:center;gap:7px;margin:14px 0 4px;font-size:12px;color:var(--muted)}
+  .ig-cnew{width:22px;height:22px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;
+           border:1px solid var(--line);background:var(--field);color:var(--muted);border-radius:50%;padding:0;cursor:pointer}
+  .ig-cnew:disabled{opacity:.55}
+  .ig-cnew.spin svg{animation:igspin .9s linear infinite}
+  @keyframes igspin{to{transform:rotate(360deg)}}
   .ig-comment{-webkit-touch-callout:none}
   .ig-cbox{display:flex;gap:6px;margin-top:11px}
   .ig-cbox input{flex:1;min-width:0;padding:8px 11px;border:1px solid var(--line);border-radius:14px;background:var(--field);color:var(--text);font-family:inherit;font-size:13px}
@@ -1063,7 +1065,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-13 v42d";
+var APP_VER = "2026-09-13 v42e";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -1946,75 +1948,71 @@ function igReply(c, msgIdx, postIdx, mine){
   igReplying[tag] = 1;
 
   var owner = r.d.handle || dispOf(c) || c.name || "계정 주인";
-  var prev = (isArr(p.comments)?p.comments:[]).slice(-6).map(function(q){
-    return (q&&q.who||"")+": "+(q&&q.text||"");
-  }).join("\n");
+  var me = igHandle(c);
 
-  var sys = "너는 '"+(c.name||"캐릭터")+"' 본인이고, 인스타 계정 "+owner+"의 주인이다.\n"
-          + "네 게시물에 달린 댓글에 답글을 단다.\n"
-          + "JSON만 출력한다. 형식: {\"reply\":\"답글 내용\"}\n"
-          + "reply 안에는 답글 문장만 넣는다. 아이디(@...), 말투 설명, 영어 지시어, 코드블록은 넣지 않는다.\n"
-          + "인스타 댓글처럼 짧고 가볍게, 캐릭터 말투로.";
-  var msg = "내 게시물\n사진: "+String(p.photo||"")+"\n캡션: "+String(p.caption||"")+"\n\n"
-          + "지금까지 달린 댓글\n"+prev+"\n\n"
-          + igHandle(c)+"님이 방금 남긴 댓글: "+mine;
+  var sys = "너는 "+(c.name||"캐릭터")+"다. 인스타 계정 "+owner+"의 주인이고, "
+          + "네 게시물에 달린 댓글에 답글을 단다. "
+          + (c.prompt ? fillVars(c, c.prompt)+" " : "")
+          + "답글 한 줄만 말해.";
+  var story = "네가 올린 사진은 이런 모습이야. "+String(p.photo||"")+" "
+            + (p.caption ? "캡션은 이렇게 썼어. "+String(p.caption) : "");
+  var msg = story+"\n\n"+me+"가 방금 이렇게 댓글을 달았어.\n"+mine+"\n\n뭐라고 답해줄래?";
 
   askLLM(sys, msg, function(out){
     delete igReplying[tag];
-    var raw = String(out||"").replace(/^```(?:json)?\s*|\s*```$/g,"").trim();
-    var t = "";
-    try { var j = JSON.parse(raw); if (j && j.reply) t = String(j.reply); } catch(e){}
-    if (!t){
-      var mm = raw.match(/"reply"\s*:\s*"([^"]*)"/);
-      t = mm ? mm[1] : raw;
-    }
-    t = t.split("\n")[0].trim().replace(/^["'`]+|["'`]+$/g,"");
-    /* 모델이 아이디를 이미 붙였으면 떼고, 앱이 한 번만 붙인다 */
-    t = t.replace(/^@+\s*/, "").replace(new RegExp("^"+igHandle(c).replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*[,:]?\\s*","i"), "").trim();
-    t = t.replace(/^[,:\s]+/, "");
-    if (!t) return;
-    t = "@"+igHandle(c)+" "+t;
+    var t = String(out||"").split("\n").map(function(x){return x.trim();})
+             .filter(Boolean)[0] || "";
+    t = t.replace(/^["'`]+|["'`]+$/g,"").trim();
+    t = t.replace(/^@+\s*/, "")
+         .replace(new RegExp("^"+me.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*[,:]?\\s*","i"), "")
+         .replace(/^[,:\s]+/, "").trim();
+    if (!t || t.length > 160) return;
     igEditPost(c, msgIdx, postIdx, function(pp){
       if(!isArr(pp.comments)) pp.comments=[];
-      pp.comments.push({ who:owner, text:t });
+      pp.comments.push({ who:owner, text:"@"+me+" "+t });
     });
     paint();
-  }, 160);
+  }, 200, true);
 }
-/* 새로고침: 유저를 뺀 제3자 댓글을 한두 개 더 받아온다 */
+/* 새로고침: 주변 사람들 댓글을 더 받아온다 */
 function igMoreComments(c, msgIdx, postIdx, btn){
   if (!cfg.key) return;
   var r = igParse(c, msgIdx); if(!r) return;
   var p = r.d.posts[postIdx]; if(!p) return;
-  var owner = r.d.handle || dispOf(c) || c.name || "계정 주인";
-  var prev = (isArr(p.comments)?p.comments:[]).slice(-8).map(function(q){
-    return (q&&q.who||"")+": "+(q&&q.text||"");
-  }).join("\n");
-  var mine = igHandle(c);
-  btn.disabled = true; btn.textContent = "…";
-  var sys = "너는 '"+(c.name||"캐릭터")+"'의 인스타 게시물에 댓글을 다는 주변 사람들을 연기한다.\n"
-          + "JSON 배열만 출력한다. 형식: [{\"who\":\"아이디\",\"text\":\"댓글\"}]\n"
-          + "댓글은 1~2개. 친구, 지인, 팔로워 등 제3자가 쓴다. 계정 주인 "+owner+"이 직접 답글을 달아도 된다.\n"
-          + "'"+mine+"' 아이디로는 절대 쓰지 않는다. 그 사람의 댓글을 지어내지 않는다.\n"
-          + "이미 있는 댓글과 겹치지 않게. 설명이나 코드블록 없이 JSON만.";
-  var msg = "게시물\n사진: "+String(p.photo||"")+"\n캡션: "+String(p.caption||"")+"\n\n"
-          + "이미 달린 댓글\n"+prev;
+  var me = igHandle(c);
+  var had = (isArr(p.comments)?p.comments:[]).map(function(q){
+    return (q&&q.text||"");
+  });
+  btn.classList.add("spin"); btn.disabled = true;
+
+  var sys = "너는 "+(c.name||"캐릭터")+"의 인스타 게시물에 댓글을 다는 주변 사람들이다. "
+          + "친구, 지인, 팔로워가 짧게 한마디씩 남긴다. "
+          + "한 줄에 한 명씩, 아이디 다음에 쉼표 없이 한 칸 띄고 댓글을 쓴다. 두 줄만 쓴다. "
+          + me+"라는 아이디로는 쓰지 않는다.";
+  var msg = "사진은 이런 모습이야. "+String(p.photo||"")+"\n"
+          + (p.caption ? "캡션은 이렇게 달렸어. "+String(p.caption)+"\n" : "")
+          + (had.length ? "\n이미 달린 댓글이야. 겹치지 않게 써줘.\n"+had.join("\n") : "");
+
   askLLM(sys, msg, function(out){
-    btn.disabled = false; btn.textContent = "새로고침";
-    var txt = String(out||"").replace(/^```(?:json)?\s*|\s*```$/g,"").trim();
-    var arr = null; try { arr = JSON.parse(txt); } catch(e){}
-    if (!isArr(arr) || !arr.length) return;
+    btn.classList.remove("spin"); btn.disabled = false;
+    var lines = String(out||"").split("\n").map(function(x){return x.trim();}).filter(Boolean);
+    var add = [];
+    lines.forEach(function(L){
+      if (add.length>=2) return;
+      L = L.replace(/^[-*\d.)\s]+/,"").trim();
+      var m = L.match(/^@?([A-Za-z0-9._]{2,24})\s*[:：]?\s+(.+)$/);
+      if (!m) return;
+      var who = m[1], txt = m[2].trim().replace(/^["'`]+|["'`]+$/g,"");
+      if (!txt || who.toLowerCase()===me.toLowerCase()) return;
+      add.push({ who:who, text:txt });
+    });
+    if (!add.length) return;
     igEditPost(c, msgIdx, postIdx, function(pp){
       if(!isArr(pp.comments)) pp.comments=[];
-      arr.slice(0,2).forEach(function(q){
-        if (!q || !q.text) return;
-        var who = String(q.who||"").replace(/^@+/,"").trim();
-        if (!who || who.toLowerCase()===mine.toLowerCase()) return;
-        pp.comments.push({ who:who, text:String(q.text) });
-      });
+      add.forEach(function(q){ pp.comments.push(q); });
     });
     paint();
-  }, 300);
+  }, 300, true);
 }
 /* 게시 시각 표기. 모델이 준 날짜를 그대로 쓰되, 실제 시각이 있으면 상대 시간으로 */
 function igWhen(p){
@@ -5076,7 +5074,10 @@ function instagramHTML(body,c){
      + '<p><b>'+esc(name)+'</b> '+esc(p.caption||"")+'</p>'
      + '<div class="ig-when">'+esc(igWhen(p))+'</div>';
     h+='<div class="ig-chead"><span>댓글</span>'
-     + '<button class="ig-cnew" data-igcnew="'+pi+'">새로고침</button></div>';
+     + '<button class="ig-cnew" data-igcnew="'+pi+'" aria-label="댓글 더 보기">'
+     + '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">'
+     + '<path d="M20 12a8 8 0 1 1-2.3-5.6"></path><path d="M20 3v4.5h-4.5"></path></svg>'
+     + '</button></div>';
     cms.forEach(function(q,qi){
       if(!q)return;
       h+='<div class="ig-comment'+(q.me?" mine":"")+'" data-igcdel="'+pi+':'+qi+'"><b>'+esc(q.who||"익명")+'</b> '+esc(q.text||"")+'</div>';
