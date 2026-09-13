@@ -1053,7 +1053,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-12 v41k";
+var APP_VER = "2026-09-12 v41l";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -4727,12 +4727,11 @@ function igPost(c,msgIdx,postIdx){
   return r ? (r.d.posts[postIdx]||null) : null;
 }
 function igEditPost(c,msgIdx,postIdx,fn){
-  var r=igParse(c,msgIdx); if(!r) return null;
-  var p=r.d.posts[postIdx]; if(!p) return null;
+  var r=igParse(c,msgIdx); if(!r) return false;
+  var p=r.d.posts[postIdx]; if(!p) return false;
   fn(p);
   r.m.t="[인스타]\n"+JSON.stringify(r.d)+"\n[/인스타]";
-  setLog(c.id,r.lg);
-  return p;
+  return put(logKey(c.id), r.lg);
 }
 function igServer(){ return String(cfg.imgServer||"").trim().replace(/\/+$/,""); }
 function igStats(){
@@ -4747,16 +4746,25 @@ function igStats(){
   return { n:n, mb:(bytes/1048576) };
 }
 function igShrink(url, done, fail){
-  var img=new Image();
+  var img=new Image(), settled=false;
+  var tm=setTimeout(function(){ if(!settled){ settled=true; fail(new Error("사진을 받는 데 너무 오래 걸려")); } }, 60000);
   img.crossOrigin="anonymous";
   img.onload=function(){
-    var M=400, w=img.width, h=img.height, r=Math.min(1, M/Math.max(w,h));
-    var cv=document.createElement("canvas");
-    cv.width=Math.round(w*r); cv.height=Math.round(h*r);
-    cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
-    try{ done(cv.toDataURL("image/jpeg",0.82)); }catch(e){ fail(e); }
+    if(settled) return; settled=true; clearTimeout(tm);
+    try{
+      var M=400, w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
+      if(!w || !h) return fail(new Error("사진 크기를 읽지 못했어"));
+      var r=Math.min(1, M/Math.max(w,h));
+      var cv=document.createElement("canvas");
+      cv.width=Math.round(w*r); cv.height=Math.round(h*r);
+      cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+      done(cv.toDataURL("image/jpeg",0.82));
+    }catch(e){ fail(new Error("사진을 복사하지 못했어 ("+(e.name||"오류")+")")); }
   };
-  img.onerror=function(){ fail(new Error("사진을 받아오지 못했어.")); };
+  img.onerror=function(){
+    if(settled) return; settled=true; clearTimeout(tm);
+    fail(new Error("사진 주소를 열지 못했어"));
+  };
   img.src=url;
 }
 function igMake(c,msgIdx,postIdx,btn){
@@ -4779,16 +4787,23 @@ function igMake(c,msgIdx,postIdx,btn){
     return d;
   });})
   .then(function(d){
+    var remote = base + d.imageUrl;
     st.textContent="사진 받는 중…";
-    igShrink(base + d.imageUrl, function(dataUrl){
-      igEditPost(c,msgIdx,postIdx,function(pp){ pp.image = dataUrl; });
-      if (!put(logKey(c.id), getLog(c.id))){
-        btn.disabled=false;
-        st.textContent="저장 공간이 부족해. 사진 빼기로 몇 장 지우고 다시 해줘.";
+    igShrink(remote, function(dataUrl){
+      if (igEditPost(c,msgIdx,postIdx,function(pp){ pp.image=dataUrl; })){ paint(); return; }
+      if (igEditPost(c,msgIdx,postIdx,function(pp){ pp.image=remote; })){
+        paint();
+        alert("저장 공간이 부족해서 사진을 앱에 못 넣었어. 일단 서버 주소로 걸어뒀으니 PC가 켜져 있는 동안은 보여. 사진 빼기로 몇 장 지우고 다시 만들면 앱에 저장돼.");
         return;
       }
-      paint();
+      btn.disabled=false;
+      st.textContent="저장 공간이 부족해. 사진 빼기로 몇 장 지우고 다시 해줘.";
     }, function(e){
+      if (igEditPost(c,msgIdx,postIdx,function(pp){ pp.image=remote; })){
+        paint();
+        alert("사진은 만들어졌는데 앱에 복사하지 못했어 ("+(e.message||"원인 불명")+"). 서버 주소로 걸어뒀으니 PC가 켜져 있는 동안은 보여.");
+        return;
+      }
       btn.disabled=false;
       st.textContent="실패 · "+(e.message||"사진을 못 받았어");
     });
