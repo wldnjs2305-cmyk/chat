@@ -1053,7 +1053,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-12 v41l";
+var APP_VER = "2026-09-13 v41q";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -1853,6 +1853,22 @@ function field(label,key,val,big,hint){
                 : '<input data-k="'+key+'" value="'+esc(val||"")+'">';
   return '<label>'+esc(label)+'</label>'+tag+(hint?'<div class="hint">'+hint+'</div>':"");
 }
+/* 그림 참조 사진은 gz.chars 를 부풀리지 않게 따로 둔다 */
+function picKey(id,kind){ return "gz.pic."+kind+"."+id; }
+function picGet(id,kind){ return get(picKey(id,kind), "") || ""; }
+function picSet(id,kind,v){
+  if (v) return put(picKey(id,kind), v);
+  try{ localStorage.removeItem(picKey(id,kind)); }catch(e){}
+  return true;
+}
+function picBlock(label,kind,val,hint){
+  return '<label>'+esc(label)+'</label>'
+    + (hint ? '<p class="hint" style="margin:-4px 0 6px">'+esc(hint)+'</p>' : "")
+    + '<div class="pick">'+avaHTML(val,"🖼","lg")
+    + '<div class="btns"><button class="btn sm" data-picpick="'+kind+'">사진 고르기</button>'
+    + (val ? '<button class="btn sm" data-picclear="'+kind+'">지우기</button>' : "")
+    + '</div></div>';
+}
 function photoBlock(label,key,val){
   return '<label>'+esc(label)+'</label><div class="pick">'+avaHTML(val,"🙂","lg")
     + '<div class="btns"><button class="btn sm" data-pick="'+key+'">사진 고르기</button>'
@@ -1929,6 +1945,14 @@ function viewEdit(){
        + '<div class="hint" style="margin:2px 0 0">'+esc(ls.length+"줄 · "+(peek||"비어 있음"))+'</div></div>';
   });
   h += '<button class="btn" id="greadd">+ 인트로 추가</button>';
+
+  h += '<div class="sec">그림</div>';
+  h += '<label>사진 느낌</label><select data-k="imgStyle">'
+     + ["사진풍","그림풍"].map(function(o){ return '<option'+((c.imgStyle||"사진풍")===o?" selected":"")+'>'+o+"</option>"; }).join("")
+     + '</select>';
+  h += picBlock("얼굴 참조 사진","ref",picGet(c.id,"ref"),"자르지 않은 원본이 좋아. 얼굴과 머리만 참고해.");
+  h += picBlock("화풍 참조 사진","sty",picGet(c.id,"sty"),"이런 느낌으로 뽑아달라는 예시. 인물은 안 따라가.");
+  h += field("그림용 외모","look",c.look,90,"머리 색과 길이, 눈, 나이대처럼 얼굴에 남아야 하는 것만 짧게");
 
   h += '<div class="sec">나</div>';
   h += photoBlock("내 프로필 사진","userAvatar",c.userAvatar);
@@ -2060,6 +2084,18 @@ function viewEdit(){
       if (!orig) return;
       editPhoto(orig, function(cr){ savePhoto(k, cr); });
     };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-picpick]"), function(el){
+    el.onclick=function(){
+      var kind=el.getAttribute("data-picpick");
+      pickPhoto(function(orig){
+        if (!picSet(c.id, kind, orig)) alert("저장 공간이 부족해. 설정에서 정리하고 다시 해줘.");
+        render();
+      });
+    };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-picclear]"), function(el){
+    el.onclick=function(){ picSet(c.id, el.getAttribute("data-picclear"), ""); render(); };
   });
   Array.prototype.forEach.call(view.querySelectorAll("[data-clear]"), function(el){
     el.onclick=function(){ c[el.getAttribute("data-clear")]=""; saveChars(); render(); };
@@ -4829,7 +4865,8 @@ function igRefs(c){
     if (!src || !/^data:image\/(png|jpe?g|webp);base64,/i.test(src)) return;
     out.push({ slot:slot, dataUrl:src });
   }
-  add("char", (c && c.refPhoto) || get(origKey(c.id,"avatar"), null) || (c && c.avatar));
+  add("char", picGet(c.id,"ref") || get(origKey(c.id,"avatar"), null) || (c && c.avatar));
+  add("style", picGet(c.id,"sty"));
   add("persona", get(origKey(c.id,"userAvatar"), null) || (c && c.userAvatar));
   return out;
 }
@@ -4862,7 +4899,17 @@ function igMake(c,msgIdx,postIdx,btn){
   if(!p){ alert("이 게시물을 찾지 못했어."); return; }
   var desc=String(p.photo||"").trim();
   if(!desc){ alert("사진 묘사가 비어 있어."); return; }
-  var prompt="휴대폰으로 찍은 인스타그램 게시물 사진. 정사각형. 자연광, 약간 흔들린 스냅 느낌. 글자나 로고는 넣지 않는다.\n"+desc;
+  var real = (c.imgStyle||"사진풍") !== "그림풍";
+  var head = real
+    ? "A real photograph taken on a smartphone. This is photography, NOT an illustration.\n"
+      + "Real human skin with visible pores, fine texture and uneven tone. Individual hair strands. Real fabric weave.\n"
+      + "Uneven natural light, ordinary shadows, slight motion blur, casual off-center framing like a snapshot someone actually took.\n"
+      + "STRICTLY AVOID: anime, manga, cel shading, digital painting, illustration, 3D render, CG, airbrushed or plastic skin, glowing or oversized eyes, perfect symmetry, dramatic rim lighting.\n"
+      + "If a reference image is drawn or rendered, convert the person into a real human photograph. Keep only face structure, hair colour and length, and eye colour. Do not copy the drawing's rendering style.\n"
+      + "No text, no logos, no watermark.\n"
+    : "인스타그램 게시물에 올라온 그림. 정사각형. 글자나 로고는 넣지 않는다.\n";
+  var look = String(c.look||"").trim();
+  var prompt = head + (look ? "인물의 외모: "+look+"\n" : "") + desc;
   var st=btn.parentNode.querySelector(".ig-st");
   if(!st){ st=document.createElement("span"); st.className="ig-st"; btn.parentNode.appendChild(st); }
   var refs=igRefs(c);
