@@ -747,6 +747,11 @@
   .ig-caption p{margin:8px 0;white-space:pre-wrap}
   .ig-comment{margin-top:6px}
   .ig-comment b{margin-right:6px}
+  .ig-comment.mine b{color:var(--accent)}
+  .ig-cdel{margin-left:6px;border:0;background:none;color:var(--muted);font-size:15px;line-height:1;padding:0 3px;cursor:pointer}
+  .ig-cbox{display:flex;gap:6px;margin-top:11px}
+  .ig-cbox input{flex:1;min-width:0;padding:8px 11px;border:1px solid var(--line);border-radius:14px;background:var(--field);color:var(--text);font-family:inherit;font-size:13px}
+  .ig-cbox button{flex:0 0 auto;padding:8px 13px;border:1px solid var(--line);border-radius:14px;background:var(--field);color:var(--text);font-family:inherit;font-size:13px;cursor:pointer}
   .ig-private{padding:14px 16px;color:var(--muted)}
   .ig-post+.ig-post{border-top:1px solid var(--line)}
 
@@ -1053,7 +1058,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-13 v41v";
+var APP_VER = "2026-09-13 v41w";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -1925,6 +1930,9 @@ function picLoad(){
   }).catch(function(){});
 }
 /* 인스타 사진도 IndexedDB에 둔다. 로그에는 idb:<아이디> 라는 이름표만 남는다 */
+function igHandle(c){
+  return String((c && c.igHandle) || (c && c.userName) || "나").trim() || "나";
+}
 function igSrc(p){
   var v = (p && p.image) || "";
   if (v.indexOf("idb:")===0) return picGet(v.slice(4), "ig");
@@ -2068,6 +2076,7 @@ function viewEdit(){
   h += field("내 표시 이름","userDisplay",c.userDisplay);
   h += field("내 캐릭터 프롬프트","userPrompt",c.userPrompt,140);
   h += field("내 그림용 외모","userLook",c.userLook,90);
+  h += field("내 인스타 아이디","igHandle",c.igHandle);
 
   h += '<div class="sec">응답</div>';
   h += '<label>대화 형식</label><select data-k="chatFormat">'+[["bubble","말풍선"]].map(function(o){return '<option value="'+o[0]+'"'+(chatFormat(c)===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';
@@ -4612,6 +4621,41 @@ function paint(err, thinking){
       m.ai=n; m.t=m.alts[n]; setLog(c.id,lg); paint();
     }, {passive:true});
   });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-igcadd]"), function(el){
+    el.onclick=function(ev){
+      ev.stopPropagation();
+      var host=el.closest("[data-i]"); if(!host) return;
+      var mi=+host.getAttribute("data-i"), pi=+el.getAttribute("data-igcadd");
+      var box=host.querySelector('[data-igcin="'+pi+'"]');
+      var txt=box ? String(box.value||"").trim() : "";
+      if(!txt) return;
+      igEditPost(c,mi,pi,function(pp){
+        if(!isArr(pp.comments)) pp.comments=[];
+        pp.comments.push({ who:igHandle(c), text:txt, me:true });
+      });
+      paint();
+    };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-igcdel]"), function(el){
+    el.onclick=function(ev){
+      ev.stopPropagation();
+      var host=el.closest("[data-i]"); if(!host) return;
+      var mi=+host.getAttribute("data-i");
+      var v=el.getAttribute("data-igcdel").split(":");
+      igEditPost(c,mi,+v[0],function(pp){
+        if(isArr(pp.comments)) pp.comments.splice(+v[1],1);
+      });
+      paint();
+    };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-igcin]"), function(el){
+    el.onkeydown=function(ev){
+      if(ev.key!=="Enter") return;
+      ev.preventDefault();
+      var b=el.parentNode.querySelector("[data-igcadd]"); if(b) b.click();
+    };
+    el.onclick=function(ev){ ev.stopPropagation(); };
+  });
   Array.prototype.forEach.call(view.querySelectorAll("[data-igmake],[data-igcopy],[data-igdrop]"), function(el){
     el.onclick=function(ev){
       ev.stopPropagation();
@@ -4917,7 +4961,12 @@ function instagramHTML(body,c){
       +'<button data-igcopy="'+pi+'">묘사 복사</button>'
       +(src?'<button data-igdrop="'+pi+'">사진 빼기</button>':"")+'</div>';
     h+='<div class="ig-caption"><div class="ig-meta">'+esc(p.date||"")+(p.likes!=null?' · 좋아요 '+esc(p.likes):'')+'</div><p><b>'+esc(name)+'</b> '+esc(p.caption||"")+'</p>';
-    (Array.isArray(p.comments)?p.comments.slice(0,4):[]).forEach(function(q){if(q)h+='<div class="ig-comment"><b>'+esc(q.who||"익명")+'</b> '+esc(q.text||"")+'</div>';});
+    (Array.isArray(p.comments)?p.comments:[]).forEach(function(q,qi){
+      if(!q)return;
+      h+='<div class="ig-comment'+(q.me?" mine":"")+'"><b>'+esc(q.who||"익명")+'</b> '+esc(q.text||"")
+       + (q.me?'<button class="ig-cdel" data-igcdel="'+pi+':'+qi+'">×</button>':"")+'</div>';
+    });
+    h+='<div class="ig-cbox"><input data-igcin="'+pi+'" placeholder="'+esc(igHandle(c))+' (으)로 댓글 달기"><button data-igcadd="'+pi+'">달기</button></div>';
     h+='</div></article>';
   });
   if(!posts.length)h+='<div class="ig-private">게시물 없음</div>';
