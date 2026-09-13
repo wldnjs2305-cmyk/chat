@@ -1053,7 +1053,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-13 v41s";
+var APP_VER = "2026-09-13 v41v";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -1924,6 +1924,50 @@ function picLoad(){
     });
   }).catch(function(){});
 }
+/* 인스타 사진도 IndexedDB에 둔다. 로그에는 idb:<아이디> 라는 이름표만 남는다 */
+function igSrc(p){
+  var v = (p && p.image) || "";
+  if (v.indexOf("idb:")===0) return picGet(v.slice(4), "ig");
+  return v;
+}
+function igPut(dataUrl){
+  var id = Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  return picSet(id, "ig", dataUrl).then(function(ok){ return ok ? ("idb:"+id) : ""; });
+}
+function igDrop(p){
+  var v = (p && p.image) || "";
+  if (v.indexOf("idb:")===0) picSet(v.slice(4), "ig", "");
+}
+/* 예전에 로그 안에 박혀 있던 사진을 꺼내서 옮긴다. 한 번만 돈다 */
+function igMigrate(){
+  var moved = 0, jobs = [];
+  chars.forEach(function(c){
+    roomsOf(c).forEach(function(r){
+      var key = roomKey(c.id, r.id), lg = get(key, []), touched = false;
+      if (!isArr(lg)) return;
+      lg.forEach(function(m){
+        var t = String(m && m.t || "");
+        if (t.indexOf("[인스타]")<0 || t.indexOf('"data:image')<0) return;
+        var mm = t.match(/\[인스타\]([\s\S]*?)\[\/인스타\]/); if(!mm) return;
+        var d = null; try { d = JSON.parse(mm[1].trim()); } catch(e){ return; }
+        if (!d || !isArr(d.posts)) return;
+        d.posts.forEach(function(p){
+          if (!p || !p.image || p.image.indexOf("data:image")!==0) return;
+          var id = Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+          picCache["ig."+id] = p.image;
+          jobs.push(["ig."+id, p.image]);
+          p.image = "idb:"+id;
+          moved++; touched = true;
+        });
+        if (touched) m.t = "[인스타]\n"+JSON.stringify(d)+"\n[/인스타]";
+      });
+      if (touched) put(key, lg);
+    });
+  });
+  if (!jobs.length) return;
+  var st = picTx("readwrite");
+  if (st) jobs.forEach(function(j){ try { st.put(j[1], j[0]); } catch(e){} });
+}
 function picBlock(label,kind,val,hint){
   return '<label>'+esc(label)+'</label>'
     + (hint ? '<p class="hint" style="margin:-4px 0 6px">'+esc(hint)+'</p>' : "")
@@ -2023,6 +2067,7 @@ function viewEdit(){
   h += field("내 이름","userName",c.userName);
   h += field("내 표시 이름","userDisplay",c.userDisplay);
   h += field("내 캐릭터 프롬프트","userPrompt",c.userPrompt,140);
+  h += field("내 그림용 외모","userLook",c.userLook,90);
 
   h += '<div class="sec">응답</div>';
   h += '<label>대화 형식</label><select data-k="chatFormat">'+[["bubble","말풍선"]].map(function(o){return '<option value="'+o[0]+'"'+(chatFormat(c)===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('')+'</select>';
@@ -2265,11 +2310,12 @@ function viewCfg(){
   h += '<div class="hint" id="pingout"></div>';
   h += '<div class="sec">인스타 사진</div>';
   h += '<label>이미지 서버 주소</label><input id="imgsv" value="'+esc(cfg.imgServer||"")+'" autocapitalize="off" spellcheck="false" placeholder="https://...ts.net/chat2img-codex">';
-  h += '<div class="hint">PC에서 Chat2Img 서버를 켜두고 그 주소를 넣어. 인스타 카드에 사진 만들기 버튼이 생겨. 서버가 꺼져 있으면 버튼만 안 눌릴 뿐 나머지는 그대로 돼.</div>';
   h += '<button class="btn" id="imgping">서버 확인</button>';
   h += '<div class="hint" id="imgout"></div>';
-  var igs = igStats();
-  h += '<div class="hint">앱에 저장된 사진 '+igs.n+'장 · 약 '+igs.mb.toFixed(2)+'MB. 한 장에 400px로 줄여서 넣기 때문에 PC를 꺼도 계속 보여. 꽉 차면 인스타 카드의 사진 빼기로 지우면 돼.</div>';
+  h += '<label>사진 화질</label><select id="imgsz">'
+     + [[512,"작게"],[1024,"보통"],[1600,"크게"]].map(function(o){
+         return '<option value="'+o[0]+'"'+((+(cfg.imgSize||1024))===o[0]?" selected":"")+'>'+o[1]+'</option>';
+       }).join("") + '</select>';
   }
   h += '<div class="sec'+(cfgFromChat?" first":"")+'">화면</div>';
   h += '<label>테마</label><select id="th">'
@@ -2378,6 +2424,7 @@ function viewCfg(){
   on("#m","oninput",function(){ cfg.model=this.value.trim(); saveCfg(); setHome(); });
   on("#t","oninput",function(){ cfg.maxTokens=parseInt(this.value,10)||2600; saveCfg(); });
   on("#imgsv","oninput",function(){ cfg.imgServer=this.value.trim().replace(/\/+$/,""); saveCfg(); });
+  on("#imgsz","onchange",function(){ cfg.imgSize=+this.value; saveCfg(); });
   on("#imgping","onclick",function(){
     var out=$("#imgout"), btn=this, base=igServer();
     if(!base){ out.textContent="주소가 비어 있어."; return; }
@@ -4578,7 +4625,7 @@ function paint(err, thinking){
         return;
       }
       if (el.hasAttribute("data-igdrop")){
-        igEditPost(c,mi,+el.getAttribute("data-igdrop"),function(pp){ delete pp.image; });
+        igEditPost(c,mi,+el.getAttribute("data-igdrop"),function(pp){ igDrop(pp); delete pp.image; });
         paint(); return;
       }
       igMake(c, mi, +el.getAttribute("data-igmake"), el);
@@ -4860,14 +4907,15 @@ function instagramHTML(body,c){
   posts.forEach(function(p,pi){
     if(!p || typeof p!=="object")return;
     h+='<article class="ig-post">';
-    if(p.image){
-      h+='<div class="ig-photo has-img"><img src="'+esc(p.image)+'" alt="'+esc(p.photo||"")+'"></div>';
+    var src = igSrc(p);
+    if(src){
+      h+='<div class="ig-photo has-img"><img src="'+esc(src)+'" alt="'+esc(p.photo||"")+'"></div>';
     }else{
       h+='<div class="ig-photo" role="img" aria-label="사진 묘사"><p>'+esc(p.photo||"사진 없음")+'</p></div>';
     }
-    h+='<div class="ig-act"><button data-igmake="'+pi+'">'+(p.image?"사진 다시 만들기":"사진 만들기")+'</button>'
+    h+='<div class="ig-act"><button data-igmake="'+pi+'">'+(src?"사진 다시 만들기":"사진 만들기")+'</button>'
       +'<button data-igcopy="'+pi+'">묘사 복사</button>'
-      +(p.image?'<button data-igdrop="'+pi+'">사진 빼기</button>':"")+'</div>';
+      +(src?'<button data-igdrop="'+pi+'">사진 빼기</button>':"")+'</div>';
     h+='<div class="ig-caption"><div class="ig-meta">'+esc(p.date||"")+(p.likes!=null?' · 좋아요 '+esc(p.likes):'')+'</div><p><b>'+esc(name)+'</b> '+esc(p.caption||"")+'</p>';
     (Array.isArray(p.comments)?p.comments.slice(0,4):[]).forEach(function(q){if(q)h+='<div class="ig-comment"><b>'+esc(q.who||"익명")+'</b> '+esc(q.text||"")+'</div>';});
     h+='</div></article>';
@@ -4944,13 +4992,13 @@ function igShrink(url, done, fail){
   img.onload=function(){
     if(settled) return; settled=true; clearTimeout(tm);
     try{
-      var M=400, w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
+      var M=+(cfg.imgSize||1024), w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
       if(!w || !h) return fail(new Error("사진 크기를 읽지 못했어"));
       var r=Math.min(1, M/Math.max(w,h));
       var cv=document.createElement("canvas");
       cv.width=Math.round(w*r); cv.height=Math.round(h*r);
       cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
-      done(cv.toDataURL("image/jpeg",0.82));
+      done(cv.toDataURL("image/jpeg", M>=1024 ? 0.92 : 0.86));
     }catch(e){ fail(new Error("사진을 복사하지 못했어 ("+(e.name||"오류")+")")); }
   };
   img.onerror=function(){
@@ -4970,7 +5018,16 @@ function igMake(c,msgIdx,postIdx,btn){
   var head = "휴대폰으로 찍은 인스타그램 게시물 사진. 정사각형. 자연광, 약간 흔들린 스냅 느낌. 글자나 로고는 넣지 않는다.\n"
            + (real ? "실사화.\n" : "");
   var look = String(c.look||"").trim();
-  var prompt = head + (look ? look+"\n" : "") + desc;
+  var ulook = String(c.userLook||"").trim();
+  var cname = c.name||"캐릭터";
+  var uname = c.userName||"나";
+  var who = "";
+  if (look) who += cname+"의 외모: "+look+"\n";
+  if (ulook){
+    who += uname+"의 외모: "+ulook+"\n";
+    who += "참조 사진의 얼굴은 "+cname+" 한 사람의 것이다. "+uname+"은 다른 사람이며, 참조 사진의 얼굴이나 머리색을 따라가지 않는다.\n";
+  }
+  var prompt = head + who + desc;
   var st=btn.parentNode.querySelector(".ig-st");
   if(!st){ st=document.createElement("span"); st.className="ig-st"; btn.parentNode.appendChild(st); }
   var refs=igRefs(c);
@@ -4987,14 +5044,16 @@ function igMake(c,msgIdx,postIdx,btn){
     var remote = base + d.imageUrl;
     st.textContent="사진 받는 중…";
     igShrink(remote, function(dataUrl){
-      if (igEditPost(c,msgIdx,postIdx,function(pp){ pp.image=dataUrl; })){ paint(); return; }
-      if (igEditPost(c,msgIdx,postIdx,function(pp){ pp.image=remote; })){
-        paint();
-        alert("저장 공간이 부족해서 사진을 앱에 못 넣었어. 일단 서버 주소로 걸어뒀으니 PC가 켜져 있는 동안은 보여. 사진 빼기로 몇 장 지우고 다시 만들면 앱에 저장돼.");
-        return;
-      }
-      btn.disabled=false;
-      st.textContent="저장 공간이 부족해. 사진 빼기로 몇 장 지우고 다시 해줘.";
+      igPut(dataUrl).then(function(ref){
+        if (ref && igEditPost(c,msgIdx,postIdx,function(pp){ igDrop(pp); pp.image=ref; })){ paint(); return; }
+        if (igEditPost(c,msgIdx,postIdx,function(pp){ igDrop(pp); pp.image=remote; })){
+          paint();
+          alert("사진을 앱에 저장하지 못했어. 서버 주소로 걸어뒀으니 PC가 켜져 있는 동안은 보여.");
+          return;
+        }
+        btn.disabled=false;
+        st.textContent="저장하지 못했어.";
+      });
     }, function(e){
       if (igEditPost(c,msgIdx,postIdx,function(pp){ pp.image=remote; })){
         paint();
@@ -5596,7 +5655,7 @@ $("#reset").onclick=function(){
 
 applyTheme();
 render();
-picLoad().then(function(){ render(); });
+picLoad().then(function(){ try{ igMigrate(); }catch(e){} render(); });
 
 /* Keep the visual viewport and the reading position together through Safari's Done animation. */
 function installViewportLayout(){
