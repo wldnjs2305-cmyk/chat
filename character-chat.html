@@ -1058,7 +1058,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-13 v41z";
+var APP_VER = "2026-09-13 v42b";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -1945,20 +1945,23 @@ function igReply(c, msgIdx, postIdx, mine){
     return (q&&q.who||"")+": "+(q&&q.text||"");
   }).join("\n");
 
-  var sys = "너는 '"+(c.name||"캐릭터")+"'의 인스타 계정 "+owner+"을 운영하는 본인이다. "
-          + "자기 게시물에 달린 댓글에 짧게 답글을 단다. 말투와 성격을 유지한다. "
-          + "답글 한 줄만 쓴다. 아이디나 따옴표, 설명은 붙이지 않는다. 인스타 댓글답게 짧고 가볍게.";
-  var msg = "게시물 사진: "+String(p.photo||"")+"\n"
-          + "캡션: "+String(p.caption||"")+"\n\n"
-          + "댓글들:\n"+prev+"\n\n"
-          + igHandle(c)+"가 방금 남긴 댓글: "+mine+"\n\n"
-          + "이 댓글에 @"+igHandle(c)+" 로 시작하는 답글을 한 줄 써라.";
+  var sys = "너는 '"+(c.name||"캐릭터")+"' 본인이고, 인스타 계정 "+owner+"의 주인이다.\n"
+          + "네 게시물에 달린 댓글에 다는 답글 딱 한 줄만 출력한다.\n"
+          + "출력은 답글 내용 그 자체여야 한다. 설명, 말투 분석, 영어 지시어, 따옴표, 아이디, 따옴표는 절대 쓰지 않는다.\n"
+          + "인스타 댓글처럼 짧고 가볍게, 캐릭터 말투로 쓴다.";
+  var msg = "내 게시물\n사진: "+String(p.photo||"")+"\n캡션: "+String(p.caption||"")+"\n\n"
+          + "지금까지 달린 댓글\n"+prev+"\n\n"
+          + igHandle(c)+"님이 방금 이렇게 댓글을 남겼다: \""+mine+"\"\n\n"
+          + "여기에 뭐라고 답글을 달래? 답글 내용만 한 줄로.";
 
   askLLM(sys, msg, function(out){
     delete igReplying[tag];
     var t = String(out||"").split("\n")[0].trim().replace(/^["'`]+|["'`]+$/g,"");
+    /* 모델이 아이디를 이미 붙였으면 떼고, 앱이 한 번만 붙인다 */
+    t = t.replace(/^@+\s*/, "").replace(new RegExp("^"+igHandle(c).replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\s*[,:]?\\s*","i"), "").trim();
+    t = t.replace(/^[,:\s]+/, "");
     if (!t) return;
-    if (t.indexOf("@")!==0) t = "@"+igHandle(c)+" "+t;
+    t = "@"+igHandle(c)+" "+t;
     igEditPost(c, msgIdx, postIdx, function(pp){
       if(!isArr(pp.comments)) pp.comments=[];
       pp.comments.push({ who:owner, text:t });
@@ -5002,7 +5005,7 @@ function instagramHTML(body,c){
     (Array.isArray(p.comments)?p.comments:[]).forEach(function(q,qi){
       if(!q)return;
       h+='<div class="ig-comment'+(q.me?" mine":"")+'"><b>'+esc(q.who||"익명")+'</b> '+esc(q.text||"")
-       + (q.me?'<button class="ig-cdel" data-igcdel="'+pi+':'+qi+'">×</button>':"")+'</div>';
+       + '<button class="ig-cdel" data-igcdel="'+pi+':'+qi+'">×</button></div>';
     });
     h+='<div class="ig-cbox"><input data-igcin="'+pi+'" placeholder="'+esc(igHandle(c))+' (으)로 댓글 달기"><button data-igcadd="'+pi+'">달기</button></div>';
     h+='</div></article>';
