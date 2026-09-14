@@ -999,6 +999,7 @@ if (!cfg.trSrc) cfg.trSrc = "영어";
 if (!cfg.trWork) cfg.trWork = cfg.trOn ? "trans" : "off";
 if (typeof cfg.trNote !== "string") cfg.trNote = "";
 if (!cfg.trPow) cfg.trPow = "light";  /* light · rewrite */
+if (typeof cfg.trNoteT !== "string") cfg.trNoteT = "";  /* 번역 모드 지침 */
 function undoV34Hand(c){
   if(!c || c.handRollbackV35 || c.handRuleVersion!==34 || c.handOrigin==="restored")return;
   var previous=c.handBeforeV34;
@@ -2351,8 +2352,10 @@ function viewCfg(){
          return '<option value="'+o[0]+'"'+((cfg.trPow||"light")===o[0]?" selected":"")+'>'+o[1]+'</option>';
        }).join("")
      + '</select>';
-  h += '<label>지침 · 비워두면 기본값만</label>'
+  h += '<label>다듬기 지침 · 비워두면 기본값만</label>'
      + '<textarea id="trnote" style="min-height:90px" placeholder="예) 호칭을 관계에 맞게 고쳐줘. 의태어를 더 살려줘.">'+esc(cfg.trNote||"")+'</textarea>';
+  h += '<label>번역 지침 · 비워두면 기본값만</label>'
+     + '<textarea id="trnotet" style="min-height:90px" placeholder="번역 모드에서만 쓰여. 긴 프롬프트를 통째로 붙여넣어도 돼.">'+esc(cfg.trNoteT||"")+'</textarea>';
   h += '<label>번역 API 종류</label><select id="trmd">'
      + '<option value="openai"'+(cfg.trMode==="openai"?" selected":"")+'>직접 입력 · OpenAI 호환</option>'
      + '<option value="gemini"'+(cfg.trMode==="gemini"?" selected":"")+'>구글 직접 · Gemini</option></select>';
@@ -2474,6 +2477,7 @@ function viewCfg(){
   on("#k","oninput",function(){ cfg.key=this.value.trim(); saveCfg(); });
   on("#tron","onchange",function(){ cfg.trWork=this.value; cfg.trOn=(this.value==="off")?0:1; saveCfg(); });
   on("#trnote","oninput",function(){ cfg.trNote=this.value; saveCfg(); });
+  on("#trnotet","oninput",function(){ cfg.trNoteT=this.value; saveCfg(); });
   on("#trpow","onchange",function(){ cfg.trPow=this.value; saveCfg(); });
   on("#trsrc","onchange",function(){ cfg.trSrc=this.value; saveCfg(); });
   on("#trmd","onchange",function(){ cfg.trMode=this.value; saveCfg(); });
@@ -4435,7 +4439,7 @@ function trSkip(scope){
 }
 function trSystem(){
   var p = trWork()==="polish" ? trPolishLines() : trTransLines();
-  var note = String(cfg.trNote||"").trim();
+  var note = String((trWork()==="polish" ? cfg.trNote : cfg.trNoteT)||"").trim();
   if (note){ p = p.concat(["", "# 추가 지침", note]); }
   return p.join("\n");
 }
