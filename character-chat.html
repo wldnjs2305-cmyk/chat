@@ -995,6 +995,9 @@ if (typeof cfg.trBase !== "string") cfg.trBase = "";
 if (typeof cfg.trKey !== "string") cfg.trKey = "";
 if (typeof cfg.trModel !== "string") cfg.trModel = "";
 if (!cfg.trSrc) cfg.trSrc = "영어";
+/* off · trans(영어로 뽑고 번역) · polish(한국어로 뽑고 다듬기) */
+if (!cfg.trWork) cfg.trWork = cfg.trOn ? "trans" : "off";
+if (typeof cfg.trNote !== "string") cfg.trNote = "";
 function undoV34Hand(c){
   if(!c || c.handRollbackV35 || c.handRuleVersion!==34 || c.handOrigin==="restored")return;
   var previous=c.handBeforeV34;
@@ -2331,15 +2334,19 @@ function viewCfg(){
   h += '<label>최대 응답 길이</label><input id="t" value="'+esc(cfg.maxTokens)+'" inputmode="numeric">';
   h += '<button class="btn" id="ping">연결 테스트</button>';
   h += '<div class="hint" id="pingout"></div>';
-  h += '<div class="sec">번역</div>';
-  h += '<label>번역 거치기</label><select id="tron">'
-     + '<option value="0"'+(cfg.trOn?"":" selected")+'>끄기</option>'
-     + '<option value="1"'+(cfg.trOn?" selected":"")+'>켜기 · 외국어로 뽑고 한국어로 저장</option></select>';
-  h += '<label>생성 언어</label><select id="trsrc">'
+  h += '<div class="sec">번역 · 다듬기</div>';
+  h += '<label>한 번 더 거치기</label><select id="tron">'
+     + [["off","끄기"],["trans","영어로 뽑고 번역"],["polish","한국어로 뽑고 다듬기"]].map(function(o){
+         return '<option value="'+o[0]+'"'+((cfg.trWork||"off")===o[0]?" selected":"")+'>'+o[1]+'</option>';
+       }).join("")
+     + '</select>';
+  h += '<label>생성 언어 · 번역일 때만</label><select id="trsrc">'
      + ["영어","일본어","중국어","스페인어"].map(function(o){
          return '<option value="'+o+'"'+((cfg.trSrc||"영어")===o?" selected":"")+'>'+o+'</option>';
        }).join("")
      + '</select>';
+  h += '<label>지침 · 비워두면 기본값만</label>'
+     + '<textarea id="trnote" style="min-height:90px" placeholder="예) 호칭을 관계에 맞게 고쳐줘. 의태어를 더 살려줘.">'+esc(cfg.trNote||"")+'</textarea>';
   h += '<label>번역 API 종류</label><select id="trmd">'
      + '<option value="openai"'+(cfg.trMode==="openai"?" selected":"")+'>직접 입력 · OpenAI 호환</option>'
      + '<option value="gemini"'+(cfg.trMode==="gemini"?" selected":"")+'>구글 직접 · Gemini</option></select>';
@@ -2350,7 +2357,7 @@ function viewCfg(){
   h += '<label>번역 모델</label><input id="trm" value="'+esc(cfg.trModel||"")+'" autocapitalize="off" spellcheck="false">';
   h += '<button class="btn" id="trping">번역 연결 테스트</button>';
   h += '<div class="hint" id="trout"></div>';
-  h += '<div class="hint">켜면 본문 모델이 생성 언어로 쓰고, 번역 모델이 한국어로 옮겨. 원문은 남기지 않아. 설정 답변(OOC)은 번역을 거치지 않아.</div>';
+  h += '<div class="hint">번역은 본문을 영어로 뽑아 한국어로 옮겨. 다듬기는 한국어로 뽑은 뒤 문장과 호칭만 손봐. 둘 다 결과물만 저장돼. 설정 답변(OOC)과 인스타·결제 카드는 건너뛰어.</div>';
   h += '<div class="sec">인스타 사진</div>';
   h += '<label>이미지 서버 주소</label><input id="imgsv" value="'+esc(cfg.imgServer||"")+'" autocapitalize="off" spellcheck="false" placeholder="https://...ts.net/chat2img-codex">';
   h += '<button class="btn" id="imgping">서버 확인</button>';
@@ -2459,7 +2466,8 @@ function viewCfg(){
   });
   on("#b","oninput",function(){ cfg.base=this.value.trim().replace(/\/+$/,""); saveCfg(); });
   on("#k","oninput",function(){ cfg.key=this.value.trim(); saveCfg(); });
-  on("#tron","onchange",function(){ cfg.trOn=(this.value==="1")?1:0; saveCfg(); });
+  on("#tron","onchange",function(){ cfg.trWork=this.value; cfg.trOn=(this.value==="off")?0:1; saveCfg(); });
+  on("#trnote","oninput",function(){ cfg.trNote=this.value; saveCfg(); });
   on("#trsrc","onchange",function(){ cfg.trSrc=this.value; saveCfg(); });
   on("#trmd","onchange",function(){ cfg.trMode=this.value; saveCfg(); });
   on("#trb","oninput",function(){ cfg.trBase=this.value.trim().replace(/\/+$/,""); saveCfg(); });
@@ -2472,13 +2480,16 @@ function viewCfg(){
   });
   on("#trping","onclick",function(){
     var out=$("#trout"), btn=this;
-    if (!cfg.trKey){ out.textContent="번역 API 키가 비어 있어."; return; }
+    if (!cfg.trKey){ out.textContent="API 키가 비어 있어."; return; }
     if (!cfg.trModel){ out.textContent="번역 모델 이름이 비어 있어."; return; }
     if (cfg.trMode==="openai" && !cfg.trBase){ out.textContent="번역 API 주소가 비어 있어."; return; }
     btn.disabled=true; out.textContent="확인하는 중…";
     var t0=Date.now();
-    trOnce("He lit a cigarette and didn\u2019t look at her. \"You\u2019re late.\"", 300)
-    .then(function(o){ out.textContent="번역 성공 · "+(Date.now()-t0)+"ms · "+o.slice(0,80); })
+    var sample = trWork()==="polish"
+      ? "*그는 담배에 불을 붙였다. 그는 그녀를 보지 않았다.* 당신은 늦었군요."
+      : "He lit a cigarette and didn\u2019t look at her. \"You\u2019re late.\"";
+    trOnce(sample, 300)
+    .then(function(o){ out.textContent=trLabel()+" 성공 · "+(Date.now()-t0)+"ms · "+o.slice(0,80); })
     .catch(function(e){ out.textContent="실패 · "+(e.message||"연결 안 됨"); })
     .then(function(){ btn.disabled=false; });
   });
@@ -4400,8 +4411,10 @@ function askLLM(sys, content, cb, lim, plain){
     .catch(function(){ cb(""); });
 }
 /* ---------- 번역 ---------- */
+function trWork(){ return cfg.trWork || "off"; }
+function trLabel(){ return trWork()==="polish" ? "다듬기" : "번역"; }
 function trReady(){
-  if (!cfg.trOn) return false;
+  if (trWork()==="off") return false;
   if (!cfg.trKey || !cfg.trModel) return false;
   if (cfg.trMode==="openai" && !cfg.trBase) return false;
   return true;
@@ -4414,15 +4427,35 @@ function trSkip(scope){
   return /^\/(쇼핑|주문|주문내역|결제|결제내역|인스타)$/.test(k);
 }
 function trSystem(){
+  var p = trWork()==="polish" ? trPolishLines() : trTransLines();
+  var note = String(cfg.trNote||"").trim();
+  if (note){ p = p.concat(["", "# 추가 지침", note]); }
+  return p.join("\n");
+}
+/* 한국어 원고의 문장과 호칭만 손본다 */
+function trPolishLines(){
+  return [
+    "너는 소설·상황극 원고를 다듬는 윤문가다. 받은 한국어 원고의 문장을 다듬어 본문만 출력한다.",
+    "해설, 요약, 감상, 머리말, 꼬리말, 사과, 거절, 코드블록을 붙이지 않는다.",
+    "대사의 내용, 일어난 사건, 장면의 순서, 분량은 그대로 둔다. 새 장면을 쓰거나 이야기를 이어 붙이지 않는다.",
+    "호칭과 말투를 인물 관계에 맞게 바로잡는다. 부르는 이름, 누나·형·선생님 같은 호칭, 반말과 존댓말이 장면 내내 흔들리지 않게 한다.",
+    "번역투와 어색한 어순을 바로잡는다. 문단마다 그는, 그녀는, 인물 이름이 반복되면 자연스럽게 줄인다.",
+    "의태어와 의성어를 살리고, 길이가 비슷한 문장이 줄서서 늘어지면 끊어 리듬을 만든다.",
+    "대사는 문어체로 퍼지지 않게, 입 밖에 낼 말투 그대로 둔다. 지문은 3인칭 과거형 소설체로 정리한다.",
+    "거친 표현, 비속어, 성적 표현의 수위를 낮추거나 흐리지 않는다.",
+    "대괄호 태그([지문] [/지문] [대사] [편지] [일기] 등), <Scene_Info> 같은 태그, JSON의 키 이름, 별표(*), 마크다운 기호, 숫자, 날짜는 원문 그대로 둔다."
+  ];
+}
+function trTransLines(){
   return [
     "너는 소설·상황극 원고를 한국어로 옮기는 번역가다. 받은 글 전체를 한국어로 번역해서 번역문만 출력한다.",
-    "해설, 요약, 감상, 머릿말, 꿀말, 사과, 거절, 코드블록을 붙이지 않는다.",
+    "해설, 요약, 감상, 머리말, 꼬리말, 사과, 거절, 코드블록을 붙이지 않는다.",
     "문단 나눔, 줄바꿈, 빈 줄, 문장 순서, 분량을 원문 그대로 지킨다. 내용을 더하거나 빼거나 요약하지 않는다.",
     "대괄호 태그([지문] [/지문] [대사] [편지] [일기] [주문] [결제] 등), <Scene_Info> 같은 태그, JSON의 키 이름, 별표(*), 마크다운 기호, 숫자, 날짜, 통화 코드는 원문 그대로 둔다. 문장과 값만 번역한다.",
     "지문은 3인칭 과거형 소설체로, 대사는 담백한 구어체로 옮긴다.",
     "인물의 말투, 호칭, 격식, 거친 표현, 비속어, 성적 표현의 수위를 원문 그대로 옮긴다. 순화하거나 흐리거나 생략하지 않는다.",
     "고유명사는 한국어 표기로 옮기되 세계관에서 원어를 그대로 쓰는 이름은 유지한다."
-  ].join("\n");
+  ];
 }
 function trOnce(text, cap){
   var url, headers, body;
@@ -4448,7 +4481,7 @@ function trOnce(text, cap){
       var d=null; try{ d=JSON.parse(txt); }catch(e){}
       if(!res.ok){
         var em=(d&&d.error&&(d.error.message||d.error))||txt.slice(0,300);
-        throw new Error("번역 서버가 "+res.status+" 로 응답했어.\n"+em);
+        throw new Error(trLabel()+" 서버가 "+res.status+" 로 응답했어.\n"+em);
       }
       var o="";
       if (cfg.trMode==="openai"){
@@ -4459,7 +4492,7 @@ function trOnce(text, cap){
         o=finalResponseText(cd&&cd.content&&cd.content.parts);
       }
       o=String(o||"").trim().replace(/^```[a-zA-Z]*\s*/,"").replace(/```$/,"").trim();
-      if(!o) throw new Error("번역 본문이 비어서 돌아왔어. 번역 모델이나 길이를 확인해봐.");
+      if(!o) throw new Error(trLabel()+" 본문이 비어서 돌아왔어. 모델 이름이나 길이를 확인해봐.");
       return o;
     });
   });
@@ -4469,7 +4502,7 @@ function translatePass(text, cap){
   var lim = Math.max(((cap||2600)*2)|0, 3000);
   return trOnce(text, lim).catch(function(e){
     return trOnce(text, lim).catch(function(){
-      throw new Error("번역에 실패해서 이번 답은 저장하지 않았어. 번역 설정을 확인하고 다시 생성해줘.\n"+(e.message||""));
+      throw new Error(trLabel()+"에 실패해서 이번 답은 저장하지 않았어. 설정을 확인하고 다시 생성해줘.\n"+(e.message||""));
     });
   });
 }
@@ -5362,7 +5395,7 @@ function buildSystem(c, turn, scope){
 
   var lang=c.lang||"한국어";
   /* 번역을 거칠 때는 생성 언어를 바꿔 받고, 괄호 병기는 쓰지 않는다 */
-  if (trReady() && !trSkip(scope)){
+  if (trReady() && trWork()==="trans" && !trSkip(scope)){
     lang = cfg.trSrc || "영어";
     p.push("");
     p.push("# 작성 언어");
