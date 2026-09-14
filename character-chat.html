@@ -998,6 +998,7 @@ if (!cfg.trSrc) cfg.trSrc = "영어";
 /* off · trans(영어로 뽑고 번역) · polish(한국어로 뽑고 다듬기) */
 if (!cfg.trWork) cfg.trWork = cfg.trOn ? "trans" : "off";
 if (typeof cfg.trNote !== "string") cfg.trNote = "";
+if (!cfg.trPow) cfg.trPow = "light";  /* light · rewrite */
 function undoV34Hand(c){
   if(!c || c.handRollbackV35 || c.handRuleVersion!==34 || c.handOrigin==="restored")return;
   var previous=c.handBeforeV34;
@@ -2345,6 +2346,11 @@ function viewCfg(){
          return '<option value="'+o+'"'+((cfg.trSrc||"영어")===o?" selected":"")+'>'+o+'</option>';
        }).join("")
      + '</select>';
+  h += '<label>다듬기 강도 · 다듬기일 때만</label><select id="trpow">'
+     + [["light","가볍게 · 고칠 데만 고침"],["rewrite","다시 쓰기 · 문장을 처음부터"]].map(function(o){
+         return '<option value="'+o[0]+'"'+((cfg.trPow||"light")===o[0]?" selected":"")+'>'+o[1]+'</option>';
+       }).join("")
+     + '</select>';
   h += '<label>지침 · 비워두면 기본값만</label>'
      + '<textarea id="trnote" style="min-height:90px" placeholder="예) 호칭을 관계에 맞게 고쳐줘. 의태어를 더 살려줘.">'+esc(cfg.trNote||"")+'</textarea>';
   h += '<label>번역 API 종류</label><select id="trmd">'
@@ -2468,6 +2474,7 @@ function viewCfg(){
   on("#k","oninput",function(){ cfg.key=this.value.trim(); saveCfg(); });
   on("#tron","onchange",function(){ cfg.trWork=this.value; cfg.trOn=(this.value==="off")?0:1; saveCfg(); });
   on("#trnote","oninput",function(){ cfg.trNote=this.value; saveCfg(); });
+  on("#trpow","onchange",function(){ cfg.trPow=this.value; saveCfg(); });
   on("#trsrc","onchange",function(){ cfg.trSrc=this.value; saveCfg(); });
   on("#trmd","onchange",function(){ cfg.trMode=this.value; saveCfg(); });
   on("#trb","oninput",function(){ cfg.trBase=this.value.trim().replace(/\/+$/,""); saveCfg(); });
@@ -4434,14 +4441,35 @@ function trSystem(){
 }
 /* 한국어 원고의 문장과 호칭만 손본다 */
 function trPolishLines(){
+  if ((cfg.trPow||"light")==="rewrite") return trRewriteLines();
   return [
     "너는 소설·상황극 원고를 다듬는 윤문가다. 받은 한국어 원고의 문장을 다듬어 본문만 출력한다.",
     "해설, 요약, 감상, 머리말, 꼬리말, 사과, 거절, 코드블록을 붙이지 않는다.",
     "대사의 내용, 일어난 사건, 장면의 순서, 분량은 그대로 둔다. 새 장면을 쓰거나 이야기를 이어 붙이지 않는다.",
     "호칭과 말투를 인물 관계에 맞게 바로잡는다. 부르는 이름, 누나·형·선생님 같은 호칭, 반말과 존댓말이 장면 내내 흔들리지 않게 한다.",
     "번역투와 어색한 어순을 바로잡는다. 문단마다 그는, 그녀는, 인물 이름이 반복되면 자연스럽게 줄인다.",
+    "이미 자연스러운 문장과 대사는 그대로 둔다. 고칠 곳이 없으면 원문을 그대로 출력한다. 무엇이든 고쳐야 한다고 생각하지 않는다.",
+    "부정어 안, 못의 자리를 옮기지 않는다. 구어체 어미와 말버릇은 표준말로 펴지 않고 둔다.",
     "의태어와 의성어를 살리고, 길이가 비슷한 문장이 줄서서 늘어지면 끊어 리듬을 만든다.",
     "대사는 문어체로 퍼지지 않게, 입 밖에 낼 말투 그대로 둔다. 지문은 3인칭 과거형 소설체로 정리한다.",
+    "거친 표현, 비속어, 성적 표현의 수위를 낮추거나 흐리지 않는다.",
+    "대괄호 태그([지문] [/지문] [대사] [편지] [일기] 등), <Scene_Info> 같은 태그, JSON의 키 이름, 별표(*), 마크다운 기호, 숫자, 날짜는 원문 그대로 둔다."
+  ];
+}
+/* 내용은 묶어두고 문장은 처음부터 다시 쓴다 */
+function trRewriteLines(){
+  return [
+    "너는 소설·상황극 원고를 다시 쓰는 작가다. 받은 한국어 원고를 토대로, 같은 장면을 처음부터 자연스러운 한국어로 다시 써서 본문만 출력한다.",
+    "해설, 요약, 감상, 머리말, 꼬리말, 사과, 거절, 코드블록을 붙이지 않는다.",
+    "문장은 자유롭게 다시 써도 된다. 원문의 어순이나 문장 나눔을 지키려고 애쓰지 않는다. 한국어로 읽을 때 가장 생생한 구성으로 옮긴다.",
+    "대신 내용은 바꾸지 않는다. 일어난 사건, 행동, 인물의 감정과 태도, 대사가 담고 있는 뜻, 장면의 순서는 원문 그대로다.",
+    "없던 사건, 새 대화 주제, 새 인물, 새 장소를 만들지 않는다. 이야기를 앞으로 더 진행시키지 않는다.",
+    "{{user}}의 말, 행동, 생각, 반응을 지어내지 않는다.",
+    "분량은 원문과 비슷하게 맞춘다. 지문을 부풀려 길게 늘이지 않는다.",
+    "호칭과 말투는 인물 관계에 맞게 유지한다. 부르는 이름, 누나·형·선생님 같은 호칭, 반말과 존댓말이 장면 내내 흔들리지 않게 한다.",
+    "지문은 3인칭 과거형 소설체로 쓴다. 주어를 문단마다 반복하지 않고, 의태어와 의성어를 살리고, 문장 길이를 고르게 만들지 않는다.",
+    "대사는 입 밖에 낼 구어체로 쓴다. 문어체로 퍼지거나 표준말로 다듬지 않고, 인물의 말버릇을 살린다.",
+    "꼾민 비유나 문학적인 표현으로 멋을 내지 않는다. 읽힐 때 자연스러운 말을 고른다.",
     "거친 표현, 비속어, 성적 표현의 수위를 낮추거나 흐리지 않는다.",
     "대괄호 태그([지문] [/지문] [대사] [편지] [일기] 등), <Scene_Info> 같은 태그, JSON의 키 이름, 별표(*), 마크다운 기호, 숫자, 날짜는 원문 그대로 둔다."
   ];
