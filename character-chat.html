@@ -1087,7 +1087,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-15 v46d";
+var APP_VER = "2026-09-15 v46e";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -3366,10 +3366,6 @@ function askedCmd(log, idx){
 }
 
 function pieces(c, text){
-  /* 모델이 메모 라벨을 태그 바깥에 쓰는 경우가 있다. 안으로 옮긴다 */
-  text = String(text||"").replace(
-    /((?:^[ \t]*(?:쓴사람|받는사람|남긴곳)[ \t]*[:\uff1a][^\n]*\n){1,3})[ \t]*\[메모\][ \t]*\n?/gm,
-    "[메모]\n$1");
   var names = [ (c.name||"").trim() ].concat(castOf(c).map(function(x){ return x.name.trim(); }))
                 .filter(function(x){ return x; });
   var t = String(text||"");
@@ -3402,6 +3398,30 @@ function pieces(c, text){
     buf.push(L);
   }
   flush();
+
+  /* 메모 라벨이 태그 바깥으로 샌 경우 — 앞뒤 조각에서 끌어와 카드 안으로 넣는다 */
+  function memoLabels(tx){
+    var ls = String(tx||"").split("\n"), keep = [], got = [];
+    ls.forEach(function(L){
+      if (/^[ \t]*(?:쓴사람|받는사람|남긴곳)[ \t]*[:\uff1a]/.test(L)) got.push(L.trim());
+      else if (L.trim()) keep.push(L);
+    });
+    return { labels:got, rest:keep.join("\n").trim() };
+  }
+  for (var z=0; z<res.length; z++){
+    if (res[z].card !== "메모") continue;
+    var have = /(?:^|\n)[ \t]*(?:쓴사람|받는사람|남긴곳)[ \t]*[:\uff1a]/.test(res[z].text||"");
+    if (have) continue;
+    for (var y=z-1; y>=0 && y>=z-2; y--){
+      if (res[y].card) break;
+      var pick = memoLabels(res[y].text);
+      if (!pick.labels.length) continue;
+      res[z].text = pick.labels.join("\n") + "\n" + (res[z].text||"");
+      if (pick.rest) res[y].text = pick.rest;
+      else { res.splice(y,1); z--; }
+      break;
+    }
+  }
 
   // 태그가 없어도 게시글처럼 생겼으면 커뮤 글로 알아본다
   function looksComm(b){
