@@ -1087,7 +1087,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-15 v46c";
+var APP_VER = "2026-09-15 v46d";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -3263,10 +3263,8 @@ function cardHTML(kind, body, c){
       if (L.trim() || mbody.length) mbody.push(L);
     });
     var mine = isUserName(c, mfrom);
-    var head = [mfrom?esc(mfrom):"", mto?("\u2192 "+esc(mto)):""].filter(Boolean).join(" ");
     return '<div class="memo'+(mine?" me":"")+'" style="font-family:'
          + (mine ? "'HandKonkon','Caveat','Yomogi',cursive" : handOf(c)) + '">'
-         + (head?'<div class="mhead">'+head+'</div>':"")
          + '<div class="mbody">'+cardText(proseLine(mbody.join("\n")))+'</div>'
          + (mwhere?'<div class="mwhere">'+esc(mwhere)+'</div>':"")
          + '</div>';
@@ -3368,6 +3366,10 @@ function askedCmd(log, idx){
 }
 
 function pieces(c, text){
+  /* 모델이 메모 라벨을 태그 바깥에 쓰는 경우가 있다. 안으로 옮긴다 */
+  text = String(text||"").replace(
+    /((?:^[ \t]*(?:쓴사람|받는사람|남긴곳)[ \t]*[:\uff1a][^\n]*\n){1,3})[ \t]*\[메모\][ \t]*\n?/gm,
+    "[메모]\n$1");
   var names = [ (c.name||"").trim() ].concat(castOf(c).map(function(x){ return x.name.trim(); }))
                 .filter(function(x){ return x; });
   var t = String(text||"");
