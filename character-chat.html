@@ -50,6 +50,8 @@
     src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_five@.2.0/UhBeeDongKyung.woff") format("woff")}
   @import url('https://fonts.googleapis.com/css2?family=DungGeunMo&display=swap');
   @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic+Coding&display=swap');
+  @font-face{font-family:"HandKonkon";font-display:swap;
+    src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2412-1@1.0/Ownglyph_corncorn-Rg.woff2") format("woff2")}
   @font-face{font-family:"MaruBuri";font-display:swap;
     src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/MaruBuri-Regular.woff") format("woff")}
   :root{
@@ -1085,7 +1087,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-15 v46";
+var APP_VER = "2026-09-15 v46c";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -3263,7 +3265,7 @@ function cardHTML(kind, body, c){
     var mine = isUserName(c, mfrom);
     var head = [mfrom?esc(mfrom):"", mto?("\u2192 "+esc(mto)):""].filter(Boolean).join(" ");
     return '<div class="memo'+(mine?" me":"")+'" style="font-family:'
-         + (mine ? "var(--f-nar)" : handOf(c)) + '">'
+         + (mine ? "'HandKonkon','Caveat','Yomogi',cursive" : handOf(c)) + '">'
          + (head?'<div class="mhead">'+head+'</div>':"")
          + '<div class="mbody">'+cardText(proseLine(mbody.join("\n")))+'</div>'
          + (mwhere?'<div class="mwhere">'+esc(mwhere)+'</div>':"")
@@ -5586,8 +5588,12 @@ function turn(){
       var k=cmdOf(lg[i].t);
       if (k && !lg[i].ooc) ti=CMDS[k];
       if (k==="/메모"){
-        var who=String(lg[i].t).replace(/^\/메모\s*/,"").trim();
-        if (who) ti = ti + "\n이번 메모를 쓰는 인물은 '" + who + "'다. 쓴사람 칸에 그 이름을 적는다.";
+        var mm2=String(lg[i].t).match(/^\/메모\s+(\S+)\s*([\s\S]*)$/);
+        if (mm2){
+          ti = ti + "\n이번 메모를 쓰는 인물은 '" + mm2[1] + "'다. 쓴사람 칸에 그 이름만 적는다.";
+          if ((mm2[2]||"").trim())
+            ti = ti + "\n메모에 담을 내용은 이것이다: " + mm2[2].trim();
+        }
       }
       break;
     }
@@ -5654,11 +5660,11 @@ elSend.onclick=function(){
   if (screen==="sms"){ smsSend(t); return; }
   stacked=false; paintSendBtn();
 
-  /* /메모 나 — 내가 쓰는 메모. 입력창에 틀을 채워준다 */
-  var mw = t.match(/^\/메모\s+(.+)$/);
+  /* /메모 나 [내용] — 내가 쓰는 메모. 입력창에 틀을 채워준다 */
+  var mw = t.match(/^\/메모\s+(\S+)\s*([\s\S]*)$/);
   if (mw && isUserName(c, mw[1])){
     elInp.value = "[메모]\n쓴사람: " + (c.userName||"나") + "\n받는사람: " + dispOf(c)
-                + "\n남긴곳: \n\n";
+                + "\n남긴곳: \n\n" + (mw[2]||"").trim();
     resizeComposer(); elInp.focus();
     try{ elInp.setSelectionRange(elInp.value.length, elInp.value.length); }catch(e){}
     return;
