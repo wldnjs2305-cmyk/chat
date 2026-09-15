@@ -988,18 +988,6 @@ if (!cfg.cSize) cfg.cSize = 14;
 if (!cfg.inputSizeV28){cfg.iSize=14;cfg.inputSizeV28=1;put("gz.cfg",cfg);}
 if (!cfg.iSize) cfg.iSize=14;
 if (typeof cfg.models !== "string") cfg.models = "";
-/* 번역 단계: 답을 외국어로 받아서 한국어로 옮겨 저장한다 */
-if (typeof cfg.trOn !== "number") cfg.trOn = 0;
-if (!cfg.trMode) cfg.trMode = "openai";
-if (typeof cfg.trBase !== "string") cfg.trBase = "";
-if (typeof cfg.trKey !== "string") cfg.trKey = "";
-if (typeof cfg.trModel !== "string") cfg.trModel = "";
-if (!cfg.trSrc) cfg.trSrc = "영어";
-/* off · trans(영어로 뽑고 번역) · polish(한국어로 뽑고 다듬기) */
-if (!cfg.trWork) cfg.trWork = cfg.trOn ? "trans" : "off";
-if (typeof cfg.trNote !== "string") cfg.trNote = "";
-if (!cfg.trPow) cfg.trPow = "light";  /* light · rewrite */
-if (typeof cfg.trNoteT !== "string") cfg.trNoteT = "";  /* 번역 모드 지침 */
 function undoV34Hand(c){
   if(!c || c.handRollbackV35 || c.handRuleVersion!==34 || c.handOrigin==="restored")return;
   var previous=c.handBeforeV34;
@@ -2336,37 +2324,6 @@ function viewCfg(){
   h += '<label>최대 응답 길이</label><input id="t" value="'+esc(cfg.maxTokens)+'" inputmode="numeric">';
   h += '<button class="btn" id="ping">연결 테스트</button>';
   h += '<div class="hint" id="pingout"></div>';
-  h += '<div class="sec">번역 · 다듬기</div>';
-  h += '<label>한 번 더 거치기</label><select id="tron">'
-     + [["off","끄기"],["trans","영어로 뽑고 번역"],["polish","한국어로 뽑고 다듬기"]].map(function(o){
-         return '<option value="'+o[0]+'"'+((cfg.trWork||"off")===o[0]?" selected":"")+'>'+o[1]+'</option>';
-       }).join("")
-     + '</select>';
-  h += '<label>생성 언어 · 번역일 때만</label><select id="trsrc">'
-     + ["영어","일본어","중국어","스페인어"].map(function(o){
-         return '<option value="'+o+'"'+((cfg.trSrc||"영어")===o?" selected":"")+'>'+o+'</option>';
-       }).join("")
-     + '</select>';
-  h += '<label>다듬기 강도 · 다듬기일 때만</label><select id="trpow">'
-     + [["light","가볍게 · 고칠 데만 고침"],["rewrite","다시 쓰기 · 문장을 처음부터"]].map(function(o){
-         return '<option value="'+o[0]+'"'+((cfg.trPow||"light")===o[0]?" selected":"")+'>'+o[1]+'</option>';
-       }).join("")
-     + '</select>';
-  h += '<label>다듬기 지침 · 비워두면 기본값만</label>'
-     + '<textarea id="trnote" style="min-height:90px" placeholder="예) 호칭을 관계에 맞게 고쳐줘. 의태어를 더 살려줘.">'+esc(cfg.trNote||"")+'</textarea>';
-  h += '<label>번역 지침 · 비워두면 기본값만</label>'
-     + '<textarea id="trnotet" style="min-height:90px" placeholder="번역 모드에서만 쓰여. 긴 프롬프트를 통째로 붙여넣어도 돼.">'+esc(cfg.trNoteT||"")+'</textarea>';
-  h += '<label>번역 API 종류</label><select id="trmd">'
-     + '<option value="openai"'+(cfg.trMode==="openai"?" selected":"")+'>직접 입력 · OpenAI 호환</option>'
-     + '<option value="gemini"'+(cfg.trMode==="gemini"?" selected":"")+'>구글 직접 · Gemini</option></select>';
-  h += '<label>번역 API 주소</label><input id="trb" value="'+esc(cfg.trBase||"")+'" autocapitalize="off" spellcheck="false" placeholder="https://api.x.ai/v1">';
-  h += '<label>번역 API 키</label>'
-     + '<div style="display:flex;gap:8px"><input id="trk" type="password" value="'+esc(cfg.trKey||"")+'" autocapitalize="off" autocorrect="off" spellcheck="false">'
-     + '<button class="btn sm" id="trkv">보기</button></div>';
-  h += '<label>번역 모델</label><input id="trm" value="'+esc(cfg.trModel||"")+'" autocapitalize="off" spellcheck="false">';
-  h += '<button class="btn" id="trping">번역 연결 테스트</button>';
-  h += '<div class="hint" id="trout"></div>';
-  h += '<div class="hint">번역은 본문을 영어로 뽑아 한국어로 옮겨. 다듬기는 한국어로 뽑은 뒤 문장과 호칭만 손봐. 둘 다 결과물만 저장돼. 설정 답변(OOC)과 인스타·결제 카드는 건너뛰어.</div>';
   h += '<div class="sec">인스타 사진</div>';
   h += '<label>이미지 서버 주소</label><input id="imgsv" value="'+esc(cfg.imgServer||"")+'" autocapitalize="off" spellcheck="false" placeholder="https://...ts.net/chat2img-codex">';
   h += '<button class="btn" id="imgping">서버 확인</button>';
@@ -2475,35 +2432,6 @@ function viewCfg(){
   });
   on("#b","oninput",function(){ cfg.base=this.value.trim().replace(/\/+$/,""); saveCfg(); });
   on("#k","oninput",function(){ cfg.key=this.value.trim(); saveCfg(); });
-  on("#tron","onchange",function(){ cfg.trWork=this.value; cfg.trOn=(this.value==="off")?0:1; saveCfg(); });
-  on("#trnote","oninput",function(){ cfg.trNote=this.value; saveCfg(); });
-  on("#trnotet","oninput",function(){ cfg.trNoteT=this.value; saveCfg(); });
-  on("#trpow","onchange",function(){ cfg.trPow=this.value; saveCfg(); });
-  on("#trsrc","onchange",function(){ cfg.trSrc=this.value; saveCfg(); });
-  on("#trmd","onchange",function(){ cfg.trMode=this.value; saveCfg(); });
-  on("#trb","oninput",function(){ cfg.trBase=this.value.trim().replace(/\/+$/,""); saveCfg(); });
-  on("#trk","oninput",function(){ cfg.trKey=this.value.trim(); saveCfg(); });
-  on("#trm","oninput",function(){ cfg.trModel=this.value.trim(); saveCfg(); });
-  on("#trkv","onclick",function(){
-    var el=$("#trk"); if(!el) return;
-    if (el.type==="password"){ el.type="text"; this.textContent="가리기"; }
-    else { el.type="password"; this.textContent="보기"; }
-  });
-  on("#trping","onclick",function(){
-    var out=$("#trout"), btn=this;
-    if (!cfg.trKey){ out.textContent="API 키가 비어 있어."; return; }
-    if (!cfg.trModel){ out.textContent="번역 모델 이름이 비어 있어."; return; }
-    if (cfg.trMode==="openai" && !cfg.trBase){ out.textContent="번역 API 주소가 비어 있어."; return; }
-    btn.disabled=true; out.textContent="확인하는 중…";
-    var t0=Date.now();
-    var sample = trWork()==="polish"
-      ? "*그는 담배에 불을 붙였다. 그는 그녀를 보지 않았다.* 당신은 늦었군요."
-      : "He lit a cigarette and didn\u2019t look at her. \"You\u2019re late.\"";
-    trOnce(sample, 300)
-    .then(function(o){ out.textContent=trLabel()+" 성공 · "+(Date.now()-t0)+"ms · "+o.slice(0,80); })
-    .catch(function(e){ out.textContent="실패 · "+(e.message||"연결 안 됨"); })
-    .then(function(){ btn.disabled=false; });
-  });
   on("#kv","onclick",function(){
     var el=$("#k"); if(!el) return;
     if (el.type==="password"){ el.type="text"; this.textContent="가리기"; }
@@ -4421,123 +4349,6 @@ function askLLM(sys, content, cb, lim, plain){
     })
     .catch(function(){ cb(""); });
 }
-/* ---------- 번역 ---------- */
-function trWork(){ return cfg.trWork || "off"; }
-function trLabel(){ return trWork()==="polish" ? "다듬기" : "번역"; }
-function trReady(){
-  if (trWork()==="off") return false;
-  if (!cfg.trKey || !cfg.trModel) return false;
-  if (cfg.trMode==="openai" && !cfg.trBase) return false;
-  return true;
-}
-/* JSON 카드는 형식이 깨지기 쉬워서 번역을 건너뛴다 */
-function trSkip(scope){
-  if (!scope) return true;
-  if (scope.ooc) return true;
-  var k=scope.command||"";
-  return /^\/(쇼핑|주문|주문내역|결제|결제내역|인스타)$/.test(k);
-}
-function trSystem(){
-  var p = trWork()==="polish" ? trPolishLines() : trTransLines();
-  var note = String((trWork()==="polish" ? cfg.trNote : cfg.trNoteT)||"").trim();
-  if (note){ p = p.concat(["", "# 추가 지침", note]); }
-  return p.join("\n");
-}
-/* 한국어 원고의 문장과 호칭만 손본다 */
-function trPolishLines(){
-  if ((cfg.trPow||"light")==="rewrite") return trRewriteLines();
-  return [
-    "너는 소설·상황극 원고를 다듬는 윤문가다. 받은 한국어 원고의 문장을 다듬어 본문만 출력한다.",
-    "해설, 요약, 감상, 머리말, 꼬리말, 사과, 거절, 코드블록을 붙이지 않는다.",
-    "대사의 내용, 일어난 사건, 장면의 순서, 분량은 그대로 둔다. 새 장면을 쓰거나 이야기를 이어 붙이지 않는다.",
-    "호칭과 말투를 인물 관계에 맞게 바로잡는다. 부르는 이름, 누나·형·선생님 같은 호칭, 반말과 존댓말이 장면 내내 흔들리지 않게 한다.",
-    "번역투와 어색한 어순을 바로잡는다. 문단마다 그는, 그녀는, 인물 이름이 반복되면 자연스럽게 줄인다.",
-    "이미 자연스러운 문장과 대사는 그대로 둔다. 고칠 곳이 없으면 원문을 그대로 출력한다. 무엇이든 고쳐야 한다고 생각하지 않는다.",
-    "부정어 안, 못의 자리를 옮기지 않는다. 구어체 어미와 말버릇은 표준말로 펴지 않고 둔다.",
-    "의태어와 의성어를 살리고, 길이가 비슷한 문장이 줄서서 늘어지면 끊어 리듬을 만든다.",
-    "대사는 문어체로 퍼지지 않게, 입 밖에 낼 말투 그대로 둔다. 지문은 3인칭 과거형 소설체로 정리한다.",
-    "거친 표현, 비속어, 성적 표현의 수위를 낮추거나 흐리지 않는다.",
-    "대괄호 태그([지문] [/지문] [대사] [편지] [일기] 등), <Scene_Info> 같은 태그, JSON의 키 이름, 별표(*), 마크다운 기호, 숫자, 날짜는 원문 그대로 둔다."
-  ];
-}
-/* 내용은 묶어두고 문장은 처음부터 다시 쓴다 */
-function trRewriteLines(){
-  return [
-    "너는 소설·상황극 원고를 다시 쓰는 작가다. 받은 한국어 원고를 토대로, 같은 장면을 처음부터 자연스러운 한국어로 다시 써서 본문만 출력한다.",
-    "해설, 요약, 감상, 머리말, 꼬리말, 사과, 거절, 코드블록을 붙이지 않는다.",
-    "문장은 자유롭게 다시 써도 된다. 원문의 어순이나 문장 나눔을 지키려고 애쓰지 않는다. 한국어로 읽을 때 가장 생생한 구성으로 옮긴다.",
-    "대신 내용은 바꾸지 않는다. 일어난 사건, 행동, 인물의 감정과 태도, 대사가 담고 있는 뜻, 장면의 순서는 원문 그대로다.",
-    "없던 사건, 새 대화 주제, 새 인물, 새 장소를 만들지 않는다. 이야기를 앞으로 더 진행시키지 않는다.",
-    "{{user}}의 말, 행동, 생각, 반응을 지어내지 않는다.",
-    "분량은 원문과 비슷하게 맞춘다. 지문을 부풀려 길게 늘이지 않는다.",
-    "호칭과 말투는 인물 관계에 맞게 유지한다. 부르는 이름, 누나·형·선생님 같은 호칭, 반말과 존댓말이 장면 내내 흔들리지 않게 한다.",
-    "지문은 3인칭 과거형 소설체로 쓴다. 주어를 문단마다 반복하지 않고, 의태어와 의성어를 살리고, 문장 길이를 고르게 만들지 않는다.",
-    "대사는 입 밖에 낼 구어체로 쓴다. 문어체로 퍼지거나 표준말로 다듬지 않고, 인물의 말버릇을 살린다.",
-    "꼾민 비유나 문학적인 표현으로 멋을 내지 않는다. 읽힐 때 자연스러운 말을 고른다.",
-    "거친 표현, 비속어, 성적 표현의 수위를 낮추거나 흐리지 않는다.",
-    "대괄호 태그([지문] [/지문] [대사] [편지] [일기] 등), <Scene_Info> 같은 태그, JSON의 키 이름, 별표(*), 마크다운 기호, 숫자, 날짜는 원문 그대로 둔다."
-  ];
-}
-function trTransLines(){
-  return [
-    "너는 소설·상황극 원고를 한국어로 옮기는 번역가다. 받은 글 전체를 한국어로 번역해서 번역문만 출력한다.",
-    "해설, 요약, 감상, 머리말, 꼬리말, 사과, 거절, 코드블록을 붙이지 않는다.",
-    "문단 나눔, 줄바꿈, 빈 줄, 문장 순서, 분량을 원문 그대로 지킨다. 내용을 더하거나 빼거나 요약하지 않는다.",
-    "대괄호 태그([지문] [/지문] [대사] [편지] [일기] [주문] [결제] 등), <Scene_Info> 같은 태그, JSON의 키 이름, 별표(*), 마크다운 기호, 숫자, 날짜, 통화 코드는 원문 그대로 둔다. 문장과 값만 번역한다.",
-    "지문은 3인칭 과거형 소설체로, 대사는 담백한 구어체로 옮긴다.",
-    "인물의 말투, 호칭, 격식, 거친 표현, 비속어, 성적 표현의 수위를 원문 그대로 옮긴다. 순화하거나 흐리거나 생략하지 않는다.",
-    "고유명사는 한국어 표기로 옮기되 세계관에서 원어를 그대로 쓰는 이름은 유지한다."
-  ];
-}
-function trOnce(text, cap){
-  var url, headers, body;
-  if (cfg.trMode==="openai"){
-    var b=(cfg.trBase||"").replace(/\/+$/,"");
-    url = /chat\/completions$/.test(b) ? b : b+"/chat/completions";
-    headers={ "Content-Type":"application/json", "Authorization":"Bearer "+cfg.trKey };
-    body={ model:cfg.trModel, max_tokens:cap, temperature:0.3,
-           messages:[{role:"system",content:trSystem()},{role:"user",content:text}] };
-  } else {
-    var gb=(cfg.trBase||"https://generativelanguage.googleapis.com").replace(/\/+$/,"");
-    url = gb+"/v1beta/models/"+encodeURIComponent(cfg.trModel)+":generateContent?key="+encodeURIComponent(cfg.trKey);
-    headers={ "Content-Type":"application/json" };
-    body={ systemInstruction:{parts:[{text:trSystem()}]},
-           contents:[{role:"user",parts:[{text:text}]}],
-           generationConfig:{ maxOutputTokens:cap, temperature:0.3 } };
-  }
-  /* 추론 옵션은 모델마다 받는 이름이 달라서 안 보낸다. 안전 필터만 본문과 같게 맞추다 */
-  applySafety(body, cfg.trMode!=="openai");
-  return fetchJSON(url,{ method:"POST", headers:headers, body:JSON.stringify(body) }, 120000)
-  .then(function(res){
-    return res.text().then(function(txt){
-      var d=null; try{ d=JSON.parse(txt); }catch(e){}
-      if(!res.ok){
-        var em=(d&&d.error&&(d.error.message||d.error))||txt.slice(0,300);
-        throw new Error(trLabel()+" 서버가 "+res.status+" 로 응답했어.\n"+em);
-      }
-      var o="";
-      if (cfg.trMode==="openai"){
-        var ch=d&&d.choices&&d.choices[0];
-        o=ch?((ch.message&&ch.message.content)||ch.text||""):"";
-      } else {
-        var cd=d&&d.candidates&&d.candidates[0];
-        o=finalResponseText(cd&&cd.content&&cd.content.parts);
-      }
-      o=String(o||"").trim().replace(/^```[a-zA-Z]*\s*/,"").replace(/```$/,"").trim();
-      if(!o) throw new Error(trLabel()+" 본문이 비어서 돌아왔어. 모델 이름이나 길이를 확인해봐.");
-      return o;
-    });
-  });
-}
-/* 한 번은 다시 시도해 본다. 그래도 안 되면 저장하지 않는다 */
-function translatePass(text, cap){
-  var lim = Math.max(((cap||2600)*2)|0, 3000);
-  return trOnce(text, lim).catch(function(e){
-    return trOnce(text, lim).catch(function(){
-      throw new Error(trLabel()+"에 실패해서 이번 답은 저장하지 않았어. 설정을 확인하고 다시 생성해줘.\n"+(e.message||""));
-    });
-  });
-}
 function tidyName(v){
   var line=String(v||"").split("\n").map(function(x){return x.trim();}).filter(Boolean)[0]||"";
   return line.replace(/^["'`\s]+|["'`\s]+$/g,"")
@@ -4899,8 +4710,8 @@ var CMDS = {
   "/일기":"이번 턴에는 [일기]와 [/일기] 사이에 인물의 일기만 쓴다. 첫 줄은 날짜: 로 시작하고 값은 선택한 언어의 자연스러운 날짜 표기다. 날짜는 현재 장면의 시점에 맞춘다. 날짜 다음 줄에 1인칭 본문을 처음부터 끝까지 한 덩어리로 쓴다. 본문에 문단 구분이나 빈 줄, 문장별 줄바꿈을 넣지 않는다. 그날의 구체적인 일과 생각을 인물의 평소 말투로 쓴다. 번역, 설명, 일기 제목, 지문용 별표는 덧붙이지 않는다.",
   "/편지":"이번 턴에는 완성된 편지 한 통만 출력한다. [편지]로 시작하고 [/편지]로 끝낸다. 태그 바깥에는 설명, 분석, 작성 계획을 붙이지 않는다.\n받는 사람, 본문, 맺음말과 보내는 사람 이름까지 편지 전체를 이번에 지정된 언어로 쓴다. 이름은 설정이나 기존 대화의 해당 언어 표기를 우선한다. 없으면 일관된 음역을 쓰며 다른 사람의 이름으로 바꾸지 않는다. 호칭 뒤에 한국어 조사를 기계적으로 붙이지 않는다.\n받는 사람을 부를 때는 이 인물이 평소에 상대를 부르는 호칭을 그대로 쓴다. 아래 관계·예의 및 언어별 호칭·맺음말 지침은 [수신]과 [서명] 칸에만 적용한다. 이 지침을 근거로 [본문]의 기존 캐릭터 말투나 존댓말 여부를 바꾸지 않는다.\n한국어: 예의를 갖추는 학생이 선생님에게 보내는 편지라면 '선생님께'와 '이름 올림' 또는 '이름 드림'이 자연스럽다. 가까운 친구에게는 평소 호칭과 자연스러운 서명을 쓴다. 모든 편지를 '에게'와 '이름이/가'로 고정하지 않는다.\n일본어: 그 관계에서 자연스러운 호칭과 맺음말을 쓴다. 예를 들어 〇〇先生へ, 이름より 등이 가능하지만 모든 관계에 같은 예시를 적용하지 않는다. 이름과 호칭에 한국어 '에게/께/올림/가'를 남기지 않는다.\n영어: 실제로 사용하는 호칭으로 Dear ... 등 자연스러운 인사를 정한다. 관계와 성격에 맞춰 Sincerely, 이름 또는 이름만 쓰는 등 적절한 서명을 고른다. 설정에 없는 성이나 직함을 만들어내지 않는다.\n서명 칸에는 보내는 사람의 이름과 관례적인 짧은 맺음말만 쓴다. 관계와 예의는 올림·드림·가, より, From·Sincerely 같은 맺음말을 고르는 데만 반영한다. 이름은 기존 설정과 해당 언어 표기를 유지한다. 이름 앞뒤에 인물 소개, 관계 설명, 소유·연애 호칭, 고백, 약속, 미래 관계의 예고, 문장형 수식어를 붙이지 않는다. 친밀한 관계여도 이 규칙은 같다. 예: 이치조 미나토 올림 / 미나토가 / 湊より / From, Minato. 부적절한 예: 당신의 학생이자 이제는 당신의 남자가 될 이치조 미나토 올림. 이 경우 서명은 이치조 미나토 올림으로만 쓴다. 과거 편지의 긴 서명을 따라 쓰지 않는다. 이 규칙은 [서명] 칸에만 적용하며 편지 본문의 말투·내용·분량을 바꾸거나 서명에서 뺀 수식어를 본문으로 옮기지 않는다.\n내용은 다음 세 칸으로 구분한다. [수신]받는 사람 호칭[/수신] 다음 빈 줄, [본문]편지 본문[/본문] 다음 빈 줄, [서명]맺음말과 보내는 사람[/서명]. 이 칸들은 모두 [편지]와 [/편지] 안에 둔다. 바깥의 [편지]와 [/편지]는 반드시 각각 독립된 줄에 쓴다. 구분자 라벨만 한국어로 유지하고 실제 내용은 지정 언어로 쓴다. 본문은 처음부터 끝까지 한 덩어리로 이어 쓰며 문단 구분·빈 줄·문장별 줄바꿈을 넣지 않는다. 받는 사람과 서명은 본문 밖의 별도 칸으로 유지한다. 받는 사람 호칭에 실제 관계에 없는 연애·배우자 호칭을 만들어 붙이지 않는다. 제목, 지문, 별도 대사, 번역 해설은 추가하지 않는다.",
   "/속마음":"이번 턴에는 인물의 지금 속마음만 보여준다. 첫 줄에는 [속마음]만, 마지막 줄에는 [/속마음]만 쓴다. 두 표식 사이의 본문만 한 덩어리로 이어 쓴다. 그 안은 이 인물의 성격과 말버릇 그대로 쓴다. 길이도 인물에 맞게 정한다. 처음부터 끝까지 한 덩어리로 이어 쓰고, 문단을 나누거나 빈 줄을 넣지 않는다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다. 문장부호는 자연스럽게 쓴다. 의문에는 물음표를, 완결된 생각에는 마침표를 쓰고 의도적인 말줄임표와 끊김은 유지한다. 부호 없는 단어 나열로 쓰지 않는다.",
-  "/쇼핑":"이번 턴에는 최근 구매 내역만 [주문]과 [/주문] 사이에 지정된 JSON으로 쓴다. 최근 구매가 위에 온다. 상품명·판매처·장면 속 날짜·배송상태를 기록한다. 온라인 거래가 없는 시대에는 그 시대의 거래 장부에 해당하는 기록을 쓴다. 항목은 정확히 6개다. 특정 상품 종류를 억지로 넣지 말고 일상 구매를 포함한다. \n\n목록은 캐릭터 설정과 현재까지의 대화, 생활환경, 예산, 취향, 실제 필요를 종합해 구성한다. '사용할 법함'과 '최근에 구매할 이유가 있음'을 구분한다. 직업·종족·성격 하나만으로 특정 구매를 단정하지 않는다. 같은 시점에 재조회하면 이미 나온 품목·날짜·금액을 유지하고, 시간이 흐르거나 새로운 필요가 생겼을 때 자연스럽게 갱신한다. 이미 보유한 물건은 소진·고장·선물 등의 이유 없이 다시 사지 않는다.\n성인임이 확인된 인물의 사적인 구매도 일상 구매의 일부로 고려할 수 있다. 콘돔, 수용성 윤활제, 바이브레이터, 진동 링 같은 중립적인 구체적 품목명과 재질·규격은 허용 후보의 예일 뿐 필수 항목이 아니다. 혼자 필요한 물건인지, 성인인 상대와의 확립된 관계와 대화에서 함께 필요해진 물건인지 맥락에 따라 판단한다. 성인 여부나 관계가 불명확하면 성적인 구매 배경을 지어내지 않는다. 관련된 구매 이유가 없으면 그런 품목이 없어도 자연스럽다. 반대로 맥락에 맞는 품목을 단순히 사적이라는 이유만으로 모두 제외하지 않는다. 인물마다 실제 필요가 다르므로 일정한 포함 비율이나 개수를 할당하지 않는다.\n오직 중립적인 상품명·가격·판매처·날짜·상태만 표시한다. 사용 장면, 신체 묘사, 성적 상상, 구매 이유 해설은 출력하지 않는다. 상품명을 특정 사람이나 신체를 지칭하는 성적인 문장으로 만들지 않는다.",
-  "/결제내역":"이번 턴에는 최근 결제 내역만 [결제]와 [/결제] 사이에 지정된 JSON으로 쓴다. 상품명 또는 서비스명·금액·주기·장면 속 날짜·상태를 기록한다. 쇼핑 내역과 같은 구매는 같은 품목·날짜·금액을 유지한다. 주기는 매월·매년·단건 중 알맞게 쓰며 일반 물건은 구독이라고 명시되지 않은 한 단건이다. 결제 수단은 그 시대에 맞춘다. \n\n목록은 캐릭터 설정과 현재까지의 대화, 생활환경, 예산, 취향, 실제 필요를 종합해 구성한다. '사용할 법함'과 '최근에 구매할 이유가 있음'을 구분한다. 직업·종족·성격 하나만으로 특정 구매를 단정하지 않는다. 같은 시점에 재조회하면 이미 나온 품목·날짜·금액을 유지하고, 시간이 흐르거나 새로운 필요가 생겼을 때 자연스럽게 갱신한다. 이미 보유한 물건은 소진·고장·선물 등의 이유 없이 다시 사지 않는다.\n성인임이 확인된 인물의 사적인 구매도 일상 구매의 일부로 고려할 수 있다. 콘돔, 수용성 윤활제, 바이브레이터, 진동 링 같은 중립적인 구체적 품목명과 재질·규격은 허용 후보의 예일 뿐 필수 항목이 아니다. 혼자 필요한 물건인지, 성인인 상대와의 확립된 관계와 대화에서 함께 필요해진 물건인지 맥락에 따라 판단한다. 성인 여부나 관계가 불명확하면 성적인 구매 배경을 지어내지 않는다. 관련된 구매 이유가 없으면 그런 품목이 없어도 자연스럽다. 반대로 맥락에 맞는 품목을 단순히 사적이라는 이유만으로 모두 제외하지 않는다. 인물마다 실제 필요가 다르므로 일정한 포함 비율이나 개수를 할당하지 않는다.\n오직 중립적인 상품명·가격·판매처·날짜·상태만 표시한다. 사용 장면, 신체 묘사, 성적 상상, 구매 이유 해설은 출력하지 않는다. 상품명을 특정 사람이나 신체를 지칭하는 성적인 문장으로 만들지 않는다.",
+  "/쇼핑":"이번 턴에는 최근 주문 내역만 [주문]과 [/주문] 사이에 지정된 JSON으로 쓴다. 여기에는 실제로 주문해서 물건을 받는 거래만 넣는다. 구독료, 정기결제, 공과금, 통신비, 교통비, 외식비, 병원비 같은 서비스 결제는 결제 내역의 몫이므로 여기에 넣지 않는다. 최근 구매가 위에 온다. 상품명·판매처·장면 속 날짜·배송상태를 기록한다. 온라인 거래가 없는 시대에는 그 시대의 거래 장부에 해당하는 기록을 쓴다. 항목은 정확히 6개다. 특정 상품 종류를 억지로 넣지 말고 일상 구매를 포함한다. \n\n목록은 캐릭터 설정과 현재까지의 대화, 생활환경, 예산, 취향, 실제 필요를 종합해 구성한다. '사용할 법함'과 '최근에 구매할 이유가 있음'을 구분한다. 직업·종족·성격 하나만으로 특정 구매를 단정하지 않는다. 같은 시점에 재조회하면 이미 나온 품목·날짜·금액을 유지하고, 시간이 흐르거나 새로운 필요가 생겼을 때 자연스럽게 갱신한다. 이미 보유한 물건은 소진·고장·선물 등의 이유 없이 다시 사지 않는다.\n성인임이 확인된 인물의 사적인 구매도 일상 구매의 일부로 고려할 수 있다. 콘돔, 수용성 윤활제, 바이브레이터, 진동 링 같은 중립적인 구체적 품목명과 재질·규격은 허용 후보의 예일 뿐 필수 항목이 아니다. 혼자 필요한 물건인지, 성인인 상대와의 확립된 관계와 대화에서 함께 필요해진 물건인지 맥락에 따라 판단한다. 성인 여부나 관계가 불명확하면 성적인 구매 배경을 지어내지 않는다. 관련된 구매 이유가 없으면 그런 품목이 없어도 자연스럽다. 반대로 맥락에 맞는 품목을 단순히 사적이라는 이유만으로 모두 제외하지 않는다. 인물마다 실제 필요가 다르므로 일정한 포함 비율이나 개수를 할당하지 않는다.\n오직 중립적인 상품명·가격·판매처·날짜·상태만 표시한다. 사용 장면, 신체 묘사, 성적 상상, 구매 이유 해설은 출력하지 않는다. 상품명을 특정 사람이나 신체를 지칭하는 성적인 문장으로 만들지 않는다.",
+  "/결제내역":"이번 턴에는 최근 결제 내역만 [결제]와 [/결제] 사이에 지정된 JSON으로 쓴다. 이것은 주문 목록이 아니라 카드·계좌에서 돈이 빠져나간 기록이다. 구독과 정기결제, 공과금, 통신·교통, 식비, 병원·수업료 같은 서비스 이용료를 중심으로 구성한다. 물건 값은 6개 중 최대 2개까지만 넣고, 나머지는 물건이 아닌 결제로 채운다. 주문 내역에 이미 나온 물건을 넣을 때만 그 품목의 날짜와 금액을 그대로 유지하고, 주문 목록 전체를 그대로 옮겨 적지 않는다. 상품명 또는 서비스명·금액·주기·장면 속 날짜·상태를 기록한다. 주기는 매월·매년·단건 중 알맞게 쓰며 일반 물건은 구독이라고 명시되지 않은 한 단건이다. 결제 수단은 그 시대에 맞춘다. \n\n목록은 캐릭터 설정과 현재까지의 대화, 생활환경, 예산, 취향, 실제 필요를 종합해 구성한다. '사용할 법함'과 '최근에 구매할 이유가 있음'을 구분한다. 직업·종족·성격 하나만으로 특정 구매를 단정하지 않는다. 같은 시점에 재조회하면 이미 나온 품목·날짜·금액을 유지하고, 시간이 흐르거나 새로운 필요가 생겼을 때 자연스럽게 갱신한다. 이미 보유한 물건은 소진·고장·선물 등의 이유 없이 다시 사지 않는다.\n성인임이 확인된 인물의 사적인 구매도 일상 구매의 일부로 고려할 수 있다. 콘돔, 수용성 윤활제, 바이브레이터, 진동 링 같은 중립적인 구체적 품목명과 재질·규격은 허용 후보의 예일 뿐 필수 항목이 아니다. 혼자 필요한 물건인지, 성인인 상대와의 확립된 관계와 대화에서 함께 필요해진 물건인지 맥락에 따라 판단한다. 성인 여부나 관계가 불명확하면 성적인 구매 배경을 지어내지 않는다. 관련된 구매 이유가 없으면 그런 품목이 없어도 자연스럽다. 반대로 맥락에 맞는 품목을 단순히 사적이라는 이유만으로 모두 제외하지 않는다. 인물마다 실제 필요가 다르므로 일정한 포함 비율이나 개수를 할당하지 않는다.\n오직 중립적인 상품명·가격·판매처·날짜·상태만 표시한다. 사용 장면, 신체 묘사, 성적 상상, 구매 이유 해설은 출력하지 않는다. 상품명을 특정 사람이나 신체를 지칭하는 성적인 문장으로 만들지 않는다.",
   "/플리":"이번 턴에는 노래 세 곡만 고른다. 첫 줄에 [플리] 를 쓰고, 아래 순서대로 한 줄에 하나씩 '제목 - 가수 :: 이유' 형식으로 쓴 뒤 [/플리] 로 닫는다. 첫 곡은 지금 상황에 어울려서 듣고 있는 곡, 둘째 곡은 상대를 생각하며 들었던 곡, 셋째 곡은 평소에 자주 듣던 곡이다. 이유는 한 문장으로 쓴다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.\n곡을 고르는 기준은 이렇다. 이 인물이 평소에 좋아할 만한 장르와 분위기로 고른다. 지금 장면이 슬프다고 슬픈 곡을 고르는 것이 아니라, 이 사람이라면 이런 걸 듣겠다 싶은 쪽으로 고른다. 성격, 자란 환경, 나이, 하는 일이 취향을 정한다.\n인물 설정에 음악 취향이 적혀 있으면 무엇보다 그것을 따른다.\n나이가 있거나 옛 시절 이야기를 자주 하는 인물이면 그 시절 곡이 섞여도 좋다. 세계관에 시대가 정해져 있으면 그 시대보다 나중에 나온 곡은 쓰지 않는다.\n세 곡을 전부 누구나 아는 대표곡으로 채우지 않는다. 한 곡 정도는 알려진 곡이어도 좋지만, 나머지는 덜 알려졌더라도 그 인물의 취향이 드러나는 곡으로 고른다.\n실제로 존재하는 곡만 쓴다. 제목이나 가수가 확실하지 않으면 지어내지 말고 확실히 아는 곡으로 바꾼다."
 };
 var CMD_SAY = {
@@ -5061,14 +4872,18 @@ function moneyLabel(code){return {KRW:"원",JPY:"円",USD:"USD",EUR:"EUR",GBP:"G
 function moneyText(amount,code){
   return Number(amount).toLocaleString("en-US",{maximumFractionDigits:2})+" "+moneyLabel(code);
 }
-function commercePrompt(c,log){
+function commercePrompt(c,log,kind){
   var room=curRoom(c), code=moneyCode(c.currency)||(room&&room.currency)||"";
-  var past=log.filter(function(m){return m.r==="a" && /\[(주문|결제)\]/.test(m.t||"");}).slice(-6).map(function(m){return m.t;}).join("\n");
+  var tag=kind==="결제"?"결제":"주문";
+  var past=log.filter(function(m){return m.r==="a" && new RegExp("\\["+tag+"\\]").test(m.t||"");}).slice(-6).map(function(m){return m.t;}).join("\n");
+  var scopeLine=kind==="결제"
+    ? "이번 턴은 결제 내역이다. 돈이 나간 기록이므로 구독·정기결제·공과금·교통·식비·서비스 이용료가 중심이고, 물건 값은 최대 2건까지만 섞는다. 주문 내역을 그대로 복사하지 않는다.\n"
+    : "이번 턴은 주문 내역이다. 배송·수령이 있는 물건 거래만 넣고 서비스 결제는 넣지 않는다.\n";
   return "\n# 구매 기록의 출력 구조\n[주문] 또는 [결제] 안에는 다음 JSON 객체 하나만 넣는다. 파이프 표는 사용하지 않는다. "
     +'{"currency":"JPY","items":[{"name":"상품명","amount":1200,"place":"판매처","date":"장면 속 날짜","status":"결제완료","cycle":"단건"}]}'+"\n"
     +"예시의 엔화·금액·품목을 복사하지 않는다. currency는 현대 화폐면 ISO 코드, 가상 화폐면 세계관에서 쓰는 단위 이름이다. amount는 기호 없는 실제 금액 숫자다. 모든 항목은 동일 화폐로 책정한다. items에는 최근 구매·결제 기록을 정확히 6개 넣는다. 먼저 기존 기록을 유지하고 부족하면 조회 기간을 넓혀 이 세계관과 인물의 생활에 맞는 서로 다른 일상 구매를 구성한다. 특정 상품 종류를 6개 채우라는 뜻이 아니다. "
     +(code?"이 방에서 사용할 화폐는 "+code+"로 고정되어 있다. 외국어 대사를 쓰더라도 화폐를 바꾸지 않는다. 다른 화폐의 숫자에 이 단위만 덧씌우지 말고 현지 가격으로 책정한다.":"장소·시대·세계관에서 화폐를 정한다. 캐릭터 국적이나 대사 언어만으로 정하지 않는다. 이전 기록이 서로 모순되면 현재 배경을 우선한다. 배경도 불명확하면 최근 명확한 거래의 화폐를 따른다. 그래도 근거가 없으면 currency를 빈 문자열로 두고 items도 비운다.")
-    +"\n이미 나온 같은 상품·같은 날짜의 구매와 결제는 동일한 금액이다. 새로 조회했다는 이유로 새 구매나 날짜를 만들지 않는다.\n이전 구매 기록:\n"+(past||"아직 없음");
+    +"\n"+scopeLine+"이미 나온 같은 상품·같은 날짜의 구매와 결제는 동일한 금액이다. 새로 조회했다는 이유로 새 구매나 날짜를 만들지 않는다.\n같은 종류의 이전 기록:\n"+(past||"아직 없음");
 }
 function commerceResponse(text,c,command,log,context){
   var kind=/^\/(쇼핑|주문|주문내역)$/.test(command||"")?"주문":/^\/(결제|결제내역)$/.test(command||"")?"결제":null;
@@ -5426,16 +5241,7 @@ function buildSystem(c, turn, scope){
 
 
   var lang=c.lang||"한국어";
-  /* 번역을 거칠 때는 생성 언어를 바꿔 받고, 괄호 병기는 쓰지 않는다 */
-  if (trReady() && trWork()==="trans" && !trSkip(scope)){
-    lang = cfg.trSrc || "영어";
-    p.push("");
-    p.push("# 작성 언어");
-    p.push("이번 응답은 지문과 대사를 모두 "+lang+"로 쓴다. 한국어를 섞지 않는다.");
-    p.push("이전 대화 기록은 한국어 번역본으로 저장돼 있다. 기록이 한국어여도 이번 응답은 "+lang+"로 쓴다.");
-    p.push("괄호 안에 한국어 번역이나 발음을 덧붙이지 않는다. 대괄호 태그·JSON 키·형식 구분자는 지정된 표기 그대로 둔다.");
-  }
-  if (lang!=="한국어" && !trReady() && scope.command!=="/편지" && scope.command!=="/일기"){
+  if (lang!=="한국어" && scope.command!=="/편지" && scope.command!=="/일기"){
     p.push("");
     p.push("# 언어");
     if (c.romaji){
@@ -5558,7 +5364,7 @@ function callAPIOnce(c, log, turnInstr){
   log = cutLog(c, log);
   var sys=buildSystem(c, turnInstr, scope), url, headers, body;
   var commerceRoom=curRoom(c), commerceContext={room:commerceRoom,currency:moneyCode(c.currency)||(commerceRoom&&commerceRoom.currency)||""};
-  if(/^\/(쇼핑|주문|주문내역|결제|결제내역)$/.test(scope.command||""))sys+=commercePrompt(c,log);
+  if(/^\/(쇼핑|주문|주문내역|결제|결제내역)$/.test(scope.command||""))sys+=commercePrompt(c,log,/^\/(결제|결제내역)$/.test(scope.command)?"결제":"주문");
   var gen=genOf(c);
   /* 카드 명령어 턴은 댓글까지 다 나와야 하니 상한을 넉넉히 잡는다 */
   if (scope.card || scope.ooc){
@@ -5609,17 +5415,12 @@ function callAPIOnce(c, log, turnInstr){
         out=finalResponseText(cand.content&&cand.content.parts);
       }
       if(!out) throw new Error("본문이 비어 있어. 응답 길이를 늘리거나 프롬프트를 바꿔봐.");
-      function post(t){
-        if(scope.ooc)t=normalizeOoc(t);
-        if(scope.command==="/속마음")t=normalizeMind(t);
-        t=documentResponse(t,scope.command);
-        t=commerceResponse(t,c,scope.command,log,commerceContext);
-        if(scope.command==="/인스타")t=instagramResponse(t);
-        return scope.card || scope.ooc ? t : normalizeStory(t);
-      }
-      /* 설정 답변(OOC)은 그대로 두고, 장면만 번역해서 저장한다 */
-      if(!trReady() || trSkip(scope)) return post(out);
-      return translatePass(out, gen.maxTokens).then(post);
+      if(scope.ooc)out=normalizeOoc(out);
+      if(scope.command==="/속마음")out=normalizeMind(out);
+      out=documentResponse(out,scope.command);
+      out=commerceResponse(out,c,scope.command,log,commerceContext);
+      if(scope.command==="/인스타")out=instagramResponse(out);
+      return scope.card || scope.ooc ? out : normalizeStory(out);
     });
   });
 }
