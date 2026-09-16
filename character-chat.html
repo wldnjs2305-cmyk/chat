@@ -273,6 +273,8 @@
   body[data-view=script] .msg.me .bub{border-left:2px solid var(--myink,#6B5CA5) !important;padding:2px 0 2px 13px}
   body.dark[data-view=script] .msg.me .bub{border-left-color:var(--myink,#B7ADEB)}
   body[data-view=novel] .msg.me, body[data-view=script] .msg.me{margin-bottom:26px}
+  body[data-view=novel] .msg.me{margin:26px 0}
+  body[data-view=novel] .msg.me .bub{margin:0 !important}
   .smschip{display:block;background:var(--field);border-radius:14px;
     padding:12px 15px;margin:14px 0;line-height:1.6;color:var(--text);font-weight:400}
   .smschip b{font-weight:700;margin-right:7px}
@@ -356,8 +358,8 @@
     color:#F4F4F8;
     text-shadow:0 1px 2px rgba(0,0,0,.55),0 0 1px rgba(0,0,0,.45)}
   body[data-novelbg] .nov .nn, body[data-novelbg] .snar{color:var(--nar);font-style:italic}
-  body[data-novelbg] .nov .ns{color:var(--saycol,#FFC94A)}
-  body[data-novelbg] .ssay{color:var(--saycol,#FFC94A)}
+  body[data-novelbg] .nov .ns, body[data-novelbg] .ssay{color:var(--saycol,#111114);
+    text-shadow:none}
   body[data-novelbg] .ssay b{color:#F4F4F8}
   body[data-novelbg] .tr{color:rgba(232,232,240,.75)}
   body[data-novelbg][data-view] .msg.me .bub{color:var(--myink,#F4F4F8)}
@@ -375,7 +377,7 @@
   .bgprev i::before{content:"";position:absolute;left:12px;right:12px;top:30px;height:34px;
     background:repeating-linear-gradient(180deg,rgba(235,235,240,.8) 0 2px,transparent 2px 9px)}
   .bgprev i::after{content:"";position:absolute;left:12px;right:28px;top:78px;height:11px;
-    background:repeating-linear-gradient(180deg,#FFC94A 0 2px,transparent 2px 9px)}
+    background:repeating-linear-gradient(180deg,#fff 0 2px,transparent 2px 9px)}
   .bgprev span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px}
   #view.sms{padding:0}
 
@@ -935,10 +937,25 @@
 .lore-book-tabs .btn{width:auto;white-space:nowrap;margin:0}
 
 
-  /* 배경 사진이 있을 때 — 상단바·입력창은 불투명 */
+  /* 배경 사진이 있을 때 — 테마와 상관없이 상단바·입력창을 어두운 막 색에 맞춘다 */
+  body[data-novelbg]::before{display:none !important}
   body[data-novelbg][data-screen=chat] #bar,
   body[data-novelbg][data-screen=chat] #dock{
-    background:var(--panel);-webkit-backdrop-filter:none;backdrop-filter:none}
+    background:#17171C !important;background-image:none !important;
+    -webkit-backdrop-filter:none !important;backdrop-filter:none !important;
+    border-color:rgba(255,255,255,.08) !important;box-shadow:none !important}
+  body[data-novelbg][data-screen=chat] #bar h1{color:#F4F4F8 !important;text-shadow:none !important}
+  body[data-novelbg][data-screen=chat] #bar .sub{color:rgba(230,230,238,.6) !important}
+  body[data-novelbg][data-screen=chat] #bar .iconbtn{color:#D8D2FF !important}
+  body[data-novelbg][data-screen=chat] #dock .tools button{color:rgba(230,230,238,.62) !important}
+  body[data-novelbg][data-screen=chat] #inp{
+    background:#26262D !important;color:#F1F1F5 !important;
+    border:1px solid rgba(255,255,255,.08) !important;box-shadow:none !important}
+  body[data-novelbg][data-screen=chat] #inp::placeholder{color:rgba(230,230,238,.45)}
+  body[data-novelbg][data-screen=chat] #star{color:rgba(230,230,238,.6)}
+  body[data-novelbg][data-screen=chat] #send{
+    background:#F1F1F5 !important;color:#17171C !important;
+    border:0 !important;box-shadow:none !important}
 </style>
 </head>
 <body>
@@ -1891,6 +1908,7 @@ function render(){
   view.className=""; dock.style.display="none";
   document.body.setAttribute("data-screen", screen);
   document.body.removeAttribute("data-novelbg");
+  (function(){ var tcm=document.getElementById("tc"); if (tcm && typeof THEME_BG!=="undefined") tcm.setAttribute("content", THEME_BG[cfg.theme]||"#FFFFFF"); })();
   document.body.style.removeProperty("--novelbg");
   document.body.style.removeProperty("--noveldim");
   document.body.style.removeProperty("--saycol");
@@ -2220,7 +2238,7 @@ function viewEdit(){
      + '<input id="bgdim" type="range" min="20" max="85" step="5" value="'+shadeOf(c)+'" style="padding:0">';
   h += '<label>배경 있을 때 대사 색</label>'
      + '<div style="display:flex;gap:8px;align-items:center">'
-     + '<input id="saycol" type="color" value="'+esc(c.sayColor||"#FFC94A")+'" style="width:56px;padding:2px;height:40px">'
+     + '<input id="saycol" type="color" value="'+esc(c.sayColor||"#111114")+'" style="width:56px;padding:2px;height:40px">'
      + '<button class="btn sm" id="saycolx" style="margin:0;width:auto">기본색으로</button></div>';
   h += picBlock("얼굴 참조 1","ref",picGet(c.id,"ref"));
   h += picBlock("얼굴 참조 2","ref2",picGet(c.id,"ref2"));
@@ -4694,6 +4712,7 @@ function viewChat(){
     var novel = cc && chatFormat(cc)!=="bubble";
     if (bg && novel){
       document.body.setAttribute("data-novelbg","1");
+      var tcm=document.getElementById("tc"); if (tcm) tcm.setAttribute("content","#17171C");
       document.body.style.setProperty("--novelbg", 'url("'+bg+'")');
       document.body.style.setProperty("--noveldim", shadeOf(cc)/100);
       if (cc.sayColor) document.body.style.setProperty("--saycol", cc.sayColor); else document.body.style.removeProperty("--saycol");
