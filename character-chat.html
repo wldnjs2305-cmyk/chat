@@ -319,6 +319,8 @@
     border-bottom:1px solid var(--line);background:var(--panel);
   }
   #bar .ttl{flex:1;min-width:0;text-align:center}
+  #bar .iconbtn.backbtn{display:flex;align-items:center;padding-left:0;margin-left:-4px}
+  #bar .iconbtn.backbtn svg{display:block}
   #bar h1{margin:0;font-size:16px;font-weight:600;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #bar .sub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .hb{display:inline-flex;align-items:center;justify-content:center;
@@ -353,11 +355,11 @@
     content:"";position:fixed;inset:-30px;z-index:0;pointer-events:none;
     background-image:var(--novelbg);
     background-size:cover;background-position:center;background-repeat:no-repeat;
-    filter:blur(var(--novelblur,3px))}
+    filter:blur(var(--novelblur,0px))}
   body[data-novelbg] #app{z-index:2}
   body[data-novelbg] #app::before{
     content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
-    background:rgba(0,0,0,var(--noveldim,.55))}
+    background:rgba(0,0,0,var(--noveldim,.45))}
   body[data-novelbg] #view, body[data-novelbg] #app{background:transparent}
   body[data-novelbg] #app{isolation:isolate}
   body[data-novelbg] #view.chat{
@@ -365,7 +367,7 @@
     color:#F4F4F8;
     text-shadow:0 1px 2px rgba(0,0,0,.55),0 0 1px rgba(0,0,0,.45)}
   body[data-novelbg] .nov .nn, body[data-novelbg] .snar{color:var(--nar);font-style:italic}
-  body[data-novelbg] .nov .ns, body[data-novelbg] .ssay{color:var(--saycol,#000000);
+  body[data-novelbg] .nov .ns, body[data-novelbg] .ssay{color:var(--saycol,#FFC94A);
     text-shadow:none}
   body[data-novelbg] .ssay b{color:#F4F4F8}
   body[data-novelbg] .tr{color:rgba(232,232,240,.75)}
@@ -380,11 +382,11 @@
   /* 설정 — 배경 미리보기 */
   .bgprev{position:relative;width:96px;height:170px;border-radius:14px;overflow:hidden;flex:0 0 auto;
     background:var(--field) center/cover no-repeat;border:1px solid var(--line)}
-  .bgprev i{position:absolute;inset:0;background:rgba(0,0,0,var(--g,.55))}
+  .bgprev i{position:absolute;inset:0;background:rgba(0,0,0,var(--g,.45))}
   .bgprev i::before{content:"";position:absolute;left:12px;right:12px;top:30px;height:34px;
     background:repeating-linear-gradient(180deg,rgba(235,235,240,.8) 0 2px,transparent 2px 9px)}
   .bgprev i::after{content:"";position:absolute;left:12px;right:28px;top:78px;height:11px;
-    background:repeating-linear-gradient(180deg,#fff 0 2px,transparent 2px 9px)}
+    background:repeating-linear-gradient(180deg,#FFC94A 0 2px,transparent 2px 9px)}
   .bgprev span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px}
   #view.sms{padding:0}
 
@@ -946,14 +948,18 @@
 
   /* 배경 사진이 있을 때 — 테마와 상관없이 상단바·입력창을 어두운 막 색에 맞춘다 */
   body[data-novelbg]::before{display:none !important}
-  body[data-novelbg][data-screen=chat] #bar,
+  body[data-novelbg][data-screen=chat] #bar{
+    background:transparent !important;background-image:none !important;
+    -webkit-backdrop-filter:none !important;backdrop-filter:none !important;
+    border-bottom:0 !important;box-shadow:none !important}
+  body[data-novelbg][data-screen=chat] #bar h1{text-shadow:0 1px 3px rgba(0,0,0,.6) !important}
+  body[data-novelbg][data-screen=chat] #bar .iconbtn{color:#F4F4F8 !important;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
   body[data-novelbg][data-screen=chat] #dock{
     background:#17171C !important;background-image:none !important;
     -webkit-backdrop-filter:none !important;backdrop-filter:none !important;
     border-color:rgba(255,255,255,.08) !important;box-shadow:none !important}
-  body[data-novelbg][data-screen=chat] #bar h1{color:#F4F4F8 !important;text-shadow:none !important}
+  body[data-novelbg][data-screen=chat] #bar h1{color:#F4F4F8 !important}
   body[data-novelbg][data-screen=chat] #bar .sub{color:rgba(230,230,238,.6) !important}
-  body[data-novelbg][data-screen=chat] #bar .iconbtn{color:#D8D2FF !important}
   body[data-novelbg][data-screen=chat] #dock .tools button{color:rgba(230,230,238,.62) !important}
   body[data-novelbg][data-screen=chat] #inp{
     background:#26262D !important;color:#F1F1F5 !important;
@@ -2147,14 +2153,14 @@ function picBlock(label,kind,val,hint){
 /* 유리판 진하기. 예전 막 값(0~90)이 낮으면 읽히는 선까지 올린다 */
 /* 사진 흐림 (px) */
 function blurOf(c){
-  var v = (c && c.bgBlur!=null) ? +c.bgBlur : 3;
-  if (isNaN(v)) v = 3;
+  var v = (c && c.bgBlur!=null) ? +c.bgBlur : 0;
+  if (isNaN(v)) v = 0;
   return Math.max(0, Math.min(12, Math.round(v)));
 }
 /* 배경 막 진하기 (어두운 막) */
 function shadeOf(c){
-  var v = (c && c.bgShade!=null) ? +c.bgShade : 55;
-  if (isNaN(v)) v = 55;
+  var v = (c && c.bgShade!=null) ? +c.bgShade : 45;
+  if (isNaN(v)) v = 45;
   return Math.max(20, Math.min(85, Math.round(v/5)*5));
 }
 function bgBlock(val, g){
@@ -2254,7 +2260,7 @@ function viewEdit(){
      + '<input id="bgblur" type="range" min="0" max="12" step="1" value="'+blurOf(c)+'" style="padding:0">';
   h += '<label>배경 있을 때 대사 색</label>'
      + '<div style="display:flex;gap:8px;align-items:center">'
-     + '<input id="saycol" type="color" value="'+esc(c.sayColor||"#000000")+'" style="width:56px;padding:2px;height:40px">'
+     + '<input id="saycol" type="color" value="'+esc(c.sayColor||"#FFC94A")+'" style="width:56px;padding:2px;height:40px">'
      + '<button class="btn sm" id="saycolx" style="margin:0;width:auto">기본색으로</button></div>';
   h += picBlock("얼굴 참조 1","ref",picGet(c.id,"ref"));
   h += picBlock("얼굴 참조 2","ref2",picGet(c.id,"ref2"));
@@ -4750,7 +4756,10 @@ function viewChat(){
   elTitle.textContent=c.name||"이름 없음";
   var rs=roomsOf(c);
   elSub.textContent = "";
-  elLeft.textContent="목록"; elLeft.onclick=function(){ go("list"); };
+  elLeft.classList.add("backbtn");
+  elLeft.innerHTML='<svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  elLeft.setAttribute("aria-label","목록"); elLeft.title="목록";
+  elLeft.onclick=function(){ go("list"); };
   elRight.className="iconbtn hbs";
   elRight.innerHTML='<span class="hb" data-go="edit">✎</span><span class="hb" data-go="cfg">⚙</span>';
   elRight.onclick=function(e){
