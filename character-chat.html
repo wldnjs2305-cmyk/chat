@@ -5874,7 +5874,7 @@ function callAPIOnce(c, log, turnInstr, noSearch, onDelta){
       }, 90000).then(function(streamed){
         if (streamed===null){
           /* 스트림을 안 해주는 서버. 통째로 온 JSON 을 원래대로 읽는다 */
-          live.note="이 서버는 한 글자씩 보내기를 지원하지 않아서 답이 한 번에 나와.";
+          streamNote="이 서버는 한 글자씩 보내기를 지원하지 않아서 답이 한 번에 나와.";
           return res.text().then(function(txt){
             var data=null; try{ data=JSON.parse(txt); }catch(e){}
             var o="";
@@ -5885,7 +5885,7 @@ function callAPIOnce(c, log, turnInstr, noSearch, onDelta){
           });
         }
         if (streamErr) throw new Error("서버가 답하다가 오류를 냈어.\n"+String(streamErr).slice(0,300));
-        if (chunks<=1 && acc.length>80) live.note="서버가 답을 모았다가 한 덩어리로 보내고 있어. 앱 설정이 아니라 서버(중계) 쪽 문제야.";
+        if (chunks<=1 && acc.length>80) streamNote="서버가 답을 모았다가 한 덩어리로 보내고 있어. 앱 설정이 아니라 서버(중계) 쪽 문제야.";
         if (!acc.trim() && blocked) throw new Error("안전 필터에 막혀서 답이 비었어. ("+blocked+")");
         return finish(acc.trim());
       });
@@ -5949,7 +5949,9 @@ function turn(){
   }
   turnGo(c, lg, ti);
 }
-var live={ cid:null, text:"", raf:0, note:"", noted:false };
+var live={ cid:null, text:"", raf:0 };
+/* v48: callAPIOnce 안의 live 는 true/false 값이라 여기에 따로 둔다 */
+var streamNote="", streamNoted=false;
 function liveEnd(){ live.cid=null; live.text=""; if(live.raf){ cancelAnimationFrame(live.raf); live.raf=0; } }
 function paintLive(){
   live.raf=0;
@@ -5980,12 +5982,12 @@ function turnGo(c, lg, ti){
     setLog(c.id,l);
     busy=false; elSend.disabled=false; paint();
     /* v48: 켜기인데 한 번에 나온 이유를 한 번만 알려준다 */
-    if (live.note && !live.noted){
-      live.noted=true;
+    if (streamNote && !streamNoted){
+      streamNoted=true;
       var nd=document.createElement("div"); nd.className="hint"; nd.style.margin="6px 12px";
-      nd.textContent="ⓘ "+live.note; view.appendChild(nd); view.scrollTop=view.scrollHeight;
+      nd.textContent="ⓘ "+streamNote; view.appendChild(nd); view.scrollTop=view.scrollHeight;
     }
-    live.note="";
+    streamNote="";
     if (/\[\s*(?:편지|일기)\s*\]/.test(text)) syncHand(c);
   }).catch(function(e){
     liveEnd();
