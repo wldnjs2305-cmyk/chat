@@ -261,7 +261,7 @@
   body[data-view=script] .msg .col, body[data-view=script] .msg.me .col{max-width:100%}
   body[data-view=novel] .msg .who, body[data-view=script] .msg .who{display:none}
   body[data-view=novel] .bub, body[data-view=script] .bub{
-    background:transparent;padding:0;border:0;border-radius:0;box-shadow:none;line-height:1.95}
+    background:transparent;padding:0;border:0;border-radius:0;box-shadow:none;line-height:1.5}
   body[data-view=novel] .bub::before, body[data-view=script] .bub::before{display:none}
   body[data-view=novel] .msg.me .bub, body[data-view=script] .msg.me .bub{
     background:transparent;box-shadow:none;
@@ -273,17 +273,19 @@
   body[data-view=script] .msg.me .bub{border-left:2px solid var(--myink,#6B5CA5) !important;padding:2px 0 2px 13px}
   body.dark[data-view=script] .msg.me .bub{border-left-color:var(--myink,#B7ADEB)}
   body[data-view=novel] .msg.me, body[data-view=script] .msg.me{margin-bottom:26px}
-  body[data-view=novel] .msg.me{margin:26px 0}
-  body[data-view=novel] .msg.me .bub{margin:0 !important}
+  body[data-view=novel] .msg.me{margin:30px 0;padding:26px 0;
+    border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  body[data-view=novel] .msg.me .bub{margin:0 !important;color:var(--text) !important;font-weight:400 !important}
+  body[data-novelbg][data-view=novel] .msg.me{border-color:rgba(255,255,255,.2)}
   .smschip{display:block;background:var(--field);border-radius:14px;
     padding:12px 15px;margin:14px 0;line-height:1.6;color:var(--text);font-weight:400}
   .smschip b{font-weight:700;margin-right:7px}
   .nov .smschip, .snar .smschip{white-space:normal}
   /* 소설 — 지문은 연한 회색 정자체, 대사는 진하게 */
   .nov{white-space:pre-wrap;word-break:break-word;
-    font-family:var(--f-body);font-size:var(--fs);line-height:1.95;letter-spacing:-.004em}
+    font-family:var(--f-body);font-size:var(--fs);line-height:1.5;letter-spacing:-.004em}
   .nov em{font-family:inherit;font-style:normal;font-weight:400;color:var(--nar)}
-  .nov .np{margin:0 0 1.05em}
+  .nov .np{margin:0 0 1em}
   .nov .np:last-child{margin-bottom:0}
   .nov .nn{color:var(--nar)}
   .nov .ns{color:var(--text);font-weight:500}
@@ -293,7 +295,7 @@
   .dturn{margin-bottom:22px}
   .dturn > :last-child{margin-bottom:0}
   .snar, .ssay{white-space:pre-wrap;word-break:break-word;margin:0 0 12px;
-    font-family:var(--f-body);font-size:var(--fs);line-height:1.9;letter-spacing:-.004em}
+    font-family:var(--f-body);font-size:var(--fs);line-height:1.5;letter-spacing:-.004em}
   .snar{color:var(--nar)}
   .ssay b{font-weight:700}
   .ssay b::after{content:" │ ";color:var(--muted);font-weight:400}
@@ -362,18 +364,22 @@
     background:rgba(0,0,0,var(--noveldim,.45))}
   body[data-novelbg] #view, body[data-novelbg] #app{background:transparent}
   body[data-novelbg] #app{isolation:isolate}
-  body[data-novelbg] #view.chat{
+  /* 밝은 글씨·그림자는 본문 글에만. 인스타·문자 같은 카드는 원래 색 그대로 */
+  body[data-novelbg] #view.chat :is(.nov, .snar, .ssay, .msg.me .bub, .thinking, .ooc){
     --nar:rgba(232,232,240,.80);--text:#F4F4F8;--muted:rgba(230,230,238,.7);
     color:#F4F4F8;
     text-shadow:0 1px 2px rgba(0,0,0,.55),0 0 1px rgba(0,0,0,.45)}
-  body[data-novelbg] .nov .nn, body[data-novelbg] .snar{color:var(--nar);font-style:italic}
-  body[data-novelbg] .nov .ns, body[data-novelbg] .ssay{color:var(--saycol,#FFC94A);
+  body[data-novelbg] #view.chat .thinking{color:rgba(230,230,238,.75)}
+  body[data-novelbg] #view.chat .nov .nn, body[data-novelbg] #view.chat .snar{color:rgba(232,232,240,.80);font-style:italic}
+  body[data-novelbg] #view.chat .nov .ns, body[data-novelbg] #view.chat .ssay{color:var(--saycol,#FFC94A);
     text-shadow:none}
-  body[data-novelbg] .ssay b{color:#F4F4F8}
+  body[data-novelbg] #view.chat .ssay b{color:#F4F4F8}
   body[data-novelbg] .tr{color:rgba(232,232,240,.75)}
-  body[data-novelbg][data-view] .msg.me .bub{color:var(--myink,#F4F4F8)}
-  body[data-novelbg] .ooc{color:var(--muted);border-color:rgba(255,255,255,.3)}
-  body[data-novelbg] :is(.smschip,.altbar,.smswrap,.card,.err){text-shadow:none}
+  body[data-novelbg][data-view=script] #view.chat .msg.me .bub{color:var(--myink,#F4F4F8)}
+  body[data-novelbg] #view.chat .ooc{color:rgba(230,230,238,.7);border-color:rgba(255,255,255,.3)}
+  body[data-novelbg] #view.chat :is(.smschip,.smschip *){text-shadow:none;color:var(--text)}
+  body[data-novelbg] #view.chat .smschip{--text:#191820}
+  body.dark[data-novelbg] #view.chat .smschip{--text:#F2F1F6}
   /* 소설·대본의 내 글은 테마 말풍선 효과(흐림·그림자·배경)를 모두 끈다 */
   body[data-screen=chat][data-view=novel] .bub, body[data-screen=chat][data-view=script] .bub{
     -webkit-backdrop-filter:none !important;backdrop-filter:none !important;
@@ -1374,6 +1380,36 @@ function novelHTML(raw, i){
   if (!out) return "";
   return '<div class="nov" data-i="'+i+'">'+out+'</div>';
 }
+/* 소설 — 내 글. 별표가 있으면 별표 기준, 없으면 따옴표 안을 대사로 본다. 줄마다 문단 */
+function userNovelHTML(raw, i){
+  var src = String(stripJunk(raw)).replace(/\r/g,"");
+  var starMode = /\*/.test(src), out = "";
+  src.split(/\n+/).forEach(function(line){
+    line = line.trim(); if (!line) return;
+    var segs = [];
+    if (starMode){ segs = docSegs(line); }
+    else {
+      var re = /("[^"\n]*"|“[^”\n]*”|「[^」\n]*」|『[^』\n]*』)/g, last = 0, m;
+      while ((m = re.exec(line))){
+        var pre = line.slice(last, m.index).trim(); if (pre) segs.push({nar:true, t:pre});
+        segs.push({nar:false, t:m[1]});
+        last = re.lastIndex;
+      }
+      var tail = line.slice(last).trim(); if (tail) segs.push({nar:true, t:tail});
+    }
+    var inner = "";
+    function flush(){ if (inner) out += '<p class="np">'+inner+'</p>'; inner = ""; }
+    segs.forEach(function(sg){
+      var tx = esc(sg.nar ? sg.t : quoteSay(sg.t));
+      tx = tx.replace(/([(（][^)）\n]*[)）])/g,'<span class="tr">$1</span>');
+      tx = hilite(quoteMark(markUp(tx)));
+      if (sg.nar){ inner += (inner ? " " : "") + '<span class="nn">'+tx+'</span>'; }
+      else { flush(); inner = '<span class="ns">'+tx+'</span>'; flush(); }
+    });
+    flush();
+  });
+  return out ? '<div class="nov">'+out+'</div>' : "";
+}
 /* 대본 — 지문과 대사를 나누고 대사에만 이름표 */
 function scriptHTML(nm, raw, i){
   var segs = docSegs(stripJunk(raw)), out = "";
@@ -2279,7 +2315,7 @@ function viewEdit(){
      + [["bubble","말풍선"],["novel","소설"],["script","대본"]].map(function(o){
          return '<option value="'+o[0]+'"'+(chatFormat(c)===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join('')
      + '</select>';
-  h += '<label>소설·대본에서 내 글 색</label>'
+  h += '<label>대본에서 내 글 색</label>'
      + '<div style="display:flex;gap:8px;align-items:center">'
      + '<input id="mycol" type="color" value="'+esc(c.myColor||"#6B5CA5")+'" style="width:56px;padding:2px;height:40px">'
      + '<button class="btn sm" id="mycolx" style="margin:0;width:auto">기본색으로</button></div>';
@@ -4833,7 +4869,7 @@ function paint(err, thinking){
       continue;
     }
     if (m.r==="u"){
-      var ub = (chatFormat(c)==="bubble") ? fmt(m.t) : fmtIn(m.t);
+      var ub = (chatFormat(c)==="bubble") ? fmt(m.t) : (chatFormat(c)==="novel" ? userNovelHTML(m.t, i) : fmtIn(m.t));
       h += '<div class="msg me"><div class="col"><div class="bub" data-i="'+i+'">'+ub+'</div>'
          + (selIdx===i?actsHTML(i):"")+'</div></div>';
       continue;
@@ -5147,7 +5183,7 @@ function conversationGuide(){
 }
 function formatGuide(c){
   var mode=chatFormat(c);
-  var layout=mode==="novel" ? "소설 형식이다. 행동의 초점이나 화제가 바뀌면 빈 줄로 문단을 나눈다. 대사는 따옴표로 표시하고, 지문과 한 문단에 섞지 않고 빈 줄로 떼어 따로 문단으로 쓴다. 문장마다 줄을 끊지는 않는다. 지문은 상황에 맞는 소설체로 쓴다."
+  var layout=mode==="novel" ? "소설 형식이다. 행동의 초점이나 화제가 바뀌면 빈 줄로 문단을 나눈다. 대사는 따옴표로 표시하고, 지문과 한 문단에 섞지 않고 빈 줄로 떼어 따로 문단으로 쓴다. 문장마다 줄을 끊지는 않는다. 지문은 상황에 맞는 소설체로 쓴다. 답은 대사로 끝나도 되고 지문으로 끝나도 된다. 어느 한쪽으로 고정하지 말고, 매 답의 끝을 장면 흐름에 맞게 정한다."
     :mode==="script" ? "대본 형식이다. 지문 문단과 대사를 빈 줄로 분리한다. 화자가 바뀌거나 지문에서 대사로 넘어가면 줄을 바꾼다. 대사의 이름표는 화면에서 붙이므로 이름 │ 를 본문에 중복해서 쓰지 않는다. 지문은 무대 지시처럼 간결하게 쓰고 소설체로 길게 늘이지 않는다."
     :"말풍선 형식이다. 같은 인물의 지문과 대사는 한 칸 띄워 한 덩어리로 이어 쓴다. 일반 서술·반성문·긴 독백도 본문은 문단이나 빈 줄 없이 이어 쓴다. 이름: 값, 나이: 값처럼 명확한 항목 목록만 항목별 한 줄을 허용한다.";
   if(mode==="bubble")return layout+"\n행동·묘사·내적 서술은 *지문*처럼 별표 한 쌍으로 감싸고, 실제로 말한 대사는 별표 밖에 쓴다. 모든 지문에 여는 별표와 닫는 별표를 빠짐없이 붙인다. 외국어 대사의 번역과 발음도 별표 밖에 둔다. 화자가 바뀔 때만 줄 맨 앞에 [인물이름]을 쓴다. 지문은 처음부터 자연스러운 한국어로 쓰고 불필요한 대명사·소유격 반복을 줄인다. 번역 대사는 인물의 말투와 관계에 맞춘다. 인칭과 시제는 선택된 설정을 유지한다."
