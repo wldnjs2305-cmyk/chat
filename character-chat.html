@@ -1024,7 +1024,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-16 v47";
+var APP_VER = "2026-09-16 v47b";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -4959,8 +4959,11 @@ function formatGuide(c){
   var layout=mode==="novel" ? "소설 형식이다. 행동과 대사를 자연스럽게 엮고, 행동의 초점이나 화제가 바뀌면 빈 줄로 문단을 나눈다. 대사는 따옴표로 표시하며 대사만으로 된 문단도 가능하다. 문장마다 줄을 끊지는 않는다. 지문은 상황에 맞는 소설체로 쓴다."
     :mode==="script" ? "대본 형식이다. 지문 문단과 대사를 빈 줄로 분리한다. 화자가 바뀌거나 지문에서 대사로 넘어가면 줄을 바꾼다. 대사의 이름표는 화면에서 붙이므로 이름 │ 를 본문에 중복해서 쓰지 않는다. 지문은 무대 지시처럼 간결하게 쓰고 소설체로 길게 늘이지 않는다."
     :"말풍선 형식이다. 같은 인물의 지문과 대사는 한 칸 띄워 한 덩어리로 이어 쓴다. 일반 서술·반성문·긴 독백도 본문은 문단이나 빈 줄 없이 이어 쓴다. 이름: 값, 나이: 값처럼 명확한 항목 목록만 항목별 한 줄을 허용한다. 문자·삐삐·쪽지·메모처럼 화면이나 종이에 적힌 짧은 메시지는 그 메시지 내용만 *[내용]* 형태로 쓰고 앞뒤에서 줄을 바꾼다. 이것은 줄 맨 앞의 화자 이름 표시와는 별개이며, 화자 이름에는 대괄호를 겹쳐 쓰지 않는다.";
-  if(mode==="bubble")return layout+"\n행동·묘사·내적 서술은 *지문*처럼 별표 한 쌍으로 감싸고, 실제로 말한 대사는 별표 밖에 쓴다. 모든 지문에 여는 별표와 닫는 별표를 빠짐없이 붙인다. 외국어 대사의 번역과 발음도 별표 밖에 둔다. 화자가 바뀔 때만 줄 맨 앞에 [인물이름]을 쓴다. 지문은 처음부터 자연스러운 한국어로 쓰고 불필요한 대명사·소유격 반복을 줄인다. 번역 대사는 인물의 말투와 관계에 맞춘다. 인칭과 시제는 선택된 설정을 유지한다.";
-    /* v48: v47에서 넣은 지문 문장 길이·감정 표현·대사 길이·끝맺음 지침 4줄을 뺐다. */
+  if(mode==="bubble")return layout+"\n행동·묘사·내적 서술은 *지문*처럼 별표 한 쌍으로 감싸고, 실제로 말한 대사는 별표 밖에 쓴다. 모든 지문에 여는 별표와 닫는 별표를 빠짐없이 붙인다. 외국어 대사의 번역과 발음도 별표 밖에 둔다. 화자가 바뀔 때만 줄 맨 앞에 [인물이름]을 쓴다. 지문은 처음부터 자연스러운 한국어로 쓰고 불필요한 대명사·소유격 반복을 줄인다. 번역 대사는 인물의 말투와 관계에 맞춘다. 인칭과 시제는 선택된 설정을 유지한다."
+    +"\n지문이 이야기의 무게를 진다. 대사는 인물의 성격에 맞는 길이로 하되, 한 번에 길게 늘어놓지 않고 대사 한두 마디마다 짧은 지문을 붙인다."
+    +"\n지문에 동작만 나열하지 않는다. 인물이 무엇을 알고 어떻게 판단하는지, 지금 무엇을 느끼는지를 함께 쓴다."
+    +"\n문장은 짧게 끊어 쓰고 한 문장에 동작을 여러 개 이어 붙이지 않는다. 다만 조사와 서술어를 빠뜨리지 않고 어법에 맞는 완결된 문장으로 쓴다."
+    +"\n지문을 앞에 길게 쌓아두고 대사를 마지막에 몰아 붙이지 않는다. 대사로 시작해도 되고, 매 답을 같은 리듬으로 쓰지 않는다.";
   return layout+"\n행동·묘사·내적 서술은 [지문]내용[/지문], 실제로 말한 대사는 [대사]내용[/대사]로 각각 구분한다. 별표 대신 이 구분자를 사용한다. 구분자는 화면에 표시되지 않는다. "
     +"외국어 대사의 한국어 번역과 선택된 발음 표기도 같은 [대사] 안에 둔다. 화자 변경은 기존처럼 줄 맨 앞의 [인물이름]을 사용한다. "
     +"이야기 본문의 모든 지문과 대사를 빠짐없이 구분하고 시작한 구분자는 반드시 닫는다. 지문 안에서 문단을 나눌 때에는 문단마다 구분자를 다시 연다. "
@@ -5857,7 +5860,7 @@ function callAPIOnce(c, log, turnInstr, noSearch, onDelta){
   return fetchJSON(url,{ method:"POST", headers:headers, body:JSON.stringify(body) }, 120000)
   .then(function(res){
     if (live && res.ok){
-      var acc="", streamErr=null, blocked="", chunks=0;
+      var acc="", streamErr=null, blocked="";
       return readSSE(res, function(j){
         if (j.error){ streamErr=(j.error.message||JSON.stringify(j.error)); return; }
         var piece="";
@@ -5870,11 +5873,10 @@ function callAPIOnce(c, log, turnInstr, noSearch, onDelta){
           if (j.promptFeedback && j.promptFeedback.blockReason) blocked=j.promptFeedback.blockReason;
           if (cd && /SAFETY|PROHIBITED|BLOCKLIST/.test(cd.finishReason||"")) blocked=cd.finishReason;
         }
-        if (piece){ acc+=piece; chunks++; try{ onDelta(acc); }catch(e){} }
+        if (piece){ acc+=piece; try{ onDelta(acc); }catch(e){} }
       }, 90000).then(function(streamed){
         if (streamed===null){
           /* 스트림을 안 해주는 서버. 통째로 온 JSON 을 원래대로 읽는다 */
-          streamNote="이 서버는 한 글자씩 보내기를 지원하지 않아서 답이 한 번에 나와.";
           return res.text().then(function(txt){
             var data=null; try{ data=JSON.parse(txt); }catch(e){}
             var o="";
@@ -5885,7 +5887,6 @@ function callAPIOnce(c, log, turnInstr, noSearch, onDelta){
           });
         }
         if (streamErr) throw new Error("서버가 답하다가 오류를 냈어.\n"+String(streamErr).slice(0,300));
-        if (chunks<=1 && acc.length>80) streamNote="서버가 답을 모았다가 한 덩어리로 보내고 있어. 앱 설정이 아니라 서버(중계) 쪽 문제야.";
         if (!acc.trim() && blocked) throw new Error("안전 필터에 막혀서 답이 비었어. ("+blocked+")");
         return finish(acc.trim());
       });
@@ -5950,8 +5951,6 @@ function turn(){
   turnGo(c, lg, ti);
 }
 var live={ cid:null, text:"", raf:0 };
-/* v48: callAPIOnce 안의 live 는 true/false 값이라 여기에 따로 둔다 */
-var streamNote="", streamNoted=false;
 function liveEnd(){ live.cid=null; live.text=""; if(live.raf){ cancelAnimationFrame(live.raf); live.raf=0; } }
 function paintLive(){
   live.raf=0;
@@ -5981,13 +5980,6 @@ function turnGo(c, lg, ti){
     }else l.push({r:"a",t:text});
     setLog(c.id,l);
     busy=false; elSend.disabled=false; paint();
-    /* v48: 켜기인데 한 번에 나온 이유를 한 번만 알려준다 */
-    if (streamNote && !streamNoted){
-      streamNoted=true;
-      var nd=document.createElement("div"); nd.className="hint"; nd.style.margin="6px 12px";
-      nd.textContent="ⓘ "+streamNote; view.appendChild(nd); view.scrollTop=view.scrollHeight;
-    }
-    streamNote="";
     if (/\[\s*(?:편지|일기)\s*\]/.test(text)) syncHand(c);
   }).catch(function(e){
     liveEnd();
