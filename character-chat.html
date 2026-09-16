@@ -358,8 +358,8 @@
     color:#F4F4F8;
     text-shadow:0 1px 2px rgba(0,0,0,.55),0 0 1px rgba(0,0,0,.45)}
   body[data-novelbg] .nov .nn, body[data-novelbg] .snar{color:var(--nar);font-style:italic}
-  body[data-novelbg] .nov .ns, body[data-novelbg] .ssay{color:var(--saycol,#111114);
-    text-shadow:none}
+  body[data-novelbg] .nov .ns, body[data-novelbg] .ssay{color:var(--saycol,#000000);
+    font-weight:700;text-shadow:none}
   body[data-novelbg] .ssay b{color:#F4F4F8}
   body[data-novelbg] .tr{color:rgba(232,232,240,.75)}
   body[data-novelbg][data-view] .msg.me .bub{color:var(--myink,#F4F4F8)}
@@ -2238,7 +2238,7 @@ function viewEdit(){
      + '<input id="bgdim" type="range" min="20" max="85" step="5" value="'+shadeOf(c)+'" style="padding:0">';
   h += '<label>배경 있을 때 대사 색</label>'
      + '<div style="display:flex;gap:8px;align-items:center">'
-     + '<input id="saycol" type="color" value="'+esc(c.sayColor||"#111114")+'" style="width:56px;padding:2px;height:40px">'
+     + '<input id="saycol" type="color" value="'+esc(c.sayColor||"#000000")+'" style="width:56px;padding:2px;height:40px">'
      + '<button class="btn sm" id="saycolx" style="margin:0;width:auto">기본색으로</button></div>';
   h += picBlock("얼굴 참조 1","ref",picGet(c.id,"ref"));
   h += picBlock("얼굴 참조 2","ref2",picGet(c.id,"ref2"));
