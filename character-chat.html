@@ -324,6 +324,33 @@
   .iconbtn:active{opacity:.5}
   #view{flex:1 1 auto;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding:16px 14px calc(env(safe-area-inset-bottom) + 24px)}
   #view.chat{padding:18px 14px 8px}
+  /* 소설·대본 — 읽는 폭을 좁히고 여백을 넉넉히 */
+  body[data-view=novel] #view.chat,
+  body[data-view=script] #view.chat{padding:26px 22px 14px}
+  body[data-view=novel] #view.chat > *,
+  body[data-view=script] #view.chat > *{max-width:640px;margin-left:auto;margin-right:auto}
+  /* 종이 느낌 바탕 — 사진이 없을 때 */
+  body[data-view=novel]:not([data-novelbg]),
+  body[data-view=script]:not([data-novelbg]){
+    background-image:
+      radial-gradient(70% 45% at 82% 10%, rgba(255,255,255,.5), transparent 70%),
+      radial-gradient(65% 45% at 12% 88%, rgba(255,255,255,.34), transparent 72%)}
+  body.dark[data-view=novel]:not([data-novelbg]),
+  body.dark[data-view=script]:not([data-novelbg]){
+    background-image:
+      radial-gradient(70% 45% at 82% 10%, rgba(255,255,255,.06), transparent 70%),
+      radial-gradient(65% 45% at 12% 88%, rgba(255,255,255,.04), transparent 72%)}
+  /* 배경 사진 — 사진 위에 막을 덮는다 */
+  body[data-novelbg]{
+    background-image:
+      linear-gradient(rgba(255,255,255,var(--noveldim,.55)), rgba(255,255,255,var(--noveldim,.55))),
+      var(--novelbg);
+    background-size:cover;background-position:center;background-repeat:no-repeat}
+  body.dark[data-novelbg]{
+    background-image:
+      linear-gradient(rgba(8,8,12,var(--noveldim,.55)), rgba(8,8,12,var(--noveldim,.55))),
+      var(--novelbg)}
+  body[data-novelbg] #view, body[data-novelbg] #app{background:transparent}
   #view.sms{padding:0}
 
   .card{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:10px;cursor:pointer}
@@ -1094,7 +1121,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-15 v47";
+var APP_VER = "2026-09-15 v47a";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -2129,6 +2156,9 @@ function viewEdit(){
   h += '<label>사진 느낌</label><select data-k="imgStyle">'
      + ["사진풍","그림풍"].map(function(o){ return '<option'+((c.imgStyle||"사진풍")===o?" selected":"")+'>'+o+"</option>"; }).join("")
      + '</select>';
+  h += picBlock("소설 배경 사진","bg",picGet(c.id,"bg"),"소설·대본 모드에서 글 뒤에 깔려. 밝은 사진일수록 막을 진하게 올려줘.");
+  h += '<label>배경 막 진하기 · '+Math.round((c.bgDim==null?55:c.bgDim))+'%</label>'
+     + '<input id="bgdim" type="range" min="0" max="90" step="5" value="'+(c.bgDim==null?55:c.bgDim)+'" style="padding:0">';
   h += picBlock("얼굴 참조 1","ref",picGet(c.id,"ref"));
   h += picBlock("얼굴 참조 2","ref2",picGet(c.id,"ref2"));
   h += picBlock("얼굴 참조 3","ref3",picGet(c.id,"ref3"));
@@ -2321,6 +2351,11 @@ function viewEdit(){
   if ($("#tens")) $("#tens").onchange=function(){ c.tense=this.value; saveChars(); };
   if ($("#hard")) $("#hard").onchange=function(){ c.hard=this.value; saveChars(); };
   if ($("#mycol")) $("#mycol").oninput=function(){ c.myColor=this.value; saveChars(); };
+  if ($("#bgdim")) $("#bgdim").oninput=function(){
+    c.bgDim=+this.value; saveChars();
+    var lb=this.previousElementSibling;
+    if (lb) lb.textContent="배경 막 진하기 · "+c.bgDim+"%";
+  };
   if ($("#mycolx")) $("#mycolx").onclick=function(){ c.myColor=""; saveChars(); render(); };
   if ($("#defy")) $("#defy").onchange=function(){ c.defy=this.value; saveChars(); };
   if ($("#narr")) $("#narr").onchange=function(){ c.narrOn=this.value; saveChars(); };
@@ -4587,7 +4622,19 @@ function viewChat(){
   document.body.setAttribute("data-view",chatFormat(cur()));
   (function(){ var cc=cur();
     if (cc && cc.myColor) document.body.style.setProperty("--mine", cc.myColor);
-    else document.body.style.removeProperty("--mine"); })();
+    else document.body.style.removeProperty("--mine");
+    var bg = cc ? picGet(cc.id,"bg") : "";
+    var novel = cc && chatFormat(cc)!=="bubble";
+    if (bg && novel){
+      document.body.setAttribute("data-novelbg","1");
+      document.body.style.setProperty("--novelbg", 'url("'+bg+'")');
+      document.body.style.setProperty("--noveldim", ((cc.bgDim==null?55:cc.bgDim)/100));
+    } else {
+      document.body.removeAttribute("data-novelbg");
+      document.body.style.removeProperty("--novelbg");
+      document.body.style.removeProperty("--noveldim");
+    }
+  })();
   var c=cur(); if(!c) return go("list");
   elTitle.textContent=c.name||"이름 없음";
   var rs=roomsOf(c);
