@@ -355,28 +355,24 @@
       linear-gradient(rgba(8,8,12,.25), rgba(8,8,12,.25)),
       var(--novelbg)}
   body[data-novelbg] #view, body[data-novelbg] #app{background:transparent}
-  /* 문단 카드 — 흐림 없이 문단마다 반투명 카드. 카드 사이로 사진이 보인다 */
-  body[data-novelbg] #view.chat{padding:18px 12px 12px}
-  body[data-novelbg] #view.chat > *{max-width:640px;margin-left:auto;margin-right:auto}
-  body[data-novelbg] :is(.nov .np, .snar, .ssay, .msg.me .bub, .thinking){
+  /* 이어진 판 — 흐림 없이 반투명 판 한 장. 흐림을 빼서 글자가 또렷하다 */
+  body[data-novelbg] #view.chat{
+    margin:10px 10px 10px;border-radius:20px;
     background:rgba(255,255,255,var(--novelglass,.8));
-    border-radius:14px;padding:10px 14px;margin:0 0 8px}
-  body.dark[data-novelbg] :is(.nov .np, .snar, .ssay, .msg.me .bub, .thinking){
-    background:rgba(18,20,28,var(--novelglass,.8))}
-  body[data-novelbg] .nov .np:last-child{margin-bottom:8px}
+    border:0.5px solid rgba(255,255,255,.6);
+    padding:20px 16px 12px}
+  body.dark[data-novelbg] #view.chat{
+    background:rgba(18,20,28,var(--novelglass,.8));border-color:rgba(255,255,255,.08)}
+  body[data-novelbg] #view.chat > *{max-width:640px;margin-left:auto;margin-right:auto}
   body[data-novelbg] .msg.me .bub{border:0}
-  body[data-novelbg] .msg, body[data-novelbg] .dturn{margin-bottom:8px}
-  body[data-novelbg] .thinking{display:inline-block;padding:6px 12px}
   /* 설정 — 배경 미리보기 */
   .bgprev{position:relative;width:96px;height:170px;border-radius:14px;overflow:hidden;flex:0 0 auto;
     background:var(--field) center/cover no-repeat;border:1px solid var(--line)}
-  .bgprev i{position:absolute;left:8px;right:8px;top:22px;height:34px;border-radius:7px;
+  .bgprev i{position:absolute;inset:12px 8px;border-radius:9px;
     background:rgba(255,255,255,var(--g,.8))}
-  .bgprev i::after{content:"";position:absolute;left:8px;right:8px;top:92px;height:42px;border-radius:7px;
-    background:rgba(255,255,255,var(--g,.8))}
-  body.dark .bgprev i, body.dark .bgprev i::after{background:rgba(18,20,28,var(--g,.8))}
-  .bgprev i::before{content:"";position:absolute;left:7px;right:7px;top:8px;height:18px;
-    background:repeating-linear-gradient(180deg,var(--muted) 0 2px,transparent 2px 8px);opacity:.55}
+  body.dark .bgprev i{background:rgba(18,20,28,var(--g,.8))}
+  .bgprev i::before{content:"";position:absolute;left:8px;right:8px;top:10px;height:44px;
+    background:repeating-linear-gradient(180deg,var(--muted) 0 2px,transparent 2px 9px);opacity:.55}
   .bgprev span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px}
   #view.sms{padding:0}
 
@@ -2133,7 +2129,7 @@ function glassOf(c){
 }
 function bgBlock(val, g){
   return '<label>소설 배경 사진</label>'
-    + '<p class="hint" style="margin:-4px 0 6px">소설·대본 모드에서 글 뒤에 깔리고, 문단마다 반투명 카드가 덮여.</p>'
+    + '<p class="hint" style="margin:-4px 0 6px">소설·대본 모드에서 글 뒤에 깔리고, 글 칸엔 반투명 판이 덮여.</p>'
     + '<div class="pick"><div class="bgprev"'+(val?' style="background-image:url(&quot;'+esc(val)+'&quot;)"':'')+'>'
     + (val ? '<i style="--g:'+(g/100)+'"></i>' : '<span>🖼</span>') + '</div>'
     + '<div class="btns"><button class="btn sm" data-picpick="bg">사진 고르기</button>'
@@ -2222,7 +2218,7 @@ function viewEdit(){
      + ["사진풍","그림풍"].map(function(o){ return '<option'+((c.imgStyle||"사진풍")===o?" selected":"")+'>'+o+"</option>"; }).join("")
      + '</select>';
   h += bgBlock(picGet(c.id,"bg"), glassOf(c));
-  h += '<label>카드 진하기 · '+glassOf(c)+'%</label>'
+  h += '<label>판 진하기 · '+glassOf(c)+'%</label>'
      + '<input id="bgdim" type="range" min="30" max="95" step="5" value="'+glassOf(c)+'" style="padding:0">';
   h += picBlock("얼굴 참조 1","ref",picGet(c.id,"ref"));
   h += picBlock("얼굴 참조 2","ref2",picGet(c.id,"ref2"));
@@ -2419,7 +2415,7 @@ function viewEdit(){
   if ($("#bgdim")) $("#bgdim").oninput=function(){
     c.bgDim=+this.value; saveChars();
     var lb=this.previousElementSibling;
-    if (lb) lb.textContent="카드 진하기 · "+c.bgDim+"%";
+    if (lb) lb.textContent="판 진하기 · "+c.bgDim+"%";
     var pv=$(".bgprev i"); if (pv) pv.style.setProperty("--g", c.bgDim/100);
   };
   if ($("#mycolx")) $("#mycolx").onclick=function(){ c.myColor=""; saveChars(); render(); };
