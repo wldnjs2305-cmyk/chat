@@ -15,6 +15,13 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400&family=Noto+Sans+KR:wght@400;600&family=Nanum+Gothic&family=Nanum+Myeongjo&family=Gowun+Dodum&family=Gowun+Batang&family=Song+Myung&family=Nanum+Pen+Script&family=Nanum+Brush+Script&family=Gaegu&family=Hi+Melody&family=Black+Han+Sans&family=Gothic+A1:wght@400;700&family=Do+Hyeon&family=Gamja+Flower&family=Caveat:wght@400;600&family=Yomogi&display=swap">
 <style>
+  /* 추가 글꼴 — 대사·지문 글꼴 목록용. 쓰는 글꼴만 내려받는다 */
+  @font-face{font-family:"GounBatang";src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/GowunBatang-Regular.woff") format("woff");font-weight:normal;font-display:swap}
+  @font-face{font-family:"GounBatang";src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/GowunBatang-Bold.woff") format("woff");font-weight:700;font-display:swap}
+  @font-face{font-family:"BookkMyungjo";src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/BookkMyungjo-Bd.woff2") format("woff2");font-weight:700;font-display:swap}
+  @font-face{font-family:"ChosunIlboMyungjo";src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/Chosunilbo_myungjo.woff") format("woff");font-weight:normal;font-display:swap}
+  @font-face{font-family:"BookendBatang";src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2410-2@1.0/TTBookendBatangSB.woff2") format("woff2");font-weight:700;font-display:swap}
+  @font-face{font-family:"JeonnamEducationBarun";src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/2408-1@1.0/JNE-Bareun-TTF-Bold.woff2") format("woff2");font-weight:700;font-display:swap}
   @font-face{font-family:"RIDIBatang";font-display:swap;
     src:url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/RIDIBatang.woff") format("woff")}
   /* 편지 · 일기 손글씨 */
@@ -1137,7 +1144,11 @@ var FONTS = {
   "리디바탕":'"RIDIBatang","Noto Serif KR",serif',
   "마루부리":'"MaruBuri","Noto Serif KR",serif',
   "나눔명조":'"Nanum Myeongjo",serif',
-  "고운바탕":'"Gowun Batang",serif',
+  "고운바탕":'"GounBatang","Gowun Batang",serif',
+  "부크크명조":'"BookkMyungjo","Noto Serif KR",serif',
+  "조선일보명조":'"ChosunIlboMyungjo","Noto Serif KR",serif',
+  "북엔드바탕":'"BookendBatang","Noto Serif KR",serif',
+  "전남교육바른체":'"JeonnamEducationBarun","Pretendard Variable",Pretendard,sans-serif',
   "송명":'"Song Myung",serif',
   "하이멜로디":'"Hi Melody",cursive',
   "둥근모":'"DungGeunMo","돋움",Dotum,sans-serif',
@@ -1226,7 +1237,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-17 v47y";
+var APP_VER = "2026-09-17 v47z";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
