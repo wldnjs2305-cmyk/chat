@@ -1080,13 +1080,13 @@ function handFallback(c){
   return HAND_KEYS[n % HAND_KEYS.length];
 }
 function handOf(c){
-  if (c && c.handMode && c.handMode!=="auto" && handFam(c.handMode)) return handFam(c.handMode);
+  if (c && c.handMode && c.handMode!=="auto" && HANDS[c.handMode]) return HANDS[c.handMode];
   /* 예전에 잘못 배정된 것은 한 번 비우고 다시 고르게 한다 */
   if (c && c.hand && !c.handV9){
     c.hand = null; c.handAsking = false; c.handV9 = 1;
     try { saveChars(); } catch(e){}
   }
-  return (c && handFam(c.hand)) || HANDS[handFallback(c||{})];
+  return (c && HANDS[c.hand]) || HANDS[handFallback(c||{})];
 }
 var FONTS = {
   "Neo둥근모":'"NeoDunggeunmo","Galmuri14",monospace',
@@ -1107,111 +1107,6 @@ var FONTS = {
   "둥근모":'"DungGeunMo","돋움",Dotum,sans-serif',
   "고정폭":'"Nanum Gothic Coding","Nanum Gothic",monospace'
 };
-/* 글꼴 창고 — 눈누 웹폰트. 고른 글꼴만 그때 불러온다 */
-var FONT_STORE = [["Suit", "수트", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_suit@1.0/SUIT-Light.woff2", 300],
-  ["GMarketSans", "GMarketSans", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansLight.woff", 300],
-  ["IbmPlexSans", "IBM Plex Sans", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-07@1.0/IBMPlexSansKR-Light.woff", 300],
-  ["Escoredream", "에스코어드림", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-3Light.woff", 300],
-  ["NanumSquareNeo", "나눔스퀘어 네오", "고딕", "https://hangeul.pstatic.net/hangeul_static/webfont/NanumSquareNeo/NanumSquareNeoTTF-aLt.woff2", 300],
-  ["NanumSquareRound", "나눔스퀘어라운드", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NanumSquareRound.woff", 400],
-  ["MinSans", "민산스", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/MinSans-Light.woff", 300],
-  ["GothicA1", "Gothic A1", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2205@1.0/GothicA1-Light.woff2", 300],
-  ["SeoulNamsan", "서울남산체", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/SeoulNamsanM.woff", 400],
-  ["SeoulHangang", "서울한강체", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/SeoulHangangM.woff", 400],
-  ["NexonLv1Gothic", "넥슨 Lv.1 고딕", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/NEXON%20Lv1%20Gothic%20OTF%20Light.woff", 300],
-  ["NexonLv2Gothic", "넥슨 Lv.2 고딕", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/NEXON%20Lv2%20Gothic.woff", 400],
-  ["NixgonFont", "닉스곤폰트", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/NIXGONL-Vb.woff", 300],
-  ["Godo", "고도체", "고딕", "https://cdn.jsdelivr.net/korean-webfonts/1/corps/godo/Godo/GodoM.woff2", 400],
-  ["DoolgiMayoGothic", "둘기마요고딕", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.1/Dovemayo_gothic.woff2", 400],
-  ["Hamchorom", "함초롬체", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_four@1.0/HCRDotum.woff", 400],
-  ["JeonnamEducationBarun", "전남교육바른체", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/2408-1@1.0/JNE-Bareun-TTF-Light.woff2", 300],
-  ["GangwonEducationModuche", "강원교육모두체", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GangwonEdu_OTFLightA.woff", 300],
-  ["GangwonEducationSaeum", "강원교육새음체", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GangwonEduSaeeem_OTFMediumA.woff", 400],
-  ["GyeonggiMillenniumTitle", "경기천년제목", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/2410-3@1.0/Title_Light.woff", 300],
-  ["Minguk", "민국체", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.1/Minguk-Regular.woff", 400],
-  ["Cafe24SurroundAir", "카페24 써라운드에어", "고딕", "https://gcore.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/Cafe24SsurroundAir.woff", 400],
-  ["Paperozi", "페이퍼로지", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-3Light.woff2", 300],
-  ["YeogiOttaeJalnanGothic", "잘난 고딕체", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_231029@1.1/JalnanGothic.woff", 400],
-  ["Aggravo", "어그로체", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/SBAggroL.woff", 300],
-  ["Presentation", "프리젠테이션", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/2404@1.0/Freesentation-3Light.woff2", 300],
-  ["SeoulNotice", "서울알림체", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/2505-1@1.0/SeoulAlrimTTF-Medium.woff2", 500],
-  ["Daeojamjil", "더잠실체", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302_01@1.0/TheJamsil2Light.woff2", 300],
-  ["Dohyun", "도현체", "고딕", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/BMDOHYEON.woff", 400],
-  ["Soonbatang", "순바탕", "명조", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_eight@1.0/SunBatang-Light.woff", 300],
-  ["JoseonShinmyeongjo", "조선신명조", "명조", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@1.1/ChosunSm.woff", 400],
-  ["JoseonGulim", "조선굴림체", "명조", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@1.0/ChosunGu.woff", 400],
-  ["Joseon100Years", "조선100년체", "명조", "https://gcore.jsdelivr.net/gh/projectnoonnu/noonfonts_2206-02@1.0/ChosunCentennial.woff2", 400],
-  ["KbizHanmaumMyungjo", "KBIZ한마음명조체", "명조", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/KBIZHanmaumMyungjo.woff", 400],
-  ["Hamlet", "함렛", "명조", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2110@1.0/Hahmlet-Light.woff2", 300],
-  ["GyeongbokgungSumunjangBodyText", "경복궁 수문장 본문체", "명조", "https://cdn.jsdelivr.net/gh/projectnoonnu/2511-3@1.0/Sumunjang_BodyL.woff2", 300],
-  ["HsGlidingSerif", "HS활공명조", "명조", "https://cdn.jsdelivr.net/gh/projectnoonnu/2604-1@1.0/HSHwalkongSerif-Regular.woff2", 400],
-  ["GyeonggiMillenniumBackground", "경기천년바탕", "명조", "https://cdn.jsdelivr.net/gh/projectnoonnu/2410-3@1.0/Batang_Regular.woff", 400],
-  ["ChosunIlboMyungjo", "조선일보명조", "명조", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/Chosunilbo_myungjo.woff", 400],
-  ["JoseonPalace", "조선궁서체", "명조", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@1.0/ChosunGs.woff", 400],
-  ["KyoboHandwriting2019", "교보손글씨 2019", "손글씨", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@1.0/KyoboHand.woff", 400],
-  ["KyoboHandwriting2020ParkDoYeon", "교보손글씨 2020", "손글씨", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2112@1.0/KyoboHandwriting2020A.woff", 400],
-  ["NanumBarunPen", "나눔바른펜", "손글씨", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_two@1.0/NanumBarunpen.woff", 400],
-  ["IsYun", "이서윤체", "손글씨", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2202-2@1.0/LeeSeoyun.woff", 400],
-  ["ImHyeMin", "IM혜민체", "손글씨", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2106@1.1/IM_Hyemin-Regular.woff2", 400],
-  ["SseulroneNetHandwrittenFont", "스스로넷 손글씨체", "손글씨", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2402_1@1.0/SSRONETHandwritten.woff2", 400],
-  ["GangwonEducationHyunokSam", "강원교육현옥샘체", "손글씨", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/GangwonEduHyeonokT_OTFMediumA.woff", 400],
-  ["BelovedMyoeunttobak", "그리운 묘은또박체", "손글씨", "https://cdn.jsdelivr.net/gh/projectnoonnu/2601-1@1.0/Griun_Myoeunddobak-Rg.woff2", 400],
-  ["OngleipParkDahyeon", "온글잎 박다현체", "손글씨", "https://cdn.jsdelivr.net/gh/projectnoonnu/2411-3@1.0/Ownglyph_ParkDaHyun.woff2", 400],
-  ["MapoFlowerIsland", "마포꽃섬", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/MapoFlowerIslandA.woff", 400],
-  ["MapoGeumbitnaru", "마포금빛나루", "개성", "https://gcore.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/MapoGoldenPierA.woff", 400],
-  ["NexonMaplestory", "넥슨 메이플스토리", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/MaplestoryOTFLight.woff", 300],
-  ["SchoolSafeDictation", "학교안심 받아쓰기", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/2408-5@1.0/HakgyoansimBadasseugiTTF-L.woff2", 400],
-  ["SchoolSafeUniverse", "학교안심 우주", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2307-2@1.0/HakgyoansimWoojuR.woff2", 400],
-  ["SchoolSafetySusukkang", "학교안심 수수깡", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/2508-2@1.0/HakgyoansimSusukkangL.woff2", 400],
-  ["Wave", "웨이브 파도체", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/2404@1.0/WavvePADO-Regular.woff2", 400],
-  ["OngleipKonkon", "온글잎 콘콘체", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/2412-1@1.0/Ownglyph_corncorn-Rg.woff2", 400],
-  ["OngleipRyudung", "온글잎 류뚱체", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/2405-2@1.0/Ownglyph_ryuttung-Rg.woff2", 400],
-  ["Okticon", "오케이티콘체", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/2408@1.0/Ownglyph_okticon-Lt.woff2", 300],
-  ["NotGothicButGoding", "고딕 아니고 고딩", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/naverfont_05@1.0/Gothic_Goding.woff", 400],
-  ["Isamanru", "이사만루", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10@1.0/GongGothicLight.woff", 300],
-  ["KblJump", "KBL점프체", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/2601-5@1.0/KBLJump_RTTF.woff2", 400],
-  ["WatermelonYang", "수박양체", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/2408-4@1.0/RixXladywatermelonR.woff2", 400],
-  ["YoonchoUsanChildrenS", "윤초록우산어린이 대한", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/2408@1.0/YoonChildfundkoreaDaeHan.woff2", 400],
-  ["ReperipointOblique", "레페리포인트", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2201-2@1.0/LeferiPoint-WhiteObliqueA.woff", 200],
-  ["Cafe24Gowoonbam", "카페24 고운밤", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.1/Cafe24Oneprettynight.woff", 400],
-  ["MunmakchoHaeban", "문막초 해반체", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/2604-1@1.0/MUNMAK_HAEBANCHE.woff2", 400],
-  ["YeogiOttaeJalnan", "잘난체", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_four@1.2/JalnanOTF00.woff", 400],
-  ["Juache", "주아체", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_one@1.0/BMJUA.woff", 400],
-  ["JejuStoneWall", "제주돌담체", "개성", "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2210-EF@1.0/EF_jejudoldam.woff2", 400]];
-var FONT_STORE_BY = {};
-FONT_STORE.forEach(function(f){
-  var fam = "gz-"+f[0];
-  var fb = f[2]==="명조" ? '"Noto Serif KR",serif' : (f[2]==="고딕" ? '"Pretendard Variable",Pretendard,sans-serif' : '"Pretendard Variable",Pretendard,sans-serif');
-  FONT_STORE_BY[f[1]] = { fam:fam, tag:f[2], url:f[3], w:f[4], done:false };
-  if (!FONTS[f[1]]) FONTS[f[1]] = '"'+fam+'",'+fb;
-});
-function ensureFont(label){
-  var f = FONT_STORE_BY[label];
-  if (!f || f.done) return;
-  f.done = true;
-  var fmt = /\.woff2(\?|$)/.test(f.url) ? "woff2" : "woff";
-  var s = document.createElement("style");
-  s.textContent = '@font-face{font-family:"'+f.fam+'";src:url("'+f.url+'") format("'+fmt+'");font-weight:100 900;font-display:swap}';
-  document.head.appendChild(s);
-}
-/* 설정의 글꼴 목록 — 기본 글꼴 먼저, 창고 글꼴은 종류별 묶음 */
-function fontOptionsHTML(sel){
-  var h = Object.keys(FONTS).filter(function(n){ return !FONT_STORE_BY[n]; }).map(function(n){
-    return '<option'+(sel===n?" selected":"")+'>'+n+'</option>'; }).join("");
-  ["고딕","명조","손글씨","개성"].forEach(function(tag){
-    h += '<optgroup label="글꼴 창고 · '+tag+'">' + FONT_STORE.filter(function(f){ return f[2]===tag; }).map(function(f){
-      return '<option'+(sel===f[1]?" selected":"")+'>'+f[1]+'</option>'; }).join("") + '</optgroup>';
-  });
-  return h;
-}
-/* 편지·일기 필체: 기본 필체거나 창고 글꼴 */
-function handFam(k){
-  if (!k) return null;
-  if (HANDS[k]) return HANDS[k];
-  var f = FONT_STORE_BY[k];
-  if (f){ ensureFont(k); return "'"+f.fam+"','HandKonkon','Caveat','Yomogi',cursive"; }
-  return null;
-}
 var cfg = get("gz.cfg", { mode:"openai", key:"", base:"", model:"gemini-3.7-flash", maxTokens:2600,
                           theme:"light", fBody:"프리텐다드", fNar:"본명조", fSize:16, smsTheme:"기본", preset:"", viewMode:"bubble", bubW:84, fSms:"테마 따라가기", sSize:15, cSize:14, iSize:14, think:"auto", models:"" });
 if (!cfg.mode) cfg.mode = "openai";
@@ -1329,7 +1224,6 @@ function applyTheme(){
   var tc = document.getElementById("tc");
   if (tc) tc.setAttribute("content", THEME_BG[t]);
   var st = document.body.style;
-  ensureFont(displayFontName("body")); ensureFont(displayFontName("nar"));
   st.setProperty("--f-body", FONTS[displayFontName("body")] || FONTS["프리텐다드"]);
   st.setProperty("--f-nar",  FONTS[displayFontName("nar")]  || FONTS["본명조"]);
   st.setProperty("--fs", (cfg.fSize||16)+"px");
@@ -2462,15 +2356,7 @@ function viewEdit(){
      + '</select>';
   h += '<label>편지·일기 필체</label><select data-k="handMode">'
      + '<option value="auto"'+((c.handMode||"auto")==="auto"?' selected':'')+'>자동 선택</option>'
-     + '<optgroup label="기본 필체">'
      + HAND_KEYS.map(function(o){return '<option value="'+o+'"'+(c.handMode===o?' selected':'')+'>'+o+'</option>';}).join("")
-     + '</optgroup>'
-     + ["손글씨","개성","고딕","명조"].map(function(tag){
-         return '<optgroup label="글꼴 창고 · '+tag+'">'
-           + FONT_STORE.filter(function(f){ return f[2]===tag; }).map(function(f){
-               return '<option value="'+esc(f[1])+'"'+(c.handMode===f[1]?' selected':'')+'>'+esc(f[1])+'</option>'; }).join("")
-           + '</optgroup>';
-       }).join("")
      + '</select>';
 
   h += '<div class="sec">프리셋</div>';
@@ -2704,7 +2590,10 @@ function viewCfg(){
          return '<option value="'+t[0]+'"'+(cfg.theme===t[0]?" selected":"")+'>'+t[1]+'</option>';
        }).join("")
      + '</select>';
-  var fopts = fontOptionsHTML;
+  var fopts = function(sel){
+    return Object.keys(FONTS).map(function(n){
+      return '<option'+(sel===n?" selected":"")+'>'+n+"</option>"; }).join("");
+  };
   h += '<label>대사 글꼴</label><select id="fb">'+fopts(displayFontName("body"))+'</select>';
   h += '<label>지문 글꼴</label><select id="fn">'+fopts(displayFontName("nar"))+'</select>';
   h += '<div class="sec">크기</div>';
