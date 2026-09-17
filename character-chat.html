@@ -526,6 +526,19 @@
   .err{background:#FBE9EF;border:1px solid #EFC3D2;color:#8A3552;padding:11px 14px;border-radius:12px;font-size:13px;margin-bottom:18px;white-space:pre-wrap}
   body.dark .err{background:#3A2230;border-color:#6B3348;color:#F0C4D0}
 
+  /* NAI 장면 그림 */
+  .scenepic{margin:6px 0 14px;text-align:center}
+  .scenepic img{max-width:100%;max-height:70vh;border-radius:14px;display:block;margin:0 auto;border:1px solid var(--line)}
+  .scenepic .st{font-size:12px;color:var(--muted);padding:14px;border:1px dashed var(--line);border-radius:14px}
+  .scenepic .st.bad{color:#C0405A}
+  /* 응답 캡슐 */
+  .segcard{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:4px 14px 16px;margin-top:10px}
+  .segcard>label{margin-top:14px}
+  .seg{display:grid;gap:8px;margin-top:6px}
+  .seg button{font-family:inherit;font-size:14px;padding:11px 6px;border-radius:12px;border:1.5px solid var(--line);
+    background:var(--field);color:var(--muted);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .seg button.on{border-color:var(--accent);color:var(--text);font-weight:600;
+    background:color-mix(in srgb, var(--accent) 18%, var(--field))}
   /* 특수 카드 */
   .smswrap.mini{margin:14px 0 16px;min-height:0;padding:0;border-radius:0;background:transparent}
   .smswrap.mini[data-th],
@@ -905,6 +918,8 @@
   .ig-caption p{margin:8px 0;white-space:pre-wrap}
   .ig-comment{margin-top:6px}
   .ig-comment b{margin-right:6px}
+  .ig-comment.re{padding-left:18px}
+  .ig-at{color:#4A8FE7}
   .ig-when{font-size:11px;color:var(--muted);margin:6px 0 0;letter-spacing:.02em}
   .ig-private{padding:14px 16px;color:var(--muted)}
   .ig-post+.ig-post{border-top:1px solid var(--line)}
@@ -1023,6 +1038,72 @@
   body[data-novelbg][data-screen=chat] #send{
     background:#F1F1F5 !important;color:#17171C !important;
     border:0 !important;box-shadow:none !important}
+
+  /* 핑크 창 — 2000년대 소설 뷰어 같은 옅은 분홍 창틀 */
+  body[data-theme=pinkwin]{
+    --bg:#F5F5F5;--panel:#F1F1F1;--field:#FFFFFF;--line:#BEBEBE;
+    --text:#353136;--muted:#7C777C;--bub:#FFFFFF;--mine:#FBEAF1;
+    --nar:#777277;--accent:#B85E80;--trc:#666166;
+    --paper:#FFFFFF;--paper-line:#C8C8C8;--paper-text:#353136;
+    --paper-rule:rgba(90,90,90,.12);
+    background:#DCDCDC}
+  body[data-theme=pinkwin] #app{
+    background:#F7F7F7;
+    box-shadow:inset 2px 0 #F9F9F9,inset -2px 0 #8F8F8F}
+  body[data-theme=pinkwin] #bar{
+    background:linear-gradient(180deg,#F9E5EC 0%,#F2CAD9 52%,#E9B9CB 100%);
+    border-top:1px solid #FFF7FA;border-bottom:1px solid #A98693;
+    box-shadow:inset 0 1px #FFFFFFB8,0 1px #EFEFEF;
+    color:#4F3942}
+  body[data-theme=pinkwin] #bar :is(h1,.sub,.iconbtn,.hb){color:#5A3B48}
+  body[data-theme=pinkwin] #bar h1{font-weight:600;text-shadow:0 1px #FFF7FA}
+  body[data-theme=pinkwin] #bar .iconbtn{
+    border-radius:2px;text-shadow:0 1px #FFF7FA}
+  body[data-theme=pinkwin] #view{background:#FFFFFF}
+  body[data-theme=pinkwin] :is(.card,.castbox,.statc,.mind,.detail-card,.insta,.ord,.comm,.paper){
+    border-radius:3px;border-color:#BEBEBE;background:#FFFFFF;
+    box-shadow:1px 1px 0 #E4E4E4}
+  body[data-theme=pinkwin] .ava{border-radius:5px;border:1px solid #AFAFAF}
+  body[data-theme=pinkwin][data-view=bubble] .bub{
+    border:1px solid #C8C8C8;border-radius:3px;
+    background:#FFFFFF;box-shadow:1px 1px 0 #E6E6E6;line-height:1.8}
+  body[data-theme=pinkwin][data-view=bubble] .msg.me .bub{
+    background:#FBEAF1;border-color:#D7A9BB}
+  body[data-theme=pinkwin] :is(input,textarea,select,.btn){
+    border-radius:2px;border-color:#AFAFAF}
+  body[data-theme=pinkwin] .btn{
+    background:linear-gradient(180deg,#FFFFFF,#E5E5E5);color:#454045;
+    box-shadow:inset 1px 1px #FFFFFF,1px 1px #B7B7B7}
+  body[data-theme=pinkwin] #dock{
+    background:#F2F2F2;border-top:1px solid #8F8F8F;
+    box-shadow:inset 0 1px #FFFFFF;padding-top:9px}
+  body[data-theme=pinkwin] #dock .tools{
+    gap:5px;margin:-9px -12px 9px;padding:6px 10px !important;
+    background:linear-gradient(180deg,#EFEFEF,#D5D5D5);
+    border-top:1px solid #FFFFFF;border-bottom:1px solid #9D9D9D;
+    box-shadow:inset 0 -1px #ECECEC}
+  body[data-theme=pinkwin] #dock .tools button{
+    padding:4px 7px;border:1px solid #B1B1B1;border-radius:2px;
+    background:linear-gradient(180deg,#FAFAFA,#DADADA);color:#555057;
+    box-shadow:inset 1px 1px #FFFFFF;font-size:12px}
+  body[data-theme=pinkwin] #inp{
+    background:#FFFFFF;color:#353136;border:1px solid #9F9F9F;border-radius:3px;
+    box-shadow:inset 1px 1px 2px #D5D5D5}
+  body[data-theme=pinkwin] #send{
+    border-radius:3px;border:1px solid #A86C82;
+    background:linear-gradient(180deg,#F4D4E0,#DEA5BA);color:#573746;
+    box-shadow:inset 1px 1px #FFF4F8,1px 1px #B7B7B7}
+  body[data-theme=pinkwin] #star{color:#A8627D}
+  /* 소설 모드의 대사만 참고 이미지처럼 분홍 카드로 표시한다. 말풍선·대본은 제외. */
+  body[data-theme=pinkwin][data-view=novel] #view.chat .nov .ns{
+    display:table;max-width:100%;padding:7px 12px 8px;
+    background:linear-gradient(90deg,#FFF2F7,#FFF8FA);
+    border-left:3px solid #C86F91;box-shadow:inset 0 1px #FFFFFF;
+    color:#49343E;font-weight:500;line-height:1.55;text-shadow:none}
+  body[data-theme=pinkwin][data-novelbg][data-view=novel] #view.chat .nov .ns{
+    background:rgba(255,240,247,.94);color:#49343E !important;
+    text-shadow:none !important}
+  body[data-theme=pinkwin][data-novelbg] :is(#app,#view){background:transparent}
 </style>
 </head>
 <body>
@@ -1234,20 +1315,97 @@ function roomName(c, rid){
   return "";
 }
 function origKey(id,f){ return "gz.orig."+id+"."+f; }
-function getLog(id){ return get(logKey(id), []); }
+/* ---------- v48v: 대화 로그도 IndexedDB에 ----------
+   localStorage는 5MB가 한도라 대화가 쌓이면 금방 찬다. 로그는 IndexedDB에 두고
+   메모리에 문자열로 한 벌 캐시한다. IndexedDB를 못 쓰면 예전처럼 localStorage를 쓴다 */
+var logCache = {};
+function logTx(mode){
+  if (!picDB) return null;
+  try { return picDB.transaction("logs", mode).objectStore("logs"); } catch(e){ return null; }
+}
+function logGet(key, d){
+  var v = logCache[key];
+  if (v===undefined || v===null) return get(key, d);
+  try { return JSON.parse(v); } catch(e){ return d; }
+}
+function logPut(key, val){
+  var v;
+  try { v = JSON.stringify(val); } catch(e){ return false; }
+  if (!picDB) return put(key, val);
+  var st = logTx("readwrite");
+  if (!st) return put(key, val);
+  try { st.put(v, key); } catch(e){ return put(key, val); }
+  logCache[key] = v;
+  return true;
+}
+function logDel(key){
+  delete logCache[key];
+  var st = logTx("readwrite");
+  if (st) try { st.delete(key); } catch(e){}
+  try { localStorage.removeItem(key); } catch(e){}
+}
+function logBytes(key){
+  var v = logCache[key];
+  if (v===undefined || v===null){ try { v = localStorage.getItem(key)||""; } catch(e){ v=""; } }
+  return String(v).length;
+}
+function logTotal(){
+  var n=0;
+  for (var k in logCache) if (Object.prototype.hasOwnProperty.call(logCache,k)) n += String(logCache[k]).length*2;
+  return n;
+}
+/* 앱을 켤 때 한 번. 캐시를 채우고 예전 localStorage 로그를 옮긴다 */
+function logLoad(){
+  return picOpen().then(function(db){
+    if (!db) return;
+    return new Promise(function(res){
+      var st = logTx("readonly");
+      if (!st) return res();
+      var rq = st.openCursor();
+      rq.onsuccess = function(){
+        var cu = rq.result;
+        if (!cu) return res();
+        logCache[cu.key] = cu.value;
+        cu.continue();
+      };
+      rq.onerror = function(){ res(); };
+      setTimeout(res, 4000);
+    });
+  }).then(function(){
+    if (!picDB) return;
+    var old = [];
+    try {
+      for (var i=0;i<localStorage.length;i++){
+        var k = localStorage.key(i);
+        if (k && k.indexOf("gz.log.")===0) old.push(k);
+      }
+    } catch(e){}
+    old.forEach(function(k){
+      var v = null;
+      try { v = localStorage.getItem(k); } catch(e){}
+      if (v && logCache[k]===undefined){
+        logCache[k] = v;
+        var st = logTx("readwrite");
+        if (st) try { st.put(v, k); } catch(e){}
+      }
+      try { localStorage.removeItem(k); } catch(e){}
+    });
+  }).catch(function(){});
+}
+function getLog(id){ return logGet(logKey(id), []); }
 function setLog(id,l){
-  put(logKey(id), l);
+  logPut(logKey(id), l);
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-17 v48m";
+var APP_VER = "2026-09-18 v48w";
 var THEMES = [
   ["light","밝게"],
-  ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
+  ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["pinkwin","핑크 창"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
 ];
 var THEME_DARK = { night:1 };
 var THEME_BG = { light:"#FFFFFF", ocean:"#eef6ff", green:"#ffffff", retro:"#c5d1b8", berry:"#fff8fa",
-                 night:"#12141C", lcd:"#ADBFD3", flip:"#D9E5F3" };
+                 pinkwin:"#F2CAD9", night:"#12141C", lcd:"#ADBFD3", flip:"#D9E5F3" };
 
 function phoneTheme(t){return t==="lcd"||t==="flip";}
 function displayFontName(part){
@@ -1523,11 +1681,40 @@ function udispOf(c){ return (c.userDisplay||"").trim() || c.userName || "나"; }
 function findPerson(c, name){
   if (!name) return null;
   var n = name.trim();
-  if (n === (c.name||"").trim())
-    return { name:c.name, disp:c.display, avatar:c.avatar, tagline:c.tagline, prompt:c.prompt };
+  var main = { name:c.name, disp:c.display, avatar:c.avatar, tagline:c.tagline, prompt:c.prompt };
+  if (n === (c.name||"").trim()) return main;
   var cs = castOf(c);
   for (var i=0;i<cs.length;i++) if (cs[i].name.trim()===n) return cs[i];
-  return null;
+  return fuzzyPerson(c, n, main, cs);
+}
+/* v48r: 모델이 이름을 줄이거나(에이든) 한 글자 틀려도(하트르만) 등록 인물로 찾는다.
+   후보가 딱 하나일 때만 연결하고, 여럿이면 모르는 인물로 둔다 */
+function nameDist(a,b){
+  if (Math.abs(a.length-b.length)>1) return 9;
+  var d=[],i,j;
+  for(i=0;i<=a.length;i++){d[i]=[i];}
+  for(j=0;j<=b.length;j++){d[0][j]=j;}
+  for(i=1;i<=a.length;i++)for(j=1;j<=b.length;j++)
+    d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));
+  return d[a.length][b.length];
+}
+function fuzzyPerson(c, n, main, cs){
+  var key=function(x){ return String(x||"").replace(/\s+/g,""); };
+  var first=function(x){ return String(x||"").trim().split(/\s+/)[0]||""; };
+  var nk=key(n); if (nk.length<2) return null;
+  var people=[];
+  if (c.kind!=="다인" && (c.name||"").trim()) people.push(main);
+  people=people.concat(cs);
+  var hits=people.filter(function(p){
+    return [p.name,p.disp].some(function(full){
+      var fk=key(full); if(!fk) return false;
+      if (fk===nk) return true;
+      if (first(full).length>=2 && (first(full)===n || first(n)===first(full) && nameDist(fk,nk)<=1)) return true;
+      if (fk.length>=4 && nk.length>=4 && nameDist(fk,nk)<=1) return true;
+      return false;
+    });
+  });
+  return hits.length===1 ? hits[0] : null;
 }
 
 function pickPhoto(done, maxPx){
@@ -1952,6 +2139,34 @@ function setHome(){
   cfg.home = { model:cfg.model, base:cfg.base, key:cfg.key };
   saveCfg();
 }
+/* 모델 목록의 세 번째 칸(API 키)을 ●로 가린다. 고칠 때 가린 칸은 원래 키로 되돌린다 */
+var KEY_MASK = "●";
+function maskKey(k){ k=String(k||""); return k ? KEY_MASK.repeat(8)+k.slice(-4) : ""; }
+function maskModels(txt){
+  return String(txt||"").split("\n").map(function(L){
+    var v=L.split("|"); if (v.length<3) return L;
+    var k=v[2].trim(); if (!k) return L;
+    v[2]=v[2].replace(k, maskKey(k));
+    return v.join("|");
+  }).join("\n");
+}
+function unmaskModels(txt, old){
+  var olds=String(old||"").split("\n").map(function(L){ return L.split("|"); });
+  return String(txt||"").split("\n").map(function(L, idx){
+    var v=L.split("|"); if (v.length<3) return L;
+    var k=v[2].trim();
+    if (k.indexOf(KEY_MASK)<0) return L;
+    var tail=k.replace(new RegExp(KEY_MASK,"g"),"");
+    var hit=null;
+    var same=function(o){ return o && o.length>=3 && o[2].trim() && maskKey(o[2].trim())===k; };
+    if (same(olds[idx])) hit=olds[idx];
+    if (!hit) for (var i=0;i<olds.length;i++){ if (same(olds[i]) && olds[i][0].trim()===v[0].trim()){ hit=olds[i]; break; } }
+    if (!hit) for (var j=0;j<olds.length;j++){ if (same(olds[j])){ hit=olds[j]; break; } }
+    if (!hit) for (var q=0;q<olds.length;q++){ if (olds[q][2] && olds[q][2].trim().slice(-4)===tail && tail){ hit=olds[q]; break; } }
+    if (hit) v[2]=v[2].replace(k, hit[2].trim());
+    return v.join("|");
+  }).join("\n");
+}
 function modelList(){
   return String(cfg.models||"").split("\n").map(function(L){
     var v = L.split("|").map(function(x){ return x.trim(); });
@@ -2132,9 +2347,10 @@ function picOpen(){
     try { idb = window.indexedDB; } catch(e){}
     if (!idb) return res(null);
     var rq;
-    try { rq = idb.open("gzpics", 1); } catch(e){ return res(null); }
+    try { rq = idb.open("gzpics", 2); } catch(e){ return res(null); }
     rq.onupgradeneeded = function(){
-      try { rq.result.createObjectStore("pics"); } catch(e){}
+      try { if (!rq.result.objectStoreNames.contains("pics")) rq.result.createObjectStore("pics"); } catch(e){}
+      try { if (!rq.result.objectStoreNames.contains("logs")) rq.result.createObjectStore("logs"); } catch(e){}
     };
     rq.onsuccess = function(){ picDB = rq.result; res(picDB); };
     rq.onerror = function(){ res(null); };
@@ -2226,7 +2442,7 @@ function igMigrate(){
   var moved = 0, jobs = [];
   chars.forEach(function(c){
     roomsOf(c).forEach(function(r){
-      var key = roomKey(c.id, r.id), lg = get(key, []), touched = false;
+      var key = roomKey(c.id, r.id), lg = logGet(key, []), touched = false;
       if (!isArr(lg)) return;
       lg.forEach(function(m){
         var t = String(m && m.t || "");
@@ -2244,7 +2460,7 @@ function igMigrate(){
         });
         if (touched) m.t = "[인스타]\n"+JSON.stringify(d)+"\n[/인스타]";
       });
-      if (touched) put(key, lg);
+      if (touched) logPut(key, lg);
     });
   });
   if (!jobs.length) return;
@@ -2274,7 +2490,6 @@ function shadeOf(c){
 }
 function bgBlock(val, g){
   return '<label>소설 배경 사진</label>'
-    + '<p class="hint" style="margin:-4px 0 6px">소설·대본 모드에서 글 뒤에 깔리고, 어두운 막 위에 밝은 글씨로 나와.</p>'
     + '<div class="pick"><div class="bgprev"'+(val?' style="background-image:url(&quot;'+esc(val)+'&quot;)"':'')+'>'
     + (val ? '<i style="--g:'+(g/100)+'"></i>' : '<span>🖼</span>') + '</div>'
     + '<div class="btns"><button class="btn sm" data-picpick="bg">사진 고르기</button>'
@@ -2289,6 +2504,31 @@ function photoBlock(label,key,val){
     ;
 }
 
+/* v48u: select[data-seg]를 캡슐 버튼 줄로 바꾼다. 원래 select는 숨겨 두고 값만 대신 바꿔서
+   기존 저장 코드가 그대로 돈다 */
+function segify(root){
+  Array.prototype.forEach.call(root.querySelectorAll("select[data-seg]"), function(sel){
+    var box=document.createElement("div");
+    box.className="seg";
+    var n=sel.options.length;
+    box.style.gridTemplateColumns="repeat("+(n>4?2:n)+",minmax(0,1fr))";
+    Array.prototype.forEach.call(sel.options, function(op){
+      var b=document.createElement("button");
+      b.type="button"; b.textContent=op.textContent;
+      if (op.selected) b.className="on";
+      b.onclick=function(){
+        sel.value=op.value;
+        Array.prototype.forEach.call(box.children, function(x){ x.className=""; });
+        b.className="on";
+        sel.dispatchEvent(new Event("input"));
+        sel.dispatchEvent(new Event("change"));
+      };
+      box.appendChild(b);
+    });
+    sel.style.display="none";
+    sel.parentNode.insertBefore(box, sel.nextSibling);
+  });
+}
 function viewEdit(){
   var c=cur(); if(!c) return go("list");
   if (typeof c.romaji !== "boolean") c.romaji = false;
@@ -2313,6 +2553,17 @@ function viewEdit(){
   h += '<div class="sec">'+(many?"세계관":"상황 및 세계관")+'</div>';
   h += field("","world",c.world,160);
   h += '<label>화폐</label><input data-k="currency" placeholder="세계관에 맞춰 자동" value="'+esc(c.currency||(curRoom(c)&&curRoom(c).currency)||'').replace(/"/g,'&quot;')+'">';
+  h += '<div class="sec">인트로</div>';
+  var gs = greetingsOf(c);
+  gs.forEach(function(g,i){
+    var ls = introLines(c, g);
+    var peek = ls.map(function(l){ return l.t; }).join(" ").replace(/\s+/g," ").slice(0,28);
+    h += '<div class="castbox" style="padding:11px 13px;margin-top:8px" data-gro="'+i+'">'
+       + '<div style="font-weight:600">인트로 '+(i+1)+'</div>'
+       + '<div class="hint" style="margin:2px 0 0">'+esc(ls.length+"줄 · "+(peek||"비어 있음"))+'</div></div>';
+  });
+  h += '<button class="btn" id="greadd">+ 인트로 추가</button>';
+
 
   if (!many){
     h += '<div class="sec">캐릭터</div>';
@@ -2322,6 +2573,7 @@ function viewEdit(){
     h += field("한 줄 소개","tagline",c.tagline);
     h += field("캐릭터 프롬프트","prompt",c.prompt,200);
     h += sampleList(c, -1);
+  h += field("NAI 그림체 태그","naiStyle",c.naiStyle,60,"이 캐릭터 그림에만 붙는 작가·그림체 태그. 설정의 '항상 넣을 태그' 뒤에 붙어.");
   } else {
     h += '<div class="sec">방</div>';
     h += photoBlock("방 사진","avatar",c.avatar);
@@ -2340,41 +2592,14 @@ function viewEdit(){
          + '<label>표시 이름</label><input data-cast="'+i+'" data-ck="disp" value="'+esc(p.disp||"")+'">'
          + '<label>한 줄 소개</label><input data-cast="'+i+'" data-ck="tagline" value="'+esc(p.tagline||"")+'">'
          + '<label>캐릭터 프롬프트</label><textarea data-cast="'+i+'" data-ck="prompt" style="min-height:110px">'+esc(p.prompt||"")+'</textarea>'
+         + '<label>NAI 태그</label><textarea data-cast="'+i+'" data-ck="naiTags" style="min-height:60px">'+esc(p.naiTags||"")+'</textarea>'
          + sampleList(c, i)
          + (cast.length>1 ? '<button class="btn danger sm" data-castdel="'+i+'">인물 '+(i+1)+' 삭제</button>' : "")
          + '</div>';
     });
     h += '<button class="btn" id="castadd">+ 인물 추가</button>';
+  h += field("NAI 그림체 태그","naiStyle",c.naiStyle,60,"이 캐릭터 그림에만 붙는 작가·그림체 태그. 설정의 '항상 넣을 태그' 뒤에 붙어.");
   }
-
-  h += '<div class="sec">인트로</div>';
-  var gs = greetingsOf(c);
-  gs.forEach(function(g,i){
-    var ls = introLines(c, g);
-    var peek = ls.map(function(l){ return l.t; }).join(" ").replace(/\s+/g," ").slice(0,28);
-    h += '<div class="castbox" style="padding:11px 13px;margin-top:8px" data-gro="'+i+'">'
-       + '<div style="font-weight:600">인트로 '+(i+1)+'</div>'
-       + '<div class="hint" style="margin:2px 0 0">'+esc(ls.length+"줄 · "+(peek||"비어 있음"))+'</div></div>';
-  });
-  h += '<button class="btn" id="greadd">+ 인트로 추가</button>';
-
-  h += '<div class="sec">그림</div>';
-  h += '<label>사진 느낌</label><select data-k="imgStyle">'
-     + ["사진풍","그림풍"].map(function(o){ return '<option'+((c.imgStyle||"사진풍")===o?" selected":"")+'>'+o+"</option>"; }).join("")
-     + '</select>';
-  h += bgBlock(picGet(c.id,"bg"), shadeOf(c));
-  h += '<label>막 진하기 · '+shadeOf(c)+'%</label>'
-     + '<input id="bgdim" type="range" min="20" max="85" step="5" value="'+shadeOf(c)+'" style="padding:0">';
-  h += '<label>사진 흐림 · '+blurOf(c)+'px</label>'
-     + '<input id="bgblur" type="range" min="0" max="12" step="1" value="'+blurOf(c)+'" style="padding:0">';
-  h += '<label>배경 있을 때 대사 색</label>'
-     + '<div style="display:flex;gap:8px;align-items:center">'
-     + '<input id="saycol" type="color" value="'+esc(c.sayColor||"#F4F4F8")+'" style="width:56px;padding:2px;height:40px">'
-     + '<button class="btn sm" id="saycolx" style="margin:0;width:auto">기본색으로</button></div>';
-  h += picBlock("얼굴 참조 1","ref",picGet(c.id,"ref"));
-  h += picBlock("얼굴 참조 2","ref2",picGet(c.id,"ref2"));
-  h += picBlock("얼굴 참조 3","ref3",picGet(c.id,"ref3"));
-  h += field("그림용 외모","look",c.look,90);
 
   h += '<div class="sec">나</div>';
   h += photoBlock("내 프로필 사진","userAvatar",c.userAvatar);
@@ -2382,38 +2607,38 @@ function viewEdit(){
   h += field("내 표시 이름","userDisplay",c.userDisplay);
   h += field("내 캐릭터 프롬프트","userPrompt",c.userPrompt,140);
   h += field("내 그림용 외모","userLook",c.userLook,90);
+  h += field("내 NAI 태그","userNaiTags",c.userNaiTags,70);
 
-  h += '<div class="sec">응답</div>';
-  h += '<label>대화 형식</label><select data-k="chatFormat">'
+  h += '<div class="sec">응답</div><div class="segcard">';
+  h += '<label>대화 형식</label><select data-seg data-k="chatFormat">'
      + [["bubble","말풍선"],["novel","소설"],["script","대본"]].map(function(o){
          return '<option value="'+o[0]+'"'+(chatFormat(c)===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join('')
      + '</select>';
-  h += '<label>길이</label><select data-k="length">'
+  h += '<label>길이</label><select data-seg data-k="length">'
      + ["자동","짧게","보통","길게"].map(function(o){
          var def = c.length || (c.kind==="다인" ? "자동" : "보통");
          return '<option'+(def===o?" selected":"")+'>'+o+"</option>"; }).join("")+"</select>";
-  h += '<label>대사 언어</label><select data-k="lang">'
+  h += '<label>대사 언어</label><select data-seg data-k="lang">'
      + ["한국어","일본어","영어","중국어"].map(function(o){ return '<option'+((c.lang||"한국어")===o?" selected":"")+'>'+o+"</option>"; }).join("")+"</select>";
-  h += '<label>발음 표기</label><select data-k="romaji">'
+  h += '<label>발음 표기</label><select data-seg data-k="romaji">'
      + '<option value="on"'+(c.romaji?" selected":"")+'>켜기</option>'
      + '<option value="off"'+(c.romaji?"":" selected")+'>끄기</option></select>';
-  h += '<label>인칭</label><select id="pers">'
+  h += '<label>인칭</label><select data-seg id="pers">'
      + ['1인칭','2인칭','3인칭'].map(function(o){
          return '<option'+((c.person||"3인칭")===o?" selected":"")+'>'+o+'</option>'; }).join("")
      + '</select>';
-  h += '<label>시제</label><select id="tens">'
+  h += '<label>시제</label><select data-seg id="tens">'
      + ['과거','현재'].map(function(o){
          return '<option'+((c.tense||"과거")===o?" selected":"")+'>'+o+'</option>'; }).join("")
      + '</select>';
-  h += '<label>소설 문체</label><select id="nvtone">'
+  h += '<label>소설 문체</label><select data-seg id="nvtone">'
      + Object.keys(NOVEL_TONE).map(function(o){
          return '<option'+((c.novelTone||"기본")===o?" selected":"")+'>'+o+'</option>'; }).join("")
      + '</select>';
-  h += '<label>글 짜임</label><select id="nvflow">'
+  h += '<label>글 짜임</label><select data-seg id="nvflow">'
      + Object.keys(NOVEL_FLOW).map(function(o){
          return '<option'+((c.novelFlow||"기본")===o?" selected":"")+'>'+o+'</option>'; }).join("")
-     + '</select>'
-     + '<p class="hint" style="margin:4px 0 0">소설·대본 모드에서만 적용돼. 인칭·시제는 위 설정을 따라.</p>';
+     + '</select>';
   /* v41h: 난이도·순응 억제는 프롬프트에서 빠져서 선택지도 숨겼다. 되살리려면 주석을 풀면 된다.
   h += '<label>난이도</label><select id="hard">'
      + ['쉬움','보통','어려움'].map(function(o){
@@ -2424,14 +2649,29 @@ function viewEdit(){
          return '<option'+((c.defy||"보통")===o?" selected":"")+'>'+o+'</option>'; }).join("")
      + '</select>';
   */
-  h += '<label>나레이션</label><select id="narr">'
+  h += '<label>나레이션</label><select data-seg id="narr">'
      + ['켬','끔'].map(function(o){
          return '<option'+((c.narrOn||"켬")===o?" selected":"")+'>'+o+'</option>'; }).join("")
-     + '</select>';
+     + '</select></div>';
   h += '<label>편지·일기 필체</label><select data-k="handMode">'
      + '<option value="auto"'+((c.handMode||"auto")==="auto"?' selected':'')+'>자동 선택</option>'
      + HAND_KEYS.map(function(o){return '<option value="'+o+'"'+(c.handMode===o?' selected':'')+'>'+o+'</option>';}).join("")
      + '</select>';
+
+  h += '<div class="sec">그림</div>';
+  h += bgBlock(picGet(c.id,"bg"), shadeOf(c));
+  h += '<label>사진 느낌</label><select data-k="imgStyle">'
+     + ["사진풍","그림풍"].map(function(o){ return '<option'+((c.imgStyle||"사진풍")===o?" selected":"")+'>'+o+"</option>"; }).join("")
+     + '</select>';
+  h += field("NAI 태그","naiTags",c.naiTags,70,"영어 태그로 외모를 고정해. 예: 1boy, silver hair, blue eyes, short hair");
+  h += '<label>배경 있을 때 대사 색</label>'
+     + '<div style="display:flex;gap:8px;align-items:center">'
+     + '<input id="saycol" type="color" value="'+esc(c.sayColor||"#F4F4F8")+'" style="width:56px;padding:2px;height:40px">'
+     + '<button class="btn sm" id="saycolx" style="margin:0;width:auto">기본색으로</button></div>';
+  h += picBlock("얼굴 참조 1","ref",picGet(c.id,"ref"));
+  h += picBlock("얼굴 참조 2","ref2",picGet(c.id,"ref2"));
+  h += picBlock("얼굴 참조 3","ref3",picGet(c.id,"ref3"));
+  h += field("그림용 외모","look",c.look,90);
 
   h += '<div class="sec">프리셋</div>';
   var gps = cfg.preset ? presetById(cfg.preset) : null;
@@ -2455,6 +2695,7 @@ function viewEdit(){
   h += '<button class="btn primary" id="done">저장하고 대화하기</button>';
   h += '<button class="btn danger" id="del">이 캐릭터 삭제</button>';
   view.innerHTML=h;
+  segify(view);
 
   Array.prototype.forEach.call(view.querySelectorAll("[data-k]"), function(el){
     el.oninput = el.onchange = function(){
@@ -2639,7 +2880,9 @@ function viewCfg(){
      + '<button class="btn sm" id="kv">보기</button></div>';
   h += '<label>모델</label><input id="m" value="'+esc(cfg.model)+'" autocapitalize="off" spellcheck="false">';
   h += '<label>모델 목록</label>'
-     + '<textarea id="mlist" style="min-height:110px" autocapitalize="off" spellcheck="false">'+esc(cfg.models||"")+'</textarea>';
+     + '<textarea id="mlist" style="min-height:110px" autocapitalize="off" spellcheck="false">'+esc(maskModels(cfg.models||""))+'</textarea>'
+     + '<div style="display:flex;gap:8px;align-items:center"><div class="hint" style="flex:1;margin:0">이름 | 주소 | API 키 | 모델명 · 키는 가려서 보여줘.</div>'
+     + '<button class="btn sm" id="mlistv" style="margin:0;width:auto">보기</button></div>';
   h += '<label>추론</label><select id="thk">'
      + [["auto","자동"],["off","끄기"],["low","낮음"],["mid","보통"],["high","높음"]].map(function(o){
          return '<option value="'+o[0]+'"'+((cfg.think||"auto")===o[0]?" selected":"")+'>'+o[1]+'</option>';
@@ -2661,6 +2904,7 @@ function viewCfg(){
      + [[512,"작게"],[1024,"보통"],[1600,"크게"]].map(function(o){
          return '<option value="'+o[0]+'"'+((+(cfg.imgSize||1024))===o[0]?" selected":"")+'>'+o[1]+'</option>';
        }).join("") + '</select>';
+  h += naiSettingsHTML();
   }
   h += '<div class="sec'+(cfgFromChat?" first":"")+'">화면</div>';
   h += '<label>테마</label><select id="th">'
@@ -2676,13 +2920,13 @@ function viewCfg(){
   h += '<label>지문 글꼴</label><select id="fn">'+fopts(displayFontName("nar"))+'</select>';
   h += '<div class="sec">크기</div>';
   h += '<label>글자 크기 · '+(cfg.fSize||16)+'px</label>'
-     + '<input id="fs" type="range" min="10" max="22" step="0.5" value="'+(cfg.fSize||16)+'" style="padding:0">';
+     + '<input id="fs" type="range" min="7" max="30" step="0.5" value="'+(cfg.fSize||16)+'" style="padding:0">';
   h += '<label>지문 글자 크기 · '+(cfg.nSize||cfg.fSize||16)+'px</label>'
-     + '<input id="ns" aria-label="지문 글자 크기" type="range" min="12" max="24" step="0.5" value="'+(cfg.nSize||cfg.fSize||16)+'" style="padding:0">';
+     + '<input id="ns" aria-label="지문 글자 크기" type="range" min="7" max="30" step="0.5" value="'+(cfg.nSize||cfg.fSize||16)+'" style="padding:0">';
   h += '<label>카드 글자 크기 · '+(cfg.cSize||14)+'px</label>'
-     + '<input id="cs" type="range" min="10" max="20" step="0.5" value="'+(cfg.cSize||14)+'" style="padding:0">';
+     + '<input id="cs" type="range" min="7" max="30" step="0.5" value="'+(cfg.cSize||14)+'" style="padding:0">';
   h += '<label>입력창 글자 크기 · '+(cfg.iSize||14)+'px</label>'
-     + '<input id="is" type="range" min="10" max="20" step="0.5" value="'+(cfg.iSize||14)+'" style="padding:0">';
+     + '<input id="is" type="range" min="7" max="30" step="0.5" value="'+(cfg.iSize||14)+'" style="padding:0">';
   h += '<div class="sec">프리셋</div>';
   h += '<label>기본 프리셋</label><select id="gps">'
      + '<option value=""'+(cfg.preset?"":" selected")+'>안 씀</option>'
@@ -2697,26 +2941,31 @@ function viewCfg(){
   h += '<button class="btn" id="dump">지금 나가는 프롬프트 보기</button>';
   h += '<div class="sec">저장 공간</div>';
   var ss = storeStats();
-  h += '<p class="hint">전체 '+fmtKB(ss.total)+' 사용 중 · 한도는 약 5MB야</p>';
+  h += '<p class="hint">설정·캐릭터 '+fmtKB(ss.total)+' 사용 중 · 한도는 약 5MB</p>';
+  h += '<p class="hint">대화 '+fmtKB(logTotal())+' · 사진 '+fmtKB(picTotal())+' · 이쪽은 한도가 훨씬 커</p>';
   if (ss.origN) h += '<button class="btn" id="clrorig">원본 사진 캐시 지우기 ('+ss.origN+'장 · '+fmtKB(ss.orig)+')</button>';
-  h += '<details><summary>어디에 쌓였는지 보기</summary>'
-     + ss.rows.slice(0,30).map(function(r){
-         return '<p class="hint">'+esc(r.k)+' — '+fmtKB(r.n)+'</p>';
-       }).join("")
-     + (ss.rows.length>30 ? '<p class="hint">…그 외 '+(ss.rows.length-30)+'개</p>' : '')
-     + '</details>';
   h += '<div class="sec">백업</div>';
   h += '<button class="btn" id="exp">전체 내보내기</button>';
   h += '<label>불러오기</label><textarea id="impbox"></textarea>';
   h += '<button class="btn" id="imp">불러오기</button>';
-  if(chars.some(function(c){return c.handProfileVersion===32 || c.handBeforeV34;}))h += '<details><summary>이전 필체 복원</summary><p class="hint">변경 전 전체 백업을 위 칸에 붙여 넣으면 필체만 복원해. 현재 대화와 설정은 유지돼.</p><button class="btn" id="handrestore">백업에서 필체만 복원</button></details>';
   if (!canStore) h += '<div class="hint">지금 저장이 막혀 있어. 창을 닫으면 사라지니 꼭 내보내둬.</div>';
   view.innerHTML=h;
 
   on("#md","onchange",function(){ cfg.mode=this.value; saveCfg(); });
   on("#thk","onchange",function(){ cfg.think=this.value; saveCfg(); });
   on("#sfg","onchange",function(){ cfg.safe=this.value; saveCfg(); });
-  on("#mlist","oninput",function(){ cfg.models=this.value; saveCfg(); });
+  on("#mlist","oninput",function(){
+    cfg.models = this.getAttribute("data-raw")==="1" ? this.value : unmaskModels(this.value, cfg.models||"");
+    saveCfg();
+  });
+  on("#mlist","onblur",function(){
+    if (this.getAttribute("data-raw")!=="1") this.value = maskModels(cfg.models||"");
+  });
+  on("#mlistv","onclick",function(){
+    var el=$("#mlist"); if(!el) return;
+    if (el.getAttribute("data-raw")==="1"){ el.setAttribute("data-raw","0"); el.value=maskModels(cfg.models||""); this.textContent="보기"; }
+    else { el.setAttribute("data-raw","1"); el.value=cfg.models||""; this.textContent="가리기"; }
+  });
   on("#th","onchange",function(){
     cfg.theme=this.value; saveCfg();
     if($("#fb"))$("#fb").value=displayFontName("body");
@@ -2770,6 +3019,7 @@ function viewCfg(){
   on("#t","oninput",function(){ cfg.maxTokens=parseInt(this.value,10)||2600; saveCfg(); });
   on("#imgsv","oninput",function(){ cfg.imgServer=this.value.trim().replace(/\/+$/,""); saveCfg(); });
   on("#imgsz","onchange",function(){ cfg.imgSize=+this.value; saveCfg(); });
+  naiSettingsBind();
   on("#imgping","onclick",function(){
     var out=$("#imgout"), btn=this, base=igServer();
     if(!base){ out.textContent="주소가 비어 있어."; return; }
@@ -2845,7 +3095,7 @@ function viewCfg(){
     chars.forEach(function(c){
       roomsOf(c).forEach(function(r){
         var k=roomKey(c.id, r.id);
-        out.logs[k]=get(k,[]);
+        out.logs[k]=logGet(k,[]);
       });
     });
     var box=document.createElement("textarea");
@@ -2886,7 +3136,7 @@ function viewCfg(){
       if(d.chars){ chars=d.chars; chars.forEach(undoV34Hand); chars.forEach(function(c){if(!c.chatFormat)c.chatFormat=cfg.viewMode||"bubble";}); saveChars(); }
       if(d.presets){ presets=d.presets; savePresets(); }
       if(d.logs) for(var id in d.logs){
-        put(/^gz\.log\./.test(id) ? id : ("gz.log."+id), d.logs[id]);
+        logPut(/^gz\.log\./.test(id) ? id : ("gz.log."+id), d.logs[id]);
       }
       alert("불러왔어."); go("list");
     }catch(e){ alert("형식이 안 맞아."); }
@@ -3116,9 +3366,7 @@ function viewIntro(){
 }
 
 /* ---------- 대화방 ---------- */
-function roomBytes(cid, rid){
-  try { return (localStorage.getItem(roomKey(cid, rid))||"").length; } catch(e){ return 0; }
-}
+function roomBytes(cid, rid){ return logBytes(roomKey(cid, rid)); }
 function viewRooms(){
   var c=cur(); if(!c) return go("list");
   var rs=roomsOf(c);
@@ -3127,7 +3375,7 @@ function viewRooms(){
 
   var h='';
   rs.forEach(function(r){
-    var lg=get(roomKey(c.id, r.id), []);
+    var lg=logGet(roomKey(c.id, r.id), []);
     var last=lg.length ? String(lg[lg.length-1].t||"").replace(/\s+/g," ").trim().slice(0,34) : "아직 비어 있어";
     var kb=Math.round(roomBytes(c.id, r.id)/1024);
     h += '<div class="card'+(c.room===r.id?" on":"")+'" data-rm="'+esc(r.id)+'"><div class="meta">'
@@ -3192,8 +3440,8 @@ function renameRoom(c, rid){
   saveChars(); render();
 }
 function copyRoom(c, rid){
-  var rs=roomsOf(c), src=get(roomKey(c.id, rid), []), nid=uid();
-  if (!put(roomKey(c.id, nid), src)){
+  var rs=roomsOf(c), src=logGet(roomKey(c.id, rid), []), nid=uid();
+  if (!logPut(roomKey(c.id, nid), src)){
     alert("저장 공간이 부족해. 안 쓰는 방이나 사진을 지우고 다시 해줘.");
     return;
   }
@@ -3204,7 +3452,7 @@ function delRoom(c, rid){
   var rs=roomsOf(c);
   if (rs.length<=1){ alert("방이 하나뿐이야. 지우려면 초기화를 써."); return; }
   if (!confirm(roomName(c,rid)+" 방을 지울까? 그 안의 대화도 같이 사라져.")) return;
-  try { localStorage.removeItem(roomKey(c.id, rid)); } catch(e){}
+  logDel(roomKey(c.id, rid));
   c.rooms = rs.filter(function(r){ return r.id!==rid; });
   if (c.room===rid) c.room = c.rooms[0].id;
   saveChars(); render();
@@ -4970,8 +5218,263 @@ function viewChat(){
   refreshDigest(c);
 }
 
+/* ---------- v48s: NAI 장면 그림 ----------
+   꾹 눌러서 '장면 그림' → 채팅 모델이 장면을 영어 태그로 바꾸고 → NAI로 그린다.
+   그림은 IndexedDB(scene 종류)에 두고 메시지에는 pic:"idb:<아이디>"만 남긴다 */
+var NAI_MODELS = [["nai-diffusion-4-5-full","V4.5 Full"],["nai-diffusion-4-5-curated","V4.5 Curated"],
+                  ["nai-diffusion-4-full","V4 Full"],["nai-diffusion-3","V3"]];
+var NAI_SIZES = [["832x1216","세로"],["1216x832","가로"],["1024x1024","정사각"]];
+var NAI_POS = "very aesthetic, masterpiece, no text";
+var NAI_NEG = "nsfw, lowres, bad anatomy, bad hands, text, error, missing fingers, extra digits, fewer digits, cropped, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry";
+var naiJobs = {};   /* "캐릭터id:메시지번호" → "그리는 중…" 또는 오류 문장 */
+
+function naiBase(){ return String(cfg.naiBase||"https://image.novelai.net").trim().replace(/\/+$/,""); }
+function naiSettingsHTML(){
+  var h = '<div class="sec">NAI 장면 그림</div>';
+  h += '<label>NAI 토큰</label>'
+     + '<div style="display:flex;gap:8px"><input id="naik" type="password" value="'+esc(cfg.naiKey||"")+'" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="pst-...">'
+     + '<button class="btn sm" id="naikv">보기</button></div>'
+     + '<div class="hint">NovelAI 설정 → Account → Get Persistent API Token 에서 받아.</div>';
+  h += '<label>NAI 주소</label><input id="naib" value="'+esc(cfg.naiBase||"")+'" autocapitalize="off" spellcheck="false" placeholder="https://image.novelai.net">'
+     + '<div class="hint">비워 두면 기본 주소. 브라우저에서 막히면 프록시 주소를 넣어.</div>';
+  h += '<label>모델</label><select id="naim">'
+     + NAI_MODELS.map(function(o){ return '<option value="'+o[0]+'"'+((cfg.naiModel||NAI_MODELS[0][0])===o[0]?" selected":"")+'>'+o[1]+'</option>'; }).join("")
+     + '</select>';
+  h += '<label>크기</label><select id="naisz">'
+     + NAI_SIZES.map(function(o){ return '<option value="'+o[0]+'"'+((cfg.naiSize||"832x1216")===o[0]?" selected":"")+'>'+o[1]+'</option>'; }).join("")
+     + '</select>';
+  h += '<label>항상 넣을 태그</label><textarea id="naipos" style="min-height:60px" autocapitalize="off" spellcheck="false">'+esc(cfg.naiPos!=null?cfg.naiPos:NAI_POS)+'</textarea>'
+     + '<div class="hint">그림체·화가 태그도 여기에 넣으면 돼.</div>';
+  h += '<label>제외 태그</label><textarea id="naineg" style="min-height:70px" autocapitalize="off" spellcheck="false">'+esc(cfg.naiNeg!=null?cfg.naiNeg:NAI_NEG)+'</textarea>';
+  h += '<label>단계 수 · '+(cfg.naiSteps||28)+'</label><input id="naist" type="range" min="10" max="28" step="1" value="'+(cfg.naiSteps||28)+'" style="padding:0">'
+     + '<div class="hint">28 이하·기본 크기면 Opus 구독에서 Anlas가 들지 않아.</div>';
+  return h;
+}
+function naiSettingsBind(){
+  on("#naik","oninput",function(){ cfg.naiKey=this.value.trim(); saveCfg(); });
+  on("#naikv","onclick",function(){
+    var el=$("#naik"); if(!el) return;
+    if (el.type==="password"){ el.type="text"; this.textContent="가리기"; }
+    else { el.type="password"; this.textContent="보기"; }
+  });
+  on("#naib","oninput",function(){ cfg.naiBase=this.value.trim(); saveCfg(); });
+  on("#naim","onchange",function(){ cfg.naiModel=this.value; saveCfg(); });
+  on("#naisz","onchange",function(){ cfg.naiSize=this.value; saveCfg(); });
+  on("#naipos","oninput",function(){ cfg.naiPos=this.value; saveCfg(); });
+  on("#naineg","oninput",function(){ cfg.naiNeg=this.value; saveCfg(); });
+  on("#naist","oninput",function(){
+    cfg.naiSteps=+this.value; saveCfg();
+    var lb=this.previousElementSibling; if (lb) lb.textContent="단계 수 · "+cfg.naiSteps;
+  });
+}
+
+function sceneHTML(c,m,i){
+  var job = naiJobs[c.id+":"+i];
+  var out = "";
+  if (m.pic){
+    var src = m.pic.indexOf("idb:")===0 ? picGet(m.pic.slice(4),"scene") : m.pic;
+    if (src) out += '<div class="scenepic"><img src="'+esc(src)+'" alt="" data-naiview="'+i+'"></div>';
+  }
+  if (job) out += '<div class="scenepic"><div class="st'+(job.bad?" bad":"")+'">'+esc(job.text)+'</div></div>';
+  return out;
+}
+function naiBindChat(c){
+  Array.prototype.forEach.call(view.querySelectorAll("[data-nai]"), function(el){
+    el.onclick=function(){ var i=+el.getAttribute("data-nai"); selIdx=-1; naiMake(c,i); };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-naidel]"), function(el){
+    el.onclick=function(){
+      var i=+el.getAttribute("data-naidel"), lg=getLog(c.id), m=lg[i];
+      if (!m || !m.pic) return;
+      if (!confirm("이 그림을 지울까?")) return;
+      if (m.pic.indexOf("idb:")===0) picSet(m.pic.slice(4),"scene","");
+      delete m.pic; setLog(c.id,lg); selIdx=-1; paint();
+    };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-naiview]"), function(el){
+    el.onclick=function(e){
+      e.stopPropagation();
+      var w = window.open();
+      if (w){ w.document.write('<title>장면</title><body style="margin:0;background:#000"><img src="'+el.src+'" style="width:100%"></body>'); }
+    };
+  });
+}
+
+/* 장면 → 인물 목록 */
+function naiPeople(c){
+  var ps = [];
+  if (c.kind!=="다인" && (c.name||"").trim())
+    ps.push({ name:c.name.trim(), fixed:String(c.naiTags||"").trim(), look:String(c.look||"").trim() });
+  castOf(c).forEach(function(x){
+    ps.push({ name:x.name.trim(), fixed:String(x.naiTags||"").trim(), look:"" });
+  });
+  if ((c.userName||"").trim())
+    ps.push({ name:c.userName.trim(), fixed:String(c.userNaiTags||"").trim(), look:String(c.userLook||"").trim(), user:true });
+  return ps;
+}
+function naiSceneText(c, lg, i){
+  var clean = function(t){
+    return String(t||"").replace(/\[\/?(?:지문|대사|나레)\]/g,"").replace(/\[OOC답변\][\s\S]*?\[\/OOC답변\]/g,"").trim();
+  };
+  var prev = "";
+  for (var k=i-1;k>=0 && k>=i-2;k--){
+    if (lg[k] && !lg[k].ooc){ prev = clean(lg[k].t).slice(-600) + (prev?"\n"+prev:""); }
+  }
+  return { prev:prev, now:clean(lg[i].t).slice(0,2500) };
+}
+function naiAskTags(c, lg, i, done){
+  var ps = naiPeople(c), sc = naiSceneText(c, lg, i);
+  var sys = "너는 롤플레이 장면 글을 NovelAI 이미지 태그로 바꾸는 도구다. 영어 Danbooru 태그만 쓴다.\n"
+    + "JSON 하나만 출력한다. 설명이나 코드 블록 표시는 붙이지 않는다.\n"
+    + '형식: {"scene":"태그, 태그","people":[{"name":"인물 이름","tags":"태그, 태그"}]}\n'
+    + "scene에는 인원수 태그(1boy, 1girl, 1boy 1girl, 2boys 등)를 맨 앞에 쓰고, 장소, 시간대, 날씨, 조명, 구도(upper body, cowboy shot, full body 등)를 쓴다.\n"
+    + "people에는 이번 장면 그림에 실제로 보이는 인물만 최대 3명까지 넣는다. name은 아래 인물 목록의 이름을 그대로 쓴다. 목록에 없는 단역이면 적당한 이름을 쓴다.\n"
+    + "각 인물의 tags는 성별 태그(boy 또는 girl)로 시작하고, 표정, 자세, 행동, 옷차림을 쓴다. 인물끼리 주고받는 행동은 source#, target#, mutual# 접두어를 붙인다(예: source#hug, target#hug).\n"
+    + "인물 목록에 '고정 태그 있음'이라고 된 인물은 머리색·눈색·머리 모양 같은 외모 태그를 쓰지 않는다. 고정 태그가 없는 인물은 외모 설명과 본문을 보고 외모 태그를 넣는다.\n"
+    + "장면의 핵심 순간 하나만 그린다. 노출이나 성적인 태그는 쓰지 않는다. 글자, 말풍선 태그는 쓰지 않는다.";
+  var who = ps.map(function(p){
+    return "- "+p.name+(p.user?" (유저)":"")+" : "+(p.fixed ? "고정 태그 있음" : ("고정 태그 없음"+(p.look?" / 외모: "+p.look:"")));
+  }).join("\n");
+  var content = "# 인물 목록\n"+(who||"(없음)")+"\n\n"
+    + (sc.prev ? "# 직전 흐름\n"+sc.prev+"\n\n" : "")
+    + "# 그릴 장면\n"+sc.now;
+  askLLM(sys, content, function(out){
+    var d = null, mm = String(out||"").match(/\{[\s\S]*\}/);
+    if (mm){ try { d = JSON.parse(mm[0]); } catch(e){} }
+    if (!d || !d.scene) return done(null);
+    done(d, ps);
+  }, 900);
+}
+function naiJoin(){
+  return Array.prototype.slice.call(arguments).map(function(x){ return String(x||"").trim().replace(/^,|,$/g,"").trim(); })
+    .filter(Boolean).join(", ");
+}
+function naiBody(d, ps, c){
+  var sz = String(cfg.naiSize||"832x1216").split("x");
+  var model = cfg.naiModel || NAI_MODELS[0][0];
+  var v4 = /-4/.test(model);
+  var neg = cfg.naiNeg!=null ? cfg.naiNeg : NAI_NEG;
+  var base = naiJoin(d.scene, cfg.naiPos!=null ? cfg.naiPos : NAI_POS, c && c.naiStyle);
+  var chars = (Array.isArray(d.people) ? d.people : []).slice(0,3).map(function(p, k){
+    var hit = null, nm = String(p && p.name || "").trim();
+    ps.forEach(function(x){ if (!hit && (x.name===nm || x.name.split(/\s+/)[0]===nm.split(/\s+/)[0])) hit = x; });
+    var xs = [0.3,0.7,0.5];
+    return { prompt: naiJoin(hit && hit.fixed, p && p.tags), uc:"", center:{ x: (d.people.length===1?0.5:xs[k]), y:0.5 }, enabled:true };
+  }).filter(function(x){ return x.prompt; });
+  var params = {
+    params_version: 3, width: +sz[0]||832, height: +sz[1]||1216,
+    scale: 5, sampler: "k_euler_ancestral", steps: Math.min(50, +cfg.naiSteps||28), n_samples: 1,
+    ucPreset: 0, qualityToggle: true, sm: false, sm_dyn: false, dynamic_thresholding: false,
+    controlnet_strength: 1, legacy: false, add_original_image: true, cfg_rescale: 0,
+    noise_schedule: v4 ? "karras" : "native", legacy_v3_extend: false, skip_cfg_above_sigma: null,
+    seed: Math.floor(Math.random()*4294967295), negative_prompt: neg,
+    deliberate_euler_ancestral_bug: false, prefer_brownian: true
+  };
+  var input = base;
+  if (v4){
+    params.use_coords = false; params.legacy_uc = false;
+    params.normalize_reference_strength_multiple = true;
+    params.characterPrompts = chars;
+    params.v4_prompt = { caption:{ base_caption: base, char_captions: chars.map(function(x){ return { char_caption:x.prompt, centers:[x.center] }; }) },
+                         use_coords:false, use_order:true };
+    params.v4_negative_prompt = { caption:{ base_caption: neg, char_captions: chars.map(function(x){ return { char_caption:"", centers:[x.center] }; }) },
+                                  legacy_uc:false };
+  } else {
+    input = naiJoin(base, chars.map(function(x){ return x.prompt; }).join(", "));
+  }
+  return { input: input, model: model, action: "generate", parameters: params };
+}
+/* NAI는 zip으로 돌려준다. 첫 파일만 꺼낸다 */
+function naiUnzip(buf){
+  var u8 = new Uint8Array(buf);
+  if (u8[0]===0x89 && u8[1]===0x50) return Promise.resolve(new Blob([buf],{type:"image/png"}));
+  var dv = new DataView(buf);
+  if (dv.getUint32(0,true)!==0x04034b50) return Promise.reject(new Error("받은 파일이 그림이 아니야"));
+  var method = dv.getUint16(8,true), size = dv.getUint32(18,true);
+  var start = 30 + dv.getUint16(26,true) + dv.getUint16(28,true);
+  if (!size){
+    for (var p=u8.length-22;p>=0;p--){
+      if (dv.getUint32(p,true)===0x06054b50){ size = dv.getUint32(dv.getUint32(p+16,true)+20,true); break; }
+    }
+  }
+  var data = buf.slice(start, start+size);
+  if (method===0) return Promise.resolve(new Blob([data],{type:"image/png"}));
+  if (method!==8 || typeof DecompressionStream==="undefined")
+    return Promise.reject(new Error("이 기기에서 그림 압축을 풀 수 없어"));
+  var st = new Blob([data]).stream().pipeThrough(new DecompressionStream("deflate-raw"));
+  return new Response(st).blob().then(function(b){ return new Blob([b],{type:"image/png"}); });
+}
+function naiShrink(blob){
+  return new Promise(function(res, rej){
+    var url = URL.createObjectURL(blob), img = new Image();
+    img.onload = function(){
+      try {
+        var M=Math.max(1024, +(cfg.imgSize||1024)), w=img.naturalWidth, h=img.naturalHeight, r=Math.min(1, M/Math.max(w,h));
+        var cv=document.createElement("canvas"); cv.width=Math.round(w*r); cv.height=Math.round(h*r);
+        cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+        URL.revokeObjectURL(url);
+        res(cv.toDataURL("image/jpeg",0.9));
+      } catch(e){ rej(new Error("그림을 저장용으로 바꾸지 못했어")); }
+    };
+    img.onerror = function(){ URL.revokeObjectURL(url); rej(new Error("그림을 열지 못했어")); };
+    img.src = url;
+  });
+}
+function naiMake(c, i){
+  var key = c.id+":"+i;
+  if (naiJobs[key] && !naiJobs[key].bad) return;
+  if (!cfg.naiKey){ alert("설정에서 NAI 토큰부터 넣어줘."); return; }
+  if (!cfg.key){ alert("장면을 태그로 바꾸려면 채팅 API 키가 필요해."); return; }
+  var lg = getLog(c.id), m = lg[i];
+  if (!m || !String(m.t||"").trim()){ alert("그릴 내용이 없어."); return; }
+  var orig = m.t;
+  var set = function(text, bad){ naiJobs[key] = { text:text, bad:!!bad }; if (curId===c.id && screen==="chat") paint(); };
+  var fail = function(msg){ set("실패 · "+msg+" (다시 꾹 눌러 재시도)", true); };
+  set("장면 읽는 중…");
+  naiAskTags(c, lg, i, function(d, ps){
+    if (!d) return fail("장면을 태그로 바꾸지 못했어");
+    set("그리는 중… 10~30초 걸려");
+    fetch(naiBase()+"/ai/generate-image", {
+      method:"POST",
+      headers:{ "Content-Type":"application/json", "Authorization":"Bearer "+cfg.naiKey },
+      body: JSON.stringify(naiBody(d, ps, c))
+    }).then(function(r){
+      if (r.ok) return r.arrayBuffer();
+      return r.text().then(function(tx){
+        var em = ""; try { em = JSON.parse(tx).message || ""; } catch(e){ em = tx.slice(0,120); }
+        if (r.status===401) throw new Error("토큰이 틀렸거나 만료됐어");
+        if (r.status===402) throw new Error("구독이나 Anlas가 부족해");
+        if (r.status===429) throw new Error("다른 그림이 아직 그려지는 중이야. 잠시 뒤에");
+        throw new Error("NAI "+r.status+(em?" · "+em:""));
+      });
+    }, function(){
+      throw new Error("NAI에 연결하지 못했어. 브라우저에서 막혔다면 설정의 NAI 주소에 프록시를 넣어줘");
+    })
+    .then(naiUnzip)
+    .then(naiShrink)
+    .then(function(dataUrl){
+      var id = Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+      return picSet(id,"scene",dataUrl).then(function(ok){
+        var lg2 = getLog(c.id), at = (lg2[i] && lg2[i].t===orig) ? i : -1;
+        if (at<0) for (var k=0;k<lg2.length;k++) if (lg2[k].t===orig){ at=k; break; }
+        if (at<0){ picSet(id,"scene",""); throw new Error("그 메시지가 바뀌거나 지워졌어"); }
+        var old = lg2[at].pic;
+        if (old && old.indexOf("idb:")===0) picSet(old.slice(4),"scene","");
+        lg2[at].pic = ok ? "idb:"+id : dataUrl;
+        setLog(c.id, lg2);
+        delete naiJobs[key];
+        if (curId===c.id && screen==="chat") paint();
+      });
+    })
+    .catch(function(e){ fail(e.message||"알 수 없는 오류"); });
+  });
+}
+
 function actsHTML(i){
-  return '<div class="acts"><button data-cp="'+i+'">복사</button>'
+  var cc=cur(), mm=cc ? getLog(cc.id)[i] : null;
+  return '<div class="acts"><button data-nai="'+i+'">장면 그림</button>'
+       + (mm && mm.pic ? '<button class="del" data-naidel="'+i+'">그림 지우기</button>' : '')
+       + '<button data-cp="'+i+'">복사</button>'
        + '<button data-ed="'+i+'">수정</button>'
        + '<button class="del" data-del="'+i+'">삭제</button>'
        + '<button class="del" data-cut="'+i+'">여기부터 지우기</button></div>';
@@ -5026,7 +5529,7 @@ function paint(err, thinking){
     if (m.r==="u"){
       var ub = (chatFormat(c)==="bubble") ? fmt(m.t) : userNovelHTML(m.t, i);
       h += '<div class="msg me"><div class="col"><div class="bub" data-i="'+i+'">'+ub+'</div>'
-         + (selIdx===i?actsHTML(i):"")+'</div></div>';
+         + '</div></div>' + sceneHTML(c,m,i) + (selIdx===i?actsHTML(i):"");
       continue;
     }
     var meta=String(m.t||"").match(/^\[OOC답변\]\s*([\s\S]*?)\s*\[\/OOC답변\]$/);
@@ -5049,6 +5552,7 @@ function paint(err, thinking){
     });
     ps.forEach(function(p){
       if (p.card){
+        igCurMsg = i;
         body += '<div data-i="'+i+'">'+cardHTML(p.card, p.text, c)+'</div>';
         return;
       }
@@ -5065,7 +5569,7 @@ function paint(err, thinking){
             + '<div class="col"><div class="who">'+esc(who.name||"")+'</div>'
             + '<div class="bub" data-i="'+i+'">'+fmt(p.text)+'</div></div></div>';
     });
-    h += body + altBarHTML(m,i,i===log.length-1) + (selIdx===i?actsHTML(i):"");
+    h += body + sceneHTML(c,m,i) + altBarHTML(m,i,i===log.length-1) + (selIdx===i?actsHTML(i):"");
   }
   if (thinking){
     var many = castOf(c).length >= 2;
@@ -5107,9 +5611,23 @@ function paint(err, thinking){
       if (t2 && (fresh || !t2.log.length)) setTimeout(smsTurn, 60);
     };
   });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-igph]"), function(el){
+    bindHold(el, function(){
+      var host=el.closest("[data-i]"); if(!host) return;
+      var k=igKey(c, +host.getAttribute("data-i"), +el.getAttribute("data-igph"));
+      if (igOpen[k]) delete igOpen[k]; else igOpen[k]=1;
+      keepScroll = view.scrollTop || 1; paint();
+    });
+  });
   Array.prototype.forEach.call(view.querySelectorAll("[data-i]"), function(el){
-    var i=+el.getAttribute("data-i");
-    bindHold(el, function(){ keepScroll = view.scrollTop || 1; selIdx = (selIdx===i) ? -1 : i; paint(); });
+    var i=+el.getAttribute("data-i"), holdSrc=null;
+    var mark=function(e){ holdSrc=e.target; };
+    el.addEventListener("touchstart", mark, {passive:true, capture:true});
+    el.addEventListener("mousedown", mark, true);
+    bindHold(el, function(){
+      if (holdSrc && holdSrc.closest && holdSrc.closest("[data-igph]")) return;
+      keepScroll = view.scrollTop || 1; selIdx = (selIdx===i) ? -1 : i; paint();
+    });
     var sx=null, sy=null;
     el.addEventListener("touchstart", function(e){ sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, {passive:true});
     el.addEventListener("touchend", function(e){
@@ -5136,7 +5654,7 @@ function paint(err, thinking){
           igPut(d).then(function(ref){
             if(!ref){ alert("사진을 저장하지 못했어."); return; }
             igEditPost(c,mi,upi,function(pp){ igDrop(pp); pp.image=ref; });
-            paint();
+            igClose(c,mi,upi); paint();
           });
         }, 1080);
         return;
@@ -5145,12 +5663,14 @@ function paint(err, thinking){
         var p=igPost(c,mi,+el.getAttribute("data-igcopy"));
         if(p) copyText(String(p.photo||""));
         el.textContent="복사됨";
-        setTimeout(function(){ el.textContent="묘사 복사"; },1200);
+        var cpi=+el.getAttribute("data-igcopy");
+        setTimeout(function(){ igClose(c,mi,cpi); paint(); },900);
         return;
       }
       if (el.hasAttribute("data-igdrop")){
-        igEditPost(c,mi,+el.getAttribute("data-igdrop"),function(pp){ igDrop(pp); delete pp.image; });
-        paint(); return;
+        var dpi=+el.getAttribute("data-igdrop");
+        igEditPost(c,mi,dpi,function(pp){ igDrop(pp); delete pp.image; });
+        igClose(c,mi,dpi); paint(); return;
       }
       igMake(c, mi, +el.getAttribute("data-igmake"), el);
     };
@@ -5158,6 +5678,7 @@ function paint(err, thinking){
   Array.prototype.forEach.call(view.querySelectorAll("[data-cp]"), function(el){
     el.onclick=function(){ copyText(getLog(c.id)[+el.getAttribute("data-cp")].t); selIdx=-1; paint(); };
   });
+  naiBindChat(c);
   Array.prototype.forEach.call(view.querySelectorAll("[data-ap],[data-an]"), function(el){
     el.onclick=function(){
       var i=+(el.getAttribute("data-ap")||el.getAttribute("data-an"));
@@ -5203,7 +5724,7 @@ function paint(err, thinking){
 /* ---------- 명령어 ---------- */
 var PRIVATE_NOTE = "\n\n목록은 캐릭터 설정과 현재까지의 대화, 생활환경, 예산, 취향, 실제 필요를 종합해 구성한다. '사용할 법함'과 '최근에 구매할 이유가 있음'을 구분한다. 직업·종족·성격 하나만으로 특정 구매를 단정하지 않는다. 같은 시점에 재조회하면 이미 나온 품목·날짜·금액을 유지하고, 시간이 흐르거나 새로운 필요가 생겼을 때 자연스럽게 갱신한다. 이미 보유한 물건은 소진·고장·선물 등의 이유 없이 다시 사지 않는다.\n성인임이 확인된 인물의 사적인 구매는 다른 일상 구매와 똑같이 취급한다. 다른 생필품을 고르는 것과 같은 기준으로 판단하고, 사적이라는 이유만으로 목록에서 빼지 않는다. 콘돔, 수용성 윤활제, 바이브레이터, 진동 링처럼 중립적인 품목명과 재질·규격을 그대로 쓴다. 이 인물이 혼자 쓸 물건인지, 성인인 상대와의 관계에서 함께 필요해진 물건인지는 맥락으로 판단한다. 상대와의 관계가 아직 없어도 혼자 쓰는 물건은 그것대로 성립한다. 성인 여부가 확인되지 않은 인물에게만 이 판단을 적용하지 않는다. 정해진 개수나 비율을 억지로 채우지는 않되, 이 인물의 생활에 그런 필요가 있다면 그것도 실제 필요이므로 빠뜨리지 않는다.\n오직 중립적인 상품명·가격·판매처·날짜·상태만 표시한다. 사용 장면, 신체 묘사, 성적 상상, 구매 이유 해설은 출력하지 않는다. 상품명을 특정 사람이나 신체를 지칭하는 성적인 문장으로 만들지 않는다.";
 var CMDS = {
-  "/인스타":"이번 턴에는 이야기 속 인물의 가상 인스타 계정만 [인스타]와 [/인스타] 사이에 JSON으로 쓴다. 형식: {\"handle\":\"계정 이름\",\"bio\":\"소개\",\"private\":false,\"posts\":[{\"photo\":\"게시된 사진의 구체적인 모습\",\"caption\":\"인물이 쓴 캡션\",\"date\":\"장면 속 게시 날짜\",\"likes\":12,\"comments\":[{\"who\":\"댓글 작성자\",\"text\":\"댓글\"}]}]}. 최근 게시물은 0~3개, 댓글은 게시물당 0~4개. 댓글은 한 사람에게 쏠리지 않게 여러 사람이 남긴다. 친구·지인·동료·팔로워 같은 주변 인물, 사용자, 계정 주인의 답글이 자연스럽게 섞인다. 사용자가 매번 댓글을 다는 것은 아니다. 인물의 성격·생활·현재 대화·시대에 맞춘다. 게시하지 않는 인물이면 posts는 빈 배열. 비공개 여부나 유명세를 억지로 만들지 않는다. 등장인물이 알지 못하는 비밀을 게시물로 공개하지 않는다. photo는 텍스트로 사진의 모습을 묘사하는 칸이며 이미지 URL이나 생성 지시를 넣지 않는다. 실제 Instagram 게시나 실제 사진 생성은 아니다. 캡션과 댓글은 각 인물이 쓸 법한 말투를 따른다.",
+  "/인스타":"이번 턴에는 이야기 속 인물의 가상 인스타 계정만 [인스타]와 [/인스타] 사이에 JSON으로 쓴다. 형식: {\"handle\":\"계정 이름\",\"bio\":\"소개\",\"private\":false,\"posts\":[{\"photo\":\"게시된 사진의 구체적인 모습\",\"caption\":\"인물이 쓴 캡션\",\"date\":\"장면 속 게시 날짜\",\"likes\":12,\"comments\":[{\"who\":\"댓글 작성자 인스타 아이디\",\"text\":\"댓글\"},{\"who\":\"계정 이름과 같은 아이디\",\"reply_to\":\"답글 받는 사람 아이디\",\"text\":\"@답글 받는 사람 아이디 답글 내용\"}]}]}. 최근 게시물은 0~3개, 댓글은 게시물당 0~4개. handle과 모든 who는 @ 없이 영문 소문자·숫자·밑줄·마침표로 된 인스타 아이디로 쓴다. 사용자도 이름이 아니라 아이디로 쓰고, 같은 사람은 항상 같은 아이디를 쓴다. 계정 주인이 답글을 달 때는 who를 handle과 똑같이 쓰고, reply_to에 상대 아이디를 넣고, text를 반드시 '@상대아이디 '로 시작한다. 답글은 답하는 댓글 바로 아래에 둔다. 댓글은 한 사람에게 쏠리지 않게 여러 사람이 남긴다. 친구·지인·동료·팔로워 같은 주변 인물, 사용자, 계정 주인의 답글이 자연스럽게 섞인다. 사용자가 매번 댓글을 다는 것은 아니다. 인물의 성격·생활·현재 대화·시대에 맞춘다. 게시하지 않는 인물이면 posts는 빈 배열. 비공개 여부나 유명세를 억지로 만들지 않는다. 등장인물이 알지 못하는 비밀을 게시물로 공개하지 않는다. photo는 텍스트로 사진의 모습을 묘사하는 칸이며 이미지 URL이나 생성 지시를 넣지 않는다. 실제 Instagram 게시나 실제 사진 생성은 아니다. 캡션과 댓글은 각 인물이 쓸 법한 말투를 따른다.",
   "/전환":"장면을 전환한다. 먼저 첫 줄에 [나레] 를 쓰고 시간과 장소가 어떻게 바뀌었는지 소설처럼 서술한 뒤 [/나레] 로 닫는다. 그 아래에 인물의 말풍선을 이어 쓴다. 나레이션은 이번 턴에만 쓰고 다음 턴부터는 쓰지 않는다.",
   "/관계도":"[관계]와 [/관계] 사이에 관계를 최대 네 묶음으로 쓴다. 각 묶음은 빈 줄로 구분하고 아래 라벨을 한 줄씩 사용한다.\n사이: 인물 A ↔ 인물 B · 구체적인 관계\nA의 시선: A가 B를 어떻게 대하는지 실제 행동과 함께\nB의 시선: 확인된 반응, 미확인이라면 아직 모름\n최근 일: 둘 사이에서 실제로 있었던 구체적인 사건\n추상적인 특별한 관계, 복잡한 감정 같은 표현으로 대신하지 않는다. 설정과 대화에서 확인된 사실을 우선한다. 단서가 없으면 없다고 짧게 쓴다. 빈칸을 채우려고 연애·배신·큰 사건을 만들지 않는다. 작은 새 설정을 보탤 때도 기존 서사를 뒤집지 않는다. 추측과 확인된 사실을 구분하고, 당사자가 알지 못하는 내용을 알고 행동하게 하지 않는다.",
   "/관계":"[관계]와 [/관계] 사이에 관계를 최대 네 묶음으로 쓴다. 각 묶음은 빈 줄로 구분한다. 사이: 인물 A ↔ 인물 B · 관계, A의 시선: 구체적 태도, B의 시선: 확인된 반응 또는 아직 모름, 최근 일: 구체적인 사건을 각각 한 줄씩 쓴다. 설정과 대화에서 확인된 사실을 우선한다. 단서가 없으면 없다고 짧게 쓴다. 빈칸을 채우려고 연애·배신·큰 사건을 만들지 않는다. 작은 새 설정을 보탤 때도 기존 서사를 뒤집지 않는다. 추측과 확인된 사실을 구분하고, 당사자가 알지 못하는 내용을 알고 행동하게 하지 않는다.",
@@ -5324,7 +5845,7 @@ function lengthGuide(c){
     return "이번 응답 분량: 자동. 정해진 글자 수가 없다. 이번 장면이 필요로 하는 만큼만 쓴다. "
       + "인사나 짧은 대꾸처럼 오갈 말이 적으면 한두 줄로 끝내고, 상황이 크게 움직이거나 묘사할 것이 많으면 길게 쓴다. "
       + "직전 몇 번의 응답과 같은 길이로 맞추려 하지 않는다. 짧은 답이 이어져도 괜찮고, 필요하면 바로 길어져도 된다. "
-      + "다만 " + (story ? "1500" : "900") + "자는 넘기지 않는다. "
+      + "다만 " + (story ? "1500" : "600") + "자는 넘기지 않는다. "
       + "분량을 채우기 위해 용건이나 사건을 만들지 않고, 길이를 맞추려고 문장을 자르지도 않는다. "
       + "지문·대사·외국어 원문·번역·발음을 합친 답변 전체 기준이며 구분자는 제외한다. "
       + "여러 인물이 나와도 전체 기준이고, 과거 응답이나 문체 예시의 분량을 따라가지 않는다.";
@@ -5372,7 +5893,7 @@ function formatGuide(c){
     :mode==="script" ? "대본 형식이다. 지문 문단과 대사를 빈 줄로 분리한다. 화자가 바뀌거나 지문에서 대사로 넘어가면 줄을 바꾼다. 대사의 이름표는 화면에서 붙이므로 이름 │ 를 본문에 중복해서 쓰지 않는다. 지문은 무대 지시처럼 간결하게 쓰고 소설체로 길게 늘이지 않는다."
     :"말풍선 형식이다. 같은 인물의 지문과 대사는 한 칸 띄워 한 덩어리로 이어 쓴다. 일반 서술·반성문·긴 독백도 본문은 문단이나 빈 줄 없이 이어 쓴다. 이름: 값, 나이: 값처럼 명확한 항목 목록만 항목별 한 줄을 허용한다.";
   if(mode==="bubble")return layout+"\n행동·묘사·내적 서술은 *지문*처럼 별표 한 쌍으로 감싸고, 실제로 말한 대사는 별표 밖에 쓴다. 모든 지문에 여는 별표와 닫는 별표를 빠짐없이 붙인다. 외국어 대사의 번역과 발음도 별표 밖에 둔다. 화자가 바뀔 때만 줄 맨 앞에 [인물이름]을 쓴다. 지문은 처음부터 자연스러운 한국어로 쓰고 불필요한 대명사·소유격 반복을 줄인다. 번역 대사는 인물의 말투와 관계에 맞춘다. 인칭과 시제는 선택된 설정을 유지한다."
-    +"\n지문이 이야기의 무게를 진다. 대사는 짧게 툭 던지고, 대사 한두 마디마다 지문 한 덩어리를 붙이는 비율이 기본이다."
+    +"\n대사와 지문이 함께 이야기를 끌고 간다. 대사 한두 마디마다 지문을 붙이되, 지문 한 덩어리는 두세 문장 안에서 끊는다."
     +"\n지문에 동작만 나열하지 않는다. 인물이 무엇을 알고 어떻게 판단하는지, 지금 무엇을 느끼는지를 함께 쓴다. 온도, 소리, 냄새, 감촉, 주변 풍경처럼 감각으로 잡히는 것을 섞는다."
     +"\n문장은 짧게 끊어 쓰고 한 문장에 동작을 여러 개 이어 붙이지 않는다. 다만 조사와 서술어를 빠뜨리지 않고 어법에 맞는 완결된 문장으로 쓴다."
     +"\n지문을 앞에 길게 쌓아두고 대사를 마지막에 몰아 붙이지 않는다. 대사로 시작해도 되고, 매 답을 같은 리듬으로 쓰지 않는다.";
@@ -5470,6 +5991,28 @@ function commerceResponse(text,c,command,log,context){
   if(room && room.currency!==code){room.currency=code;saveChars();}
   return "["+kind+"]\n"+(rows.join("\n")||"내역 없음 | — | — | — | —")+"\n[/"+kind+"]";
 }
+/* v48u: 인스타 사진 버튼은 사진 칸을 꾹 눌렀을 때만 */
+var igOpen = {}, igCurMsg = -1;
+function igKey(c, mi, pi){ return c.id+":"+mi+":"+pi; }
+function igClose(c, mi, pi){ delete igOpen[igKey(c, mi, pi)]; }
+/* 계정 주인 답글은 항상 '@상대아이디 '로 시작하게 맞춘다 */
+function igFixReplies(list, handle){
+  var out=[], h=String(handle||"").replace(/^@/,"").trim().toLowerCase();
+  (Array.isArray(list)?list:[]).forEach(function(q){
+    if (!q || typeof q!=="object") return;
+    var who=String(q.who||"").replace(/^@/,"").trim(), text=String(q.text||"").trim();
+    var mine = h && who.toLowerCase()===h;
+    var to = String(q.reply_to||q.to||"").replace(/^@/,"").trim();
+    if (mine && !/^@/.test(text)){
+      if (!to){
+        for (var k=out.length-1;k>=0;k--){ if (out[k].who.toLowerCase()!==h){ to=out[k].who; break; } }
+      }
+      if (to) text="@"+to+" "+text;
+    }
+    out.push({ who:who||"익명", text:text, reply: mine || /^@/.test(text) });
+  });
+  return out;
+}
 function instagramHTML(body,c){
   var data;
   try{data=JSON.parse(String(body).trim());}catch(e){return '<div class="insta"><div class="pt">인스타</div>'+cardText(body)+'</div>';}
@@ -5482,10 +6025,11 @@ function instagramHTML(body,c){
     h+='<article class="ig-post">';
     var src = igSrc(p);
     if(src){
-      h+='<div class="ig-photo has-img"><img src="'+esc(src)+'" alt="'+esc(p.photo||"")+'"></div>';
+      h+='<div class="ig-photo has-img" data-igph="'+pi+'"><img src="'+esc(src)+'" alt="'+esc(p.photo||"")+'"></div>';
     }else{
-      h+='<div class="ig-photo" role="img" aria-label="사진 묘사"><p>'+esc(p.photo||"사진 없음")+'</p></div>';
+      h+='<div class="ig-photo" data-igph="'+pi+'" role="img" aria-label="사진 묘사"><p>'+esc(p.photo||"사진 없음")+'</p></div>';
     }
+    if (igOpen[igKey(c, igCurMsg, pi)])
     h+='<div class="ig-act">'
       +'<button data-igup="'+pi+'">'+(src?"사진 바꾸기":"사진 올리기")+'</button>'
       +'<button data-igcopy="'+pi+'">묘사 복사</button>'
@@ -5495,8 +6039,10 @@ function instagramHTML(body,c){
      + (p.likes!=null?'<div class="ig-meta">좋아요 '+esc(p.likes)+'</div>':'')
      + '<p><b>'+esc(name)+'</b> '+esc(p.caption||"")+'</p>'
      + '<div class="ig-when">'+esc(igWhen(p))+'</div>';
-    (Array.isArray(p.comments)?p.comments.slice(0,4):[]).forEach(function(q){
-      if(q)h+='<div class="ig-comment"><b>'+esc(q.who||"익명")+'</b> '+esc(q.text||"")+'</div>';
+    igFixReplies(p.comments, name).slice(0,4).forEach(function(q){
+      var tx=esc(q.text||""), re=q.reply;
+      tx=tx.replace(/^(@[^\s@]+)/,'<span class="ig-at">$1</span>');
+      h+='<div class="ig-comment'+(re?' re':'')+'"><b>'+esc(q.who||"익명")+'</b> '+tx+'</div>';
     });
     h+='</div></article>';
   });
@@ -5519,7 +6065,7 @@ function igEditPost(c,msgIdx,postIdx,fn){
   var p=r.d.posts[postIdx]; if(!p) return false;
   fn(p);
   r.m.t="[인스타]\n"+JSON.stringify(r.d)+"\n[/인스타]";
-  return put(logKey(c.id), r.lg);
+  return logPut(logKey(c.id), r.lg);
 }
 function igServer(){ return String(cfg.imgServer||"").trim().replace(/\/+$/,""); }
 function igStats(){
@@ -5549,6 +6095,11 @@ function storeStats(){
   var orig=0, origN=0;
   rows.forEach(function(r){ if(r.k.indexOf("gz.orig.")===0){ orig+=r.n; origN++; } });
   return { rows:rows, total:total, orig:orig, origN:origN };
+}
+function picTotal(){
+  var n=0;
+  for (var k in picCache) if (Object.prototype.hasOwnProperty.call(picCache,k)) n += String(picCache[k]).length;
+  return n;
 }
 function fmtKB(n){ return n<1048576 ? Math.round(n/1024)+"KB" : (n/1048576).toFixed(1)+"MB"; }
 /* 얼굴 유지용 참조 사진. 서버가 최대 3장까지 받는다 */
@@ -5625,9 +6176,9 @@ function igMake(c,msgIdx,postIdx,btn){
     st.textContent="사진 받는 중…";
     igShrink(remote, function(dataUrl){
       igPut(dataUrl).then(function(ref){
-        if (ref && igEditPost(c,msgIdx,postIdx,function(pp){ igDrop(pp); pp.image=ref; })){ paint(); return; }
+        if (ref && igEditPost(c,msgIdx,postIdx,function(pp){ igDrop(pp); pp.image=ref; })){ igClose(c,msgIdx,postIdx); paint(); return; }
         if (igEditPost(c,msgIdx,postIdx,function(pp){ igDrop(pp); pp.image=remote; })){
-          paint();
+          igClose(c,msgIdx,postIdx); paint();
           alert("사진을 앱에 저장하지 못했어. 서버 주소로 걸어뒀으니 PC가 켜져 있는 동안은 보여.");
           return;
         }
@@ -5636,7 +6187,7 @@ function igMake(c,msgIdx,postIdx,btn){
       });
     }, function(e){
       if (igEditPost(c,msgIdx,postIdx,function(pp){ pp.image=remote; })){
-        paint();
+        igClose(c,msgIdx,postIdx); paint();
         alert("사진은 만들어졌는데 앱에 복사하지 못했어 ("+(e.message||"원인 불명")+"). 서버 주소로 걸어뒀으니 PC가 켜져 있는 동안은 보여.");
         return;
       }
@@ -6317,7 +6868,7 @@ $("#reset").onclick=function(){
 
 applyTheme();
 render();
-picLoad().then(function(){ try{ igMigrate(); }catch(e){} render(); });
+picLoad().then(function(){ return logLoad(); }).then(function(){ try{ igMigrate(); }catch(e){} render(); });
 
 /* Keep the visual viewport and the reading position together through Safari's Done animation. */
 function installViewportLayout(){
