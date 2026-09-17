@@ -341,6 +341,7 @@
   .snar, .ssay{white-space:pre-wrap;word-break:break-word;margin:0 0 12px;
     font-family:var(--f-body);font-size:var(--fs);line-height:1.5;letter-spacing:-.004em}
   .snar{color:var(--nar)}
+  .ssay{color:var(--text);font-weight:500}
   .ssay b{font-weight:700}
   .ssay b::after{content:" │ ";color:var(--muted);font-weight:400}
   .ssay .q2 + .tr{display:block;margin-top:1px}
@@ -409,7 +410,7 @@
   body[data-novelbg] #view, body[data-novelbg] #app{background:transparent}
   body[data-novelbg] #app{isolation:isolate}
   /* 밝은 글씨·그림자는 본문 글에만. 인스타·문자 같은 카드는 원래 색 그대로 */
-  body[data-novelbg] #view.chat :is(.nov, .snar, .ssay, .msg.me .bub, .thinking, .ooc){
+  body[data-novelbg] #view.chat :where(.nov, .snar, .ssay, .msg.me .bub, .thinking, .ooc){
     --nar:rgba(232,232,240,.80);--text:#F4F4F8;--muted:rgba(230,230,238,.7);
     color:#F4F4F8;
     text-shadow:0 1px 2px rgba(0,0,0,.55),0 0 1px rgba(0,0,0,.45)}
@@ -511,6 +512,9 @@
   .altbar button{flex:0 0 auto;border:1px solid var(--line);background:var(--panel);color:var(--muted);
     font-size:14px;line-height:1;padding:5px 11px;border-radius:12px;cursor:pointer}
   .altbar button:active{background:var(--field)}
+  body[data-view=novel] .altbar, body[data-view=script] .altbar{margin:14px 0 18px 0}
+  body[data-novelbg] #view.chat .altbar{color:rgba(230,230,238,.75)}
+  body[data-novelbg] #view.chat .altbar button{background:rgba(20,20,26,.55);border-color:rgba(255,255,255,.18);color:#F1F1F5}
   .altbar span{padding:0 2px;min-width:34px;text-align:center}
   .acts{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
   .acts button{background:var(--field);border:1px solid var(--line);color:var(--text);font-family:inherit;font-size:13px;padding:7px 12px;border-radius:10px;cursor:pointer}
@@ -875,7 +879,7 @@
   .paper.letter .lsign{margin:var(--rlh) 0 0;display:block}
   .paper .lbody{min-width:0}
   .nov .np{margin:0 0 1.1em}
-  .snar,.ssay{margin-bottom:1.1em;line-height:1.85}
+  .snar,.ssay{margin-bottom:1.1em;line-height:1.5}
   .detail-card,.insta{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:12px 0;overflow:hidden;font-size:var(--cfs);line-height:1.75;overflow-wrap:anywhere}
   .detail-card{padding:16px}
   .detail-card .pt{color:var(--muted);font-size:12px;margin-bottom:10px}
@@ -1236,7 +1240,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-17 v48e";
+var APP_VER = "2026-09-17 v48j";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -2401,6 +2405,15 @@ function viewEdit(){
      + ['과거','현재'].map(function(o){
          return '<option'+((c.tense||"과거")===o?" selected":"")+'>'+o+'</option>'; }).join("")
      + '</select>';
+  h += '<label>소설 문체</label><select id="nvtone">'
+     + Object.keys(NOVEL_TONE).map(function(o){
+         return '<option'+((c.novelTone||"기본")===o?" selected":"")+'>'+o+'</option>'; }).join("")
+     + '</select>';
+  h += '<label>글 짜임</label><select id="nvflow">'
+     + Object.keys(NOVEL_FLOW).map(function(o){
+         return '<option'+((c.novelFlow||"기본")===o?" selected":"")+'>'+o+'</option>'; }).join("")
+     + '</select>'
+     + '<p class="hint" style="margin:4px 0 0">소설·대본 모드에서만 적용돼. 인칭·시제는 위 설정을 따라.</p>';
   /* v41h: 난이도·순응 억제는 프롬프트에서 빠져서 선택지도 숨겼다. 되살리려면 주석을 풀면 된다.
   h += '<label>난이도</label><select id="hard">'
      + ['쉬움','보통','어려움'].map(function(o){
@@ -2550,9 +2563,13 @@ function viewEdit(){
   };
   if ($("#pers")) $("#pers").onchange=function(){ c.person=this.value; saveChars(); };
   if ($("#tens")) $("#tens").onchange=function(){ c.tense=this.value; saveChars(); };
+  if ($("#nvtone")) $("#nvtone").onchange=function(){ c.novelTone=this.value; saveChars(); };
+  if ($("#nvflow")) $("#nvflow").onchange=function(){ c.novelFlow=this.value; saveChars(); };
   if ($("#hard")) $("#hard").onchange=function(){ c.hard=this.value; saveChars(); };
   if ($("#pers")) $("#pers").onchange=function(){ c.person=this.value; saveChars(); };
   if ($("#tens")) $("#tens").onchange=function(){ c.tense=this.value; saveChars(); };
+  if ($("#nvtone")) $("#nvtone").onchange=function(){ c.novelTone=this.value; saveChars(); };
+  if ($("#nvflow")) $("#nvflow").onchange=function(){ c.novelFlow=this.value; saveChars(); };
   if ($("#hard")) $("#hard").onchange=function(){ c.hard=this.value; saveChars(); };
   if ($("#mycol")) $("#mycol").oninput=function(){ c.myColor=this.value; saveChars(); };
   if ($("#bgdim")) $("#bgdim").oninput=function(){
@@ -4959,8 +4976,9 @@ function actsHTML(i){
        + '<button class="del" data-del="'+i+'">삭제</button>'
        + '<button class="del" data-cut="'+i+'">여기부터 지우기</button></div>';
 }
-function altBarHTML(m,i){
-  if (!m.alts || m.alts.length<2) return "";
+function altBarHTML(m,i,last){
+  /* 다른 답 넘기기는 마지막 답에만. 대화가 이어지면 사라진다 */
+  if (!m.alts || m.alts.length<2 || !last) return "";
   return '<div class="altbar" data-alt="'+i+'"><button data-ap="'+i+'">‹</button>'
        + '<span>'+((m.ai||0)+1)+' / '+m.alts.length+'</span>'
        + '<button data-an="'+i+'">›</button></div>';
@@ -5012,7 +5030,7 @@ function paint(err, thinking){
       continue;
     }
     var meta=String(m.t||"").match(/^\[OOC답변\]\s*([\s\S]*?)\s*\[\/OOC답변\]$/);
-    if(meta){h+='<div class="ooc" data-i="'+i+'">'+esc(meta[1])+'</div>'+altBarHTML(m,i)+(selIdx===i?actsHTML(i):"");continue;}
+    if(meta){h+='<div class="ooc" data-i="'+i+'">'+esc(meta[1])+'</div>'+altBarHTML(m,i,i===log.length-1)+(selIdx===i?actsHTML(i):"");continue;}
     var askK=askedCmd(log,i),displayText=m.t;
     if(askK==="/속마음"){try{displayText=normalizeMind(displayText);}catch(e){/* Keep malformed historical content visible for editing. */}}
     var ps=pieces(c,displayText),body="";
@@ -5047,7 +5065,7 @@ function paint(err, thinking){
             + '<div class="col"><div class="who">'+esc(who.name||"")+'</div>'
             + '<div class="bub" data-i="'+i+'">'+fmt(p.text)+'</div></div></div>';
     });
-    h += body + altBarHTML(m,i) + (selIdx===i?actsHTML(i):"");
+    h += body + altBarHTML(m,i,i===log.length-1) + (selIdx===i?actsHTML(i):"");
   }
   if (thinking){
     var many = castOf(c).length >= 2;
@@ -5092,13 +5110,14 @@ function paint(err, thinking){
   Array.prototype.forEach.call(view.querySelectorAll("[data-i]"), function(el){
     var i=+el.getAttribute("data-i");
     bindHold(el, function(){ keepScroll = view.scrollTop || 1; selIdx = (selIdx===i) ? -1 : i; paint(); });
-    var sx=null;
-    el.addEventListener("touchstart", function(e){ sx = e.touches[0].clientX; }, {passive:true});
+    var sx=null, sy=null;
+    el.addEventListener("touchstart", function(e){ sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, {passive:true});
     el.addEventListener("touchend", function(e){
       if (sx===null) return;
-      var dx = e.changedTouches[0].clientX - sx; sx=null;
-      if (Math.abs(dx) < 55) return;
+      var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy; sx=null; sy=null;
+      if (Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy)*1.5) return;
       var lg=getLog(c.id), m=lg[i];
+      if (i!==lg.length-1) return;
       if (!m || !m.alts || m.alts.length<2) return;
       var n = (m.ai||0) + (dx<0 ? 1 : -1);
       if (n<0) n = m.alts.length-1;
@@ -5330,6 +5349,23 @@ function conversationGuide(){
   */
   return "";
 }
+/* 소설 문체·글 짜임 — 소설·대본 모드에서만. 인칭·시제는 따로 설정한다 */
+var NOVEL_TONE = {
+  "기본": "",
+  "절제·냉소": "문체: 짧고 건조한 문장을 기본으로 한다. 감정은 설명하기보다 행동, 침묵, 사소한 사물로 드러낸다. 서술은 인물을 한 발짝 떨어져 관찰하며, 어울리는 순간에는 반어나 과장이 섞인 속말로 비꼰다. 가벼운 장면에도 설명되지 않는 불안을 조금 남긴다.",
+  "해학·속말": "문체: 서술에 초점 인물의 속말을 따옴표 없이 섞는다. 점잖은 서술 사이에 인물다운 거친 입말이 튀어나와도 된다. 생활에서 가져온 친근한 비유를 쓰고, 말버릇과 말투로 인물을 드러낸다. 겉으로는 가볍고 우습게 흘러가되, 그 아래 무거운 사정을 슬쩍 깔아 둔다. 시대극 말투는 세계관이 그 시대일 때만 쓴다."
+};
+var NOVEL_FLOW = {
+  "기본": "",
+  "끊어 가기": "글 짜임: 짧게 끊어 가는 흐름을 기본으로 한다. 대사끼리 주고받을 때는 사이에 지문을 끼우지 않고 이어서 두어도 되며, '~가 말했다' 같은 꼬리표는 줄인다. 말이 없는 순간은 '……' 한 줄로 보여줄 수 있다. 지문은 짧은 문장을 마침표로 끊어 잇고, 장면을 끊거나 충격을 줄 때 한 줄짜리 문단을 쓴다. 문장은 단정하게 맺고, 문단 끝은 짧은 문장으로 여운을 남긴다.",
+  "담백 일상": "글 짜임: 담백한 일상의 흐름을 기본으로 한다. 한두 마디 대사를 꼬리표 없이 주고받고, 대답 대신 침묵이 흐르면 '……' 한 줄로 보여줄 수 있다. 대사 뒤 지문은 짧게, 표정이나 행동 하나만 짚는다. 인물의 속말은 따옴표 없이 한두 마디로 툭 던지듯 섞는다. 문장을 마친 뒤 한 조각을 떼어 덧붙이는 맺음('조금이라도 덜.', '가만히.')과 짧은 현재형 속말 맺음을 가끔 쓰고, 나머지는 담담하게 맺는다. 감정은 설명하지 않고 생활 속 사소한 디테일로 보여준다.",
+  "풀어 가기": "글 짜임: 풀어 가는 흐름을 기본으로 한다. 대사 앞에는 누가 말하는지 알리는 짧은 지문을 두고, 대사 뒤에는 인물의 반응과 생각, 지난 사연까지 이어지는 지문을 둔다. 물었다, 덧붙였다, 중얼거렸다, 운을 뗐다처럼 대사 꼬리표를 다양하게 쓴다. 쉼표로 길게 잇는 문장과 짧은 문장을 섞고, '~뿐이었다', '~터였다', '~수밖에 없었다'처럼 맺음을 다양하게 하며, 때로는 문장을 뒤집어 맺는다. 인물의 속말로 문단을 열어도 된다."
+};
+function novelStyleGuide(c){
+  var a = NOVEL_TONE[c && c.novelTone] || "", b = NOVEL_FLOW[c && c.novelFlow] || "";
+  var s = [a,b].filter(Boolean).join("\n");
+  return s ? "\n" + s + "\n문체와 글 짜임은 기본 흐름일 뿐 틀이 아니다. 장면에 맞게 느슨하게 적용하고, 인물의 성격·말투는 캐릭터 설정과 문체 예시를 먼저 따른다." : "";
+}
 function formatGuide(c){
   var mode=chatFormat(c);
   var layout=mode==="novel" ? "소설 형식이다. 행동과 대사를 자연스럽게 엮고, 행동의 초점이나 화제가 바뀌면 빈 줄로 문단을 나눈다. 대사는 따옴표로 표시하며 대사만으로 된 문단도 가능하다. 문장마다 줄을 끊지는 않는다. 지문은 상황에 맞는 소설체로 쓴다.\n지문에 동작만 나열하지 않는다. 인물이 무엇을 알고 어떻게 판단하는지, 지금 무엇을 느끼는지를 함께 쓴다. 온도, 소리, 냄새, 감촉, 주변 풍경처럼 감각으로 잡히는 것을 섞는다.\n지문을 앞에 길게 쌓아두고 대사를 마지막에 몰아 붙이지 않는다. 대사로 시작해도 되고, 대사로 끝나도 지문으로 끝나도 된다. 시작과 끝을 한쪽으로 고정하지 말고, 매 답을 같은 리듬으로 쓰지 않는다."
@@ -5344,7 +5380,8 @@ function formatGuide(c){
     +"외국어 대사의 한국어 번역과 선택된 발음 표기도 같은 [대사] 안에 둔다. 화자 변경은 기존처럼 줄 맨 앞의 [인물이름]을 사용한다. "
     +"이야기 본문의 모든 지문과 대사를 빠짐없이 구분하고 시작한 구분자는 반드시 닫는다. 지문 안에서 문단을 나눌 때에는 문단마다 구분자를 다시 연다. "
     +"지문은 외국어를 직역한 글처럼 쓰지 말고 처음부터 자연스러운 한국어로 서술한다. 불필요한 대명사·이름·소유격 반복을 줄이고, 단어만 나열하는 문장을 습관적으로 반복하지 않는다. "
-    +"번역 대사에는 해당 인물의 말투와 실제 관계에 맞는 호칭을 유지한다. 인칭과 시제는 선택된 설정을 유지한다.";
+    +"번역 대사에는 해당 인물의 말투와 실제 관계에 맞는 호칭을 유지한다. 인칭과 시제는 선택된 설정을 유지한다."
+    + novelStyleGuide(c);
 }
 function normalizeStory(text){
   // Only explicit structure is converted. Never guess whether an unmarked sentence is narration.
