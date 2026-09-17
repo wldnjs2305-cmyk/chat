@@ -277,13 +277,11 @@
   body.dark[data-view=novel] .msg.me .bub, body.dark[data-view=script] .msg.me .bub{color:var(--myink,#B7ADEB)}
   body[data-view=novel] .msg.me .bub{font-size:var(--nfs,var(--fs))}
   /* 대본만 왼쪽 선을 남긴다 */
-  body[data-view=script] .msg.me .bub{border-left:2px solid var(--myink,#6B5CA5) !important;padding:2px 0 2px 13px}
-  body.dark[data-view=script] .msg.me .bub{border-left-color:var(--myink,#B7ADEB)}
   body[data-view=novel] .msg.me, body[data-view=script] .msg.me{margin-bottom:26px}
-  body[data-view=novel] .msg.me{margin:30px 0;padding:26px 0;
+  body[data-view=novel] .msg.me, body[data-view=script] .msg.me{margin:30px 0;padding:26px 0;
     border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
-  body[data-view=novel] .msg.me .bub{margin:0 !important;color:var(--text) !important;font-weight:400 !important}
-  body[data-novelbg][data-view=novel] .msg.me{border-color:rgba(255,255,255,.2)}
+  body[data-view=novel] .msg.me .bub, body[data-view=script] .msg.me .bub{margin:0 !important;color:var(--text) !important;font-weight:400 !important;padding:0 !important}
+  body[data-novelbg][data-view=novel] .msg.me, body[data-novelbg][data-view=script] .msg.me{border-color:rgba(255,255,255,.2)}
   .smschip{display:block;background:var(--field);border-radius:14px;
     padding:12px 15px;margin:14px 0;line-height:1.6;color:var(--text);font-weight:400}
   .smschip b{font-weight:700;margin-right:7px}
@@ -295,9 +293,10 @@
   .nov .np{margin:0 0 1em}
   .nov .np:last-child{margin-bottom:0}
   /* 소설: 지문 사이 짧은 문자, 명령어 줄 */
-  .nov .nsms{font-style:normal;font-weight:500;color:var(--smscol,#2F6BD8)}
-  body.dark .nov .nsms{--smscol:#8DB8FF}
-  body[data-novelbg] #view.chat .nov .nsms{color:#9CC6FF;font-style:normal}
+  .nov .nsms{font-style:normal;font-weight:500;color:var(--text)}
+  body[data-novelbg] #view.chat .nov .nsms{color:var(--saycol,#F4F4F8);font-style:normal}
+  .snar.nsms2{font-style:normal;font-weight:500;color:var(--text)}
+  body[data-novelbg] #view.chat .snar.nsms2{color:var(--saycol,#F4F4F8);font-style:normal}
   .nov .ncmd{font-style:normal;color:var(--muted);font-family:var(--f-body)}
   /* 소설·대본: 문자 카드 */
   .nsc{display:flex;gap:11px;align-items:flex-start;margin:14px 0;padding:13px 14px 12px;
@@ -416,11 +415,11 @@
     text-shadow:0 1px 2px rgba(0,0,0,.55),0 0 1px rgba(0,0,0,.45)}
   body[data-novelbg] #view.chat .thinking{color:rgba(230,230,238,.75)}
   body[data-novelbg] #view.chat .nov .nn, body[data-novelbg] #view.chat .snar{color:rgba(232,232,240,.80);font-style:italic}
-  body[data-novelbg] #view.chat .nov .ns, body[data-novelbg] #view.chat .ssay{color:var(--saycol,#FFC94A);
+  body[data-novelbg] #view.chat .nov .ns, body[data-novelbg] #view.chat .ssay{color:var(--saycol,#F4F4F8);
     text-shadow:none}
   body[data-novelbg] #view.chat .ssay b{color:#F4F4F8}
   body[data-novelbg] .tr{color:rgba(232,232,240,.75)}
-  body[data-novelbg][data-view=script] #view.chat .msg.me .bub{color:var(--myink,#F4F4F8)}
+
   body[data-novelbg] #view.chat .ooc{color:rgba(230,230,238,.7);border-color:rgba(255,255,255,.3)}
   body[data-novelbg] #view.chat :is(.smschip,.smschip *){text-shadow:none;color:var(--text)}
   body[data-novelbg] #view.chat .smschip{--text:#191820}
@@ -437,7 +436,7 @@
   .bgprev i::before{content:"";position:absolute;left:12px;right:12px;top:30px;height:34px;
     background:repeating-linear-gradient(180deg,rgba(235,235,240,.8) 0 2px,transparent 2px 9px)}
   .bgprev i::after{content:"";position:absolute;left:12px;right:28px;top:78px;height:11px;
-    background:repeating-linear-gradient(180deg,#FFC94A 0 2px,transparent 2px 9px)}
+    background:repeating-linear-gradient(180deg,#F4F4F8 0 2px,transparent 2px 9px)}
   .bgprev span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:28px}
   #view.sms{padding:0}
 
@@ -1237,7 +1236,7 @@ function setLog(id,l){
   var c=charById(id);
   if (c){ c.at=Date.now(); put("gz.chars", chars); }
 }
-var APP_VER = "2026-09-17 v48b";
+var APP_VER = "2026-09-17 v48e";
 var THEMES = [
   ["light","밝게"],
   ["ocean","스카이"], ["green","그린"], ["berry","핑크"], ["retro","레트로"], ["lcd","새벽 액정"], ["flip","파란 폴더폰"], ["night","밤"]
@@ -1445,6 +1444,11 @@ function userNovelHTML(raw, i){
   var quoteMode = !starMode && /["“「『]/.test(src);
   src.split(/\n+/).forEach(function(line){
     line = line.trim(); if (!line) return;
+    var sm = line.replace(/^\*+|\*+$/g,"").trim().match(/^\[([^\]\n]{1,300})\]$/);
+    if (sm){
+      out += '<p class="np"><span class="nsms">'+hilite(esc("["+sm[1].trim()+"]"))+'</span></p>';
+      return;
+    }
     var segs = [];
     if (starMode){ segs = docSegs(line); }
     else if (!quoteMode){ segs = [{nar:false, t:line}]; }
@@ -1474,6 +1478,11 @@ function userNovelHTML(raw, i){
 function scriptHTML(nm, raw, i){
   var segs = docSegs(stripJunk(raw)), out = "";
   segs.forEach(function(sg){
+    var sm = String(sg.t).trim().match(/^\[([^\]\n]{1,300})\]$/);
+    if (sm && !/[|#]/.test(sm[1])){
+      out += '<div class="snar nsms2">'+hilite(esc("["+sm[1].trim()+"]"))+'</div>';
+      return;
+    }
     var tx = esc(flow(sg.nar ? sg.t : quoteSay(sg.t)));
     tx = tx.replace(/([(（][^)）\n]*[)）])/g,'<span class="tr">$1</span>');
     tx = markUp(tx);
@@ -2356,7 +2365,7 @@ function viewEdit(){
      + '<input id="bgblur" type="range" min="0" max="12" step="1" value="'+blurOf(c)+'" style="padding:0">';
   h += '<label>배경 있을 때 대사 색</label>'
      + '<div style="display:flex;gap:8px;align-items:center">'
-     + '<input id="saycol" type="color" value="'+esc(c.sayColor||"#FFC94A")+'" style="width:56px;padding:2px;height:40px">'
+     + '<input id="saycol" type="color" value="'+esc(c.sayColor||"#F4F4F8")+'" style="width:56px;padding:2px;height:40px">'
      + '<button class="btn sm" id="saycolx" style="margin:0;width:auto">기본색으로</button></div>';
   h += picBlock("얼굴 참조 1","ref",picGet(c.id,"ref"));
   h += picBlock("얼굴 참조 2","ref2",picGet(c.id,"ref2"));
@@ -2375,10 +2384,6 @@ function viewEdit(){
      + [["bubble","말풍선"],["novel","소설"],["script","대본"]].map(function(o){
          return '<option value="'+o[0]+'"'+(chatFormat(c)===o[0]?' selected':'')+'>'+o[1]+'</option>'; }).join('')
      + '</select>';
-  h += '<label>대본에서 내 글 색</label>'
-     + '<div style="display:flex;gap:8px;align-items:center">'
-     + '<input id="mycol" type="color" value="'+esc(c.myColor||"#6B5CA5")+'" style="width:56px;padding:2px;height:40px">'
-     + '<button class="btn sm" id="mycolx" style="margin:0;width:auto">기본색으로</button></div>';
   h += '<label>길이</label><select data-k="length">'
      + ["자동","짧게","보통","길게"].map(function(o){
          var def = c.length || (c.kind==="다인" ? "자동" : "보통");
@@ -5001,7 +5006,7 @@ function paint(err, thinking){
       continue;
     }
     if (m.r==="u"){
-      var ub = (chatFormat(c)==="bubble") ? fmt(m.t) : (chatFormat(c)==="novel" ? userNovelHTML(m.t, i) : fmtIn(m.t));
+      var ub = (chatFormat(c)==="bubble") ? fmt(m.t) : userNovelHTML(m.t, i);
       h += '<div class="msg me"><div class="col"><div class="bub" data-i="'+i+'">'+ub+'</div>'
          + (selIdx===i?actsHTML(i):"")+'</div></div>';
       continue;
@@ -5101,11 +5106,22 @@ function paint(err, thinking){
       m.ai=n; m.t=m.alts[n]; setLog(c.id,lg); paint();
     }, {passive:true});
   });
-  Array.prototype.forEach.call(view.querySelectorAll("[data-igmake],[data-igcopy],[data-igdrop]"), function(el){
+  Array.prototype.forEach.call(view.querySelectorAll("[data-igmake],[data-igcopy],[data-igdrop],[data-igup]"), function(el){
     el.onclick=function(ev){
       ev.stopPropagation();
       var host=el.closest("[data-i]"); if(!host) return;
       var mi=+host.getAttribute("data-i");
+      if (el.hasAttribute("data-igup")){
+        var upi=+el.getAttribute("data-igup");
+        pickPhoto(function(d){
+          igPut(d).then(function(ref){
+            if(!ref){ alert("사진을 저장하지 못했어."); return; }
+            igEditPost(c,mi,upi,function(pp){ igDrop(pp); pp.image=ref; });
+            paint();
+          });
+        }, 1080);
+        return;
+      }
       if (el.hasAttribute("data-igcopy")){
         var p=igPost(c,mi,+el.getAttribute("data-igcopy"));
         if(p) copyText(String(p.photo||""));
@@ -5433,8 +5449,10 @@ function instagramHTML(body,c){
     }else{
       h+='<div class="ig-photo" role="img" aria-label="사진 묘사"><p>'+esc(p.photo||"사진 없음")+'</p></div>';
     }
-    h+='<div class="ig-act"><button data-igmake="'+pi+'">'+(src?"사진 다시 만들기":"사진 만들기")+'</button>'
+    h+='<div class="ig-act">'
+      +'<button data-igup="'+pi+'">'+(src?"사진 바꾸기":"사진 올리기")+'</button>'
       +'<button data-igcopy="'+pi+'">묘사 복사</button>'
+      +(igServer()?'<button data-igmake="'+pi+'">'+(src?"사진 다시 만들기":"사진 만들기")+'</button>':"")
       +(src?'<button data-igdrop="'+pi+'">사진 빼기</button>':"")+'</div>';
     h+='<div class="ig-caption">'
      + (p.likes!=null?'<div class="ig-meta">좋아요 '+esc(p.likes)+'</div>':'')
