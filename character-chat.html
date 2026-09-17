@@ -3340,7 +3340,12 @@ function cardText(t){
    보낸사람: 이름 / 받는사람: 이름 / 시간: … 머리줄이 있으면 그 아래 한 줄이 한 통.
    머리줄이 없으면 예전처럼 '이름: 내용' 줄. [사진] 설명 / (사진) 설명 은 사진 칸 */
 function smsRows(body, c, defWho){
-  var lines = String(body||"").replace(/\r/g,"").split("\n").map(function(l){ return l.trim(); }).filter(Boolean);
+  var lines = String(body||"").replace(/\r/g,"").split("\n").map(function(l){
+    /* 지문 별표나 대사 따옴표로 감싸 온 줄은 벗긴다 */
+    l = l.trim().replace(/^\*+\s*|\s*\*+$/g,"").trim();
+    var q = l.match(/^["\u201c]([\s\S]*)["\u201d]$/);
+    return q ? q[1].trim() : l;
+  }).filter(Boolean);
   var head = { from:"", to:"", time:"" }, rows = [];
   var hasFrom = lines.some(function(l){ return /^보낸\s*사람\s*[:：]/.test(l); });
   var who = defWho || "";
@@ -3658,7 +3663,7 @@ function cardHTML(kind, body, c){
   return "";
 }
 
-var KINDS = ["일기","편지","속마음","플리","나레","관계","상태","비밀","소문","커뮤","주문","결제","인스타","시청","통화","리뷰","메모"];
+var KINDS = ["일기","편지","속마음","플리","나레","관계","상태","비밀","소문","커뮤","주문","결제","인스타","시청","통화","리뷰","메모","문자"];
 /* 이 카드들은 해당 명령어를 친 턴에만 카드로 그린다. 그냥 대화 중에 나오면 본문으로 흘린다 */
 var CARD_ONLY = {
   "일기":["/일기"], "편지":["/편지"], "속마음":["/속마음"], "플리":["/플리"],
