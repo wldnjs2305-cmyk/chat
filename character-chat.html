@@ -287,6 +287,39 @@
   .nov em{font-family:inherit;font-style:normal;font-weight:400;color:var(--nar)}
   .nov .np{margin:0 0 1em}
   .nov .np:last-child{margin-bottom:0}
+  /* 소설: 지문 사이 짧은 문자, 명령어 줄 */
+  .nov .nsms{font-style:normal;font-weight:500;color:var(--smscol,#2F6BD8)}
+  body.dark .nov .nsms{--smscol:#8DB8FF}
+  body[data-novelbg] #view.chat .nov .nsms{color:#9CC6FF;font-style:normal}
+  .nov .ncmd{font-style:normal;color:var(--muted);font-family:var(--f-body)}
+  /* 소설·대본: 문자 카드 */
+  .nsc{display:flex;gap:11px;align-items:flex-start;margin:14px 0;padding:13px 14px 12px;
+    background:var(--field);border:1px solid var(--line);border-radius:18px;
+    font-family:var(--f-body);font-style:normal;text-shadow:none}
+  .nsc-av{flex:0 0 auto;width:38px;height:38px;border-radius:50%;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;background:var(--bg);font-size:19px}
+  .nsc-av img{width:100%;height:100%;object-fit:cover}
+  .nsc-main{flex:1;min-width:0}
+  .nsc-hd{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin:1px 0 6px}
+  .nsc-hd b{font-weight:700;font-size:14.5px;color:var(--accent)}
+  .nsc-hd span{font-size:12px;color:var(--muted)}
+  .nsc-b{display:table;max-width:100%;margin:5px 0 0;padding:7px 12px;border-radius:14px;
+    background:var(--bg);color:var(--text);font-size:var(--fs);line-height:1.45;
+    white-space:pre-wrap;word-break:break-word}
+  .nsc-ph{margin:6px 0 0;border-radius:12px;background:var(--bg);border:1px dashed var(--line);
+    padding:18px 12px;text-align:center;color:var(--muted);font-size:13px;line-height:1.45}
+  .nsc-ph span{display:block;font-size:24px;margin-bottom:4px}
+  .nsc-ph i{font-style:normal}
+  .nsc-rd{text-align:right;font-size:11.5px;color:var(--muted);margin-top:5px}
+  .nsc.me{border-color:color-mix(in srgb, var(--accent) 45%, var(--line))}
+  .nsc.me .nsc-b{background:color-mix(in srgb, var(--accent) 16%, var(--bg))}
+  body[data-novelbg] #view.chat .nsc{background:rgba(22,22,30,.78);border-color:rgba(255,255,255,.1);color:#F1F1F5}
+  body[data-novelbg] #view.chat .nsc-b, body[data-novelbg] #view.chat .nsc-ph{background:rgba(255,255,255,.08);color:#F1F1F5;border-color:rgba(255,255,255,.14)}
+  body[data-novelbg] #view.chat .nsc-hd b{color:#FFC94A}
+  body[data-novelbg] #view.chat .nsc.me .nsc-hd b{color:#B9ADFF}
+  body[data-novelbg] #view.chat .nsc.me{border-color:rgba(185,173,255,.45)}
+  body[data-novelbg] #view.chat .nsc.me .nsc-b{background:rgba(185,173,255,.18)}
+  body[data-novelbg] #view.chat :is(.nsc-hd span,.nsc-rd,.nsc-ph){color:rgba(230,230,238,.65)}
   /* 화자 표시([이름])로 답이 여러 덩어리로 나뉘어도 문단 간격을 똑같이 둔다 */
   .nov + .nov, .nov + [data-i], [data-i] + .nov{margin-top:1em}
   .nov .nn{color:var(--nar)}
@@ -1364,6 +1397,13 @@ function novelHTML(raw, i){
     var segs = docSegs(par), inner = "";
     function flush(){ if (inner) out += '<p class="np">'+inner+'</p>'; inner = ""; }
     segs.forEach(function(sg){
+      /* *[내용]* — 지문 사이에 끼는 짧은 문자. 기울이지 않고 따로 줄 */
+      var sm = String(sg.t).trim().match(/^\[([^\]\n]{1,300})\]$/);
+      if (sm && !/[|#]/.test(sm[1])){
+        flush();
+        out += '<p class="np"><span class="nsms">'+hilite(esc("["+sm[1].trim()+"]"))+'</span></p>';
+        return;
+      }
       var body = sg.nar ? sg.t : quoteSay(sg.t);
       var tx = esc(body);
       tx = tx.replace(/([(（][^)）\n]*[)）])/g,'<span class="tr">$1</span>');
@@ -1385,6 +1425,8 @@ function novelHTML(raw, i){
 /* 소설 — 내 글. 별표가 있으면 별표 기준, 없으면 따옴표 안을 대사로 본다. 줄마다 문단 */
 function userNovelHTML(raw, i){
   var src = String(stripJunk(raw)).replace(/\r/g,"");
+  if (/^\s*\//.test(src))
+    return '<div class="nov"><p class="np"><span class="ncmd">'+esc(src.trim())+'</span></p></div>';
   var starMode = /\*/.test(src), out = "";
   var quoteMode = !starMode && /["“「『]/.test(src);
   src.split(/\n+/).forEach(function(line){
@@ -3294,8 +3336,63 @@ function cardText(t){
   out=out.replace(/([(（][^)）\n]*[)）])/g,'<span class="tr">$1</span>');
   return out;
 }
+/* 문자 본문 해석.
+   보낸사람: 이름 / 받는사람: 이름 / 시간: … 머리줄이 있으면 그 아래 한 줄이 한 통.
+   머리줄이 없으면 예전처럼 '이름: 내용' 줄. [사진] 설명 / (사진) 설명 은 사진 칸 */
+function smsRows(body, c, defWho){
+  var lines = String(body||"").replace(/\r/g,"").split("\n").map(function(l){ return l.trim(); }).filter(Boolean);
+  var head = { from:"", to:"", time:"" }, rows = [];
+  var hasFrom = lines.some(function(l){ return /^보낸\s*사람\s*[:：]/.test(l); });
+  var who = defWho || "";
+  lines.forEach(function(l){
+    var h;
+    if ((h = l.match(/^보낸\s*사람\s*[:：]\s*(.*)$/))){ head.from = h[1].trim(); who = head.from; return; }
+    if ((h = l.match(/^받는\s*사람\s*[:：]\s*(.*)$/))){ head.to = h[1].trim(); return; }
+    if ((h = l.match(/^시간\s*[:：]\s*(.*)$/))){ head.time = h[1].trim(); return; }
+    var w = who, txt = l;
+    if (!hasFrom){
+      var m = l.match(/^([^:：]{1,20})[:：]\s*([\s\S]*)$/);
+      if (m && (findPerson(c, m[1]) || isUserName(c, m[1]) || !defWho)){ w = m[1].trim(); txt = m[2].trim(); }
+    }
+    var ph = txt.match(/^\s*[\[(（]\s*사진\s*[\])）]\s*([\s\S]*)$/);
+    rows.push({ who:w, t: ph ? ph[1].trim() : txt, photo: !!ph, mine: isUserName(c, w) });
+  });
+  return { head:head, rows:rows };
+}
+function smsNovelCard(body, c, defWho){
+  var r = smsRows(body, c, defWho), rows = r.rows;
+  if (!rows.length) return "";
+  var runs = [];
+  rows.forEach(function(x){
+    var last = runs[runs.length-1];
+    if (last && last.who===x.who) last.items.push(x);
+    else runs.push({ who:x.who, mine:x.mine, items:[x] });
+  });
+  return runs.map(function(run, k){
+    var p = run.mine ? { disp:udispOf(c), avatar:c.userAvatar }
+                     : (findPerson(c, run.who) || { disp:run.who, avatar:"" });
+    var nm = run.mine ? udispOf(c) : ((p.disp||"").trim() || p.name || run.who || dispOf(c));
+    var body = run.items.map(function(x){
+      if (x.photo) return '<div class="nsc-ph"><span>📷</span><i>'+esc(x.t||"사진")+'</i></div>';
+      return '<div class="nsc-b">'+esc(x.t)+'</div>';
+    }).join("");
+    return '<div class="nsc'+(run.mine?" me":"")+'">'
+      + avaHTML(p.avatar, run.mine?"🙂":"👤", "nsc-av")
+      + '<div class="nsc-main"><div class="nsc-hd"><b>'+esc(nm)+'</b>'
+      + (k===0 && r.head.time ? '<span>'+esc(r.head.time)+'</span>' : '') + '</div>'
+      + body
+      + (run.mine ? '<div class="nsc-rd">읽음</div>' : '')
+      + '</div></div>';
+  }).join("");
+}
 /* 대화 안에 끼는 작은 문자 화면 — 문자탭과 같은 클래스를 쓴다 */
 function smsMini(body, c){
+  /* 새 형식(보낸사람 머리줄·사진 줄)은 예전 '이름: 내용' 줄로 바꿔서 그린다 */
+  if (/^\s*보낸\s*사람\s*[:：]/m.test(String(body||"")) || /^\s*[\[(（]\s*사진\s*[\])）]/m.test(String(body||""))){
+    body = smsRows(body, c, dispOf(c)).rows.map(function(x){
+      return (x.mine ? (c.userName||"나") : x.who) + ": " + (x.photo ? "(사진) " : "") + x.t;
+    }).join("\n");
+  }
   var me = (c.userName||"나").trim();
   var rows = String(body||"").split("\n").filter(function(l){ return l.trim(); }).map(function(l){
     var m = l.match(/^\s*([^:：]{1,20})[:：]\s*([\s\S]*)$/);
@@ -3331,7 +3428,7 @@ function todayLabel(){
   return d.getFullYear()+"년 "+(d.getMonth()+1)+"월 "+d.getDate()+"일";
 }
 function cardHTML(kind, body, c){
-  if (kind==="문자") return smsMini(body, c);
+  if (kind==="문자") return chatFormat(c)==="bubble" ? smsMini(body, c) : smsNovelCard(body, c, c.name||"");
   if (kind==="커뮤"){
     var site="", tag="", ttl="", body2=[], cm=[], mode=0;
     var meta={ who:"", when:"", hit:"", cmt:"", up:"" }, infoRaw="";
@@ -4866,6 +4963,14 @@ function paint(err, thinking){
          + (selIdx===i?actsHTML(i):"");
       continue;
     }
+    if (m.r==="u" && /^\s*\[문자\]/.test(String(m.t||""))){
+      var sb = String(m.t).replace(/^\s*\[문자\]\s*/,"").replace(/\s*\[\/문자\]\s*$/,"");
+      var sh = chatFormat(c)==="bubble"
+        ? smsMini(smsRows(sb, c, c.userName||"나").rows.map(function(x){ return (c.userName||"나")+": "+(x.photo?"(사진) ":"")+x.t; }).join("\n"), c)
+        : smsNovelCard(sb, c, c.userName||"나");
+      h += '<div data-i="'+i+'">'+sh+'</div>' + (selIdx===i?actsHTML(i):"");
+      continue;
+    }
     if (m.r==="u" && /^\s*\[메모\]/.test(String(m.t||""))){
       h += '<div data-i="'+i+'">'
          + cardHTML("메모", String(m.t).replace(/^\s*\[메모\]\s*/,"").replace(/\s*\[\/메모\]\s*$/,""), c)
@@ -5063,6 +5168,7 @@ var CMDS = {
   "/시청기록":"이번 턴에는 최근 시청 기록만 [시청]과 [/시청] 사이에 쓴다. 한 줄에 하나씩 '제목 | 채널 | 어디까지 봤는지 | 언제' 형식으로 쓰고 항목은 다섯 개다. 최근에 본 것이 위에 온다.\n제목과 채널은 이 인물이 볼 법한 것으로 자유롭게 짓는다. 실제로 존재하는 영상을 맞히려 하지 않는다. 채널명은 현실에 있는 곳을 써도 되고 그럴듯하게 지어내도 된다. 제목은 실제 유튜브 제목처럼 쓴다. 대문자 강조, 물음표 남발, ㅋㅋ나 ㄷㄷ 같은 표기도 그 채널 성격에 맞으면 쓴다.\n'어디까지 봤는지' 칸이 이 목록의 핵심이다. 끝까지 봤는지, 몇 분 보다 껐는지, 몇 번째 다시 보는지를 적는다.\n음악 영상으로 목록을 채우지 않는다. 노래는 따로 다룬다. 직업이나 성격 하나만으로 다섯 개를 같은 주제로 채우지 않는다. 찾아본 것과 아무 생각 없이 튼 것을 섞는다. 시간대가 드러나면 언제 칸에 적는다.\n같은 시점에 다시 조회하면 이미 나온 제목과 시점을 유지한다.\n현대 한국이 아니면 그 나라에서 실제로 쓰는 영상 플랫폼과 실존 채널로 맞춘다. 영상 플랫폼이 없는 세계관이면 그 시대에 이 인물이 구경하거나 즐겨 보던 것을 같은 형식으로 쓰고, 이때는 채널 칸에 실존 채널 대신 그 시대에 맞는 이름을 쓴다.",
   "/통화기록":"이번 턴에는 최근 통화 기록만 [통화]와 [/통화] 사이에 쓴다. 한 줄에 하나씩 '상대 | 통화 길이 | 발신 또는 수신 또는 부재중 | 날짜와 시각 | 비고' 형식으로 쓰고 항목은 여섯 개다. 최근이 위에 온다.\n상대는 설정과 대화에 이미 나온 사람을 우선하고, 없으면 이 인물의 생활에 있을 법한 사람이나 가게로 정한다. 이 인물이 저장해둔 이름 그대로 쓴다.\n부재중과 아주 짧은 통화를 반드시 섞는다. 누구의 전화를 받지 않았는지가 이 목록의 핵심이다. 비고에는 다시 걸었는지 정도만 짧게 쓰고 통화 내용을 지어내 옮기지 않는다.\n유저가 맡은 인물과의 통화는 대화에서 실제로 통화한 적이 있을 때만 넣는다.\n같은 시점에 다시 조회하면 이미 나온 기록을 유지한다.\n전화가 없는 세계관이면 최근에 주고받은 전갈이나 서신을 같은 형식으로 쓴다.",
   "/리뷰":"이번 턴에는 이 인물이 남긴 후기만 [리뷰]와 [/리뷰] 사이에 쓴다. 후기는 세 개이고 빈 줄로 나눈다. 각 후기는 다음 라벨을 각각 한 줄씩 쓴다.\n플랫폼: 후기를 남긴 곳. 쿠팡, 네이버 쇼핑, 배달의민족, 알라딘, 왓챠처럼 현실에 실제로 있는 이름을 쓴다. 한국이 아니면 그 나라에서 실제로 쓰는 곳으로 한다\n상품: 후기를 남긴 상품이나 작품의 이름\n옵션: 상품 아래에 붙는 짧은 선택 사항. '기초 1단계', '구이용 1kg', '블랙 / L', '2인분'처럼 쓴다. 붙일 것이 없으면 이 줄을 비워 둔다\n별점: 1에서 5 사이의 정수만 쓴다. 별표나 다른 기호를 쓰지 않는다\n날짜: 장면 속 날짜\n내용: 이 인물이 실제로 썼을 법한 후기 본문\n세 개의 플랫폼과 상품 종류를 서로 다르게 한다. 전부 음식이나 전부 책으로 채우지 않는다. 이 인물이 실제로 돈이나 시간을 쓴 것에서 고르고, 직업 하나만으로 단정하지 않는다.\n후기 본문은 대화할 때의 말투가 아니라 모르는 사람에게 쓰는 말투다. 이 차이가 이 카드의 핵심이다. 말을 짧게 하는 사람이면 한 줄로 끝낸다.\n별점을 전부 높게 주지 않는다. 별점이 낮으면 본문에도 그 이유가 드러나야 한다.\n후기 문화가 없는 세계관이면 그 시대에 남겼을 평이나 장부의 촌평을 같은 형식으로 쓰고, 플랫폼 칸에는 그 기록이 남은 곳을 쓴다.",
+  "/문자":"이번 턴에는 인물이 유저에게 폰으로 보내는 문자만 [문자]와 [/문자] 사이에 쓴다. 첫 줄에 보낸사람: 인물 이름을 쓰고, 그 아래에 문자 한 통을 한 줄씩 쓴다. 연달아 보내는 문자는 줄을 나눠 여러 통으로 쓴다. 사진을 보낼 때는 한 줄에 [사진] 사진에 담긴 모습을 쓴다. 카드 밖의 지문이나 대사는 쓰지 않는다. 이 인물의 평소 문자 말투와 지금 상황에 맞춘다.",
   "/플리":"이번 턴에는 노래 세 곡만 고른다. 첫 줄에 [플리] 를 쓰고, 아래 순서대로 한 줄에 하나씩 '제목 - 가수 :: 이유' 형식으로 쓴 뒤 [/플리] 로 닫는다. 첫 곡은 지금 상황에 어울려서 듣고 있는 곡, 둘째 곡은 상대를 생각하며 들었던 곡, 셋째 곡은 평소에 자주 듣던 곡이다. 이유는 한 문장으로 쓴다. 지문이나 대사 등 다른 내용은 한 줄도 쓰지 않는다.\n곡을 고르는 기준은 이렇다. 이 인물이 평소에 좋아할 만한 장르와 분위기로 고른다. 지금 장면이 슬프다고 슬픈 곡을 고르는 것이 아니라, 이 사람이라면 이런 걸 듣겠다 싶은 쪽으로 고른다. 성격, 자란 환경, 나이, 하는 일이 취향을 정한다.\n인물 설정에 음악 취향이 적혀 있으면 무엇보다 그것을 따른다.\n나이가 있거나 옛 시절 이야기를 자주 하는 인물이면 그 시절 곡이 섞여도 좋다. 세계관에 시대가 정해져 있으면 그 시대보다 나중에 나온 곡은 쓰지 않는다.\n세 곡을 전부 누구나 아는 대표곡으로 채우지 않는다. 한 곡 정도는 알려진 곡이어도 좋지만, 나머지는 덜 알려졌더라도 그 인물의 취향이 드러나는 곡으로 고른다.\n실제로 존재하는 곡만 쓴다. 제목이나 가수가 확실하지 않으면 지어내지 말고 확실히 아는 곡으로 바꾼다."
 };
 var CMD_SAY = {
@@ -5076,7 +5182,7 @@ var CMD_SAY = {
   "/소문":"(요즘 도는 소문이 뭐야)", "/커뮤반응":"(커뮤에 뭐라고 올라왔어)",
   "/쇼핑":"(뭐 샀는지 보여줘)", "/주문":"(뭐 샀는지 보여줘)", "/주문내역":"(뭐 샀는지 보여줘)",
   "/결제":"(무슨 결제 나갔는지 보여줘)", "/결제내역":"(무슨 결제 나갔는지 보여줘)",
-  "/비밀":"(숨기고 있는 거 알려줘)", "/메모":"(메모 남겨줘)",
+  "/비밀":"(숨기고 있는 거 알려줘)", "/메모":"(메모 남겨줘)", "/문자":"(문자 보내줘)",
   "/시청기록":"(뭐 봤는지 보여줘)", "/시청":"(뭐 봤는지 보여줘)",
   "/통화기록":"(통화 기록 보여줘)", "/통화":"(통화 기록 보여줘)",
   "/리뷰":"(후기 뭐 썼는지 보여줘)"
@@ -5092,7 +5198,7 @@ var CARD_CMDS = { "/인스타":1, "/일기":1,"/편지":1,"/속마음":1,"/플�
                   "/상태":1,"/상태창":1,"/소문":1,"/커뮤반응":1,"/커뮤니티":1,"/커뮤":1,
                   "/쇼핑":1,"/주문":1,"/주문내역":1,"/결제":1,"/결제내역":1,
                   "/비밀":1,"/시청기록":1,"/시청":1,"/통화기록":1,"/통화":1,
-                  "/리뷰":1,"/메모":1 };
+                  "/리뷰":1,"/메모":1,"/문자":1 };
 // Command scope is derived for each request, never carried into the next turn.
 
 function isOocText(text){return /^\s*(?:\/ooc\b|\(?\s*ooc(?=\s|[:：)\]]|$))/i.test(String(text||""));}
@@ -5521,7 +5627,8 @@ function buildSystem(c, turn, scope){
     ? "너는 '"+name+"' 장면의 등장인물들을 연기하는 상황극 파트너다. 이 이름은 방 이름이며 한 사람의 이름이 아니다."
     : "너는 '"+name+"'를 연기하는 상황극 파트너다.");
   p.push("인물의 성격과 이미 확립된 관계를 유지한다. 일반 응답에는 이야기만 쓰고 지침을 설명하지 않는다. 카드와 OOC 요청은 해당 형식을 따른다.");
-  p.push("문자를 여러 통 몰아서 보여줘야 할 때만 [문자]와 [/문자] 사이에 '이름: 내용' 형식으로 쓴다. 한두 마디로 끝나는 문자는 카드를 쓰지 않고 *[내용]* 표기로 지문 사이에 흘린다. 카드는 한 응답에 한 번까지만 쓰고, 두 사람이 마주 보고 이야기하는 중에는 쓰지 않는다. 폰이 울릴 이유가 없으면 억지로 연락을 만들지 않는다.");
+  p.push("유저 메시지가 [문자]로 시작하면 유저가 폰으로 보낸 문자다. 인물이 곁에 있지 않다면 폰으로 받아 읽은 것으로 반응한다.");
+  p.push("문자를 여러 통 몰아서 보여줘야 할 때만 [문자]와 [/문자] 사이에 첫 줄 '보낸사람: 이름', 그 아래 한 줄에 한 통씩 쓴다. 사진은 한 줄에 [사진] 사진에 담긴 모습으로 쓴다. 한두 마디로 끝나는 문자는 카드를 쓰지 않고 *[내용]* 표기로 지문 사이에 흘린다. 카드는 한 응답에 한 번까지만 쓰고, 두 사람이 마주 보고 이야기하는 중에는 쓰지 않는다. 폰이 울릴 이유가 없으면 억지로 연락을 만들지 않는다.");
   p.push("메모는 자리를 비우거나 먼저 나가거나 상대가 잠들었을 때만 [메모]와 [/메모] 사이에 쓴다. 마주 보고 있으면 메모 대신 그냥 말한다.");
   p.push("별표로 감싼 대괄호는 문자 메시지다. *[내용]* 형태로 오면 그것은 지문이나 소리 내어 한 말이 아니라 휴대폰으로 보낸 문자다. 답할 때도 같은 *[내용]* 표기로 돌려주고, 문자에 대사용 따옴표를 붙이지 않는다. 문자를 보내고 받는 동안에도 두 사람이 있는 장면은 계속 흐르므로, 필요하면 문자 앞뒤에 지문을 함께 쓴다. 한 번에 한두 마디씩만 주고받고, 여러 줄을 몰아서 늘어놓지 않는다. 세계관에 휴대폰이 없으면 그 시대에 짧은 말을 주고받는 수단으로 바꿔 쓰되 표기는 그대로 *[내용]* 을 쓴다.");
   p.push("직전까지의 장면에 등장한 인물은 자리를 뜨는 묘사가 나오기 전까지 계속 그 자리에 있다. 누가 그 인물에게 말을 걸거나 쳐다보면 그 인물이 반응한다. 이름이 설정에 없는 단역이어도 마찬가지다. 한 번 나온 인물을 다음 턴에 아무 설명 없이 사라지게 하지 않는다.");
@@ -5863,6 +5970,14 @@ function turn(){
     if (lg[i].r==="u"){
       var k=cmdOf(lg[i].t);
       if (k && !lg[i].ooc) ti=CMDS[k];
+      if (k==="/문자"){
+        var sm2=String(lg[i].t).match(/^\/문자\s+(\S+)\s*([\s\S]*)$/);
+        if (sm2){
+          ti = ti + "\n이번 문자를 보내는 인물은 '" + sm2[1] + "'다. 보낸사람 칸에 그 이름만 적는다.";
+          if ((sm2[2]||"").trim())
+            ti = ti + "\n문자에 담을 내용은 이것이다: " + sm2[2].trim();
+        }
+      }
       if (k==="/메모"){
         var mm2=String(lg[i].t).match(/^\/메모\s+(\S+)\s*([\s\S]*)$/);
         if (mm2){
@@ -5936,6 +6051,14 @@ elSend.onclick=function(){
   if (screen==="sms"){ smsSend(t); return; }
   stacked=false; paintSendBtn();
 
+  /* /문자 나 [내용] — 내가 보내는 문자. 입력창에 틀을 채워준다 */
+  var sw = t.match(/^\/문자\s+(\S+)\s*([\s\S]*)$/);
+  if (sw && isUserName(c, sw[1])){
+    elInp.value = "[문자]\n받는사람: " + dispOf(c) + "\n\n" + (sw[2]||"").trim();
+    resizeComposer(); elInp.focus();
+    try{ elInp.setSelectionRange(elInp.value.length, elInp.value.length); }catch(e){}
+    return;
+  }
   /* /메모 나 [내용] — 내가 쓰는 메모. 입력창에 틀을 채워준다 */
   var mw = t.match(/^\/메모\s+(\S+)\s*([\s\S]*)$/);
   if (mw && isUserName(c, mw[1])){
@@ -6014,7 +6137,7 @@ $("#undo").onclick=function(){
 $("#note").onclick=function(){ if(cur()) go("note"); };
 on("#smsbtn","onclick",function(){ if(cur()) go("smslist"); });
 $("#cmds").onclick=function(){
-    var k = prompt("/일기   /속마음   /편지   /플리\n/관계도   /상태창   /소문   /커뮤반응\n/쇼핑   /결제내역   /인스타   /리뷰\n/시청기록   /통화기록\n/비밀   /메모   /전환   /모브\n/이벤트   /ooc   @:", "");
+    var k = prompt("/일기   /속마음   /편지   /플리\n/관계도   /상태창   /소문   /커뮤반응\n/쇼핑   /결제내역   /인스타   /리뷰\n/시청기록   /통화기록\n/비밀   /메모   /문자   /전환   /모브\n/이벤트   /ooc   @:", "");
   if (!k) return;
   elInp.value = k.trim()+" ";
   elInp.focus();
