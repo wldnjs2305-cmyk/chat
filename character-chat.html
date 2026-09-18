@@ -5383,12 +5383,74 @@ function naiAskTags(c, lg, i, done){
   var content = "# 인물 목록\n"+(who||"(없음)")+"\n\n"
     + (sc.prev ? "# 직전 흐름\n"+sc.prev+"\n\n" : "")
     + "# 그릴 장면\n"+sc.now;
-  askLLM(sys, content, function(out){
-    var d = null, mm = String(out||"").match(/\{[\s\S]*\}/);
-    if (mm){ try { d = JSON.parse(mm[0]); } catch(e){} }
-    if (!d || !d.scene) return done(null);
+  naiLLM(sys, content, function(d, why){
+    if (!d) return done(null, null, why);
     done(d, ps);
-  }, 900);
+  });
+}
+/* v49q: 장면 → 태그 요청 전용. 안전 설정을 붙이고, 실패하면 이유를 알려 주고,
+   생각 끄기 설정이 안 먹는 모델이면 그 설정 없이 한 번 더 물어본다 */
+function naiParse(out){
+  var t = String(out||"").replace(/```(?:json)?/gi,"").trim();
+  var a = t.indexOf("{"), b = t.lastIndexOf("}");
+  if (a<0 || b<=a) return null;
+  try { var d = JSON.parse(t.slice(a,b+1)); return (d && d.scene) ? d : null; } catch(e){ return null; }
+}
+function naiLLM(sys, content, cb){
+  var gem = cfg.mode!=="openai";
+  var once = function(noThink, next){
+    var url, headers, body;
+    if (!gem){
+      var b=(cfg.base||"").replace(/\/+$/,"");
+      url = /chat\/completions$/.test(b) ? b : b+"/chat/completions";
+      headers={ "Content-Type":"application/json", "Authorization":"Bearer "+cfg.key };
+      body={ model:cfg.model, max_tokens:1600,
+             messages:[{role:"system",content:sys},{role:"user",content:content}] };
+      if (noThink){ body.reasoning_effort="none"; body.extra_body={ google:{ thinking_config:{ thinking_budget:0 } } }; }
+    } else {
+      var gb=(cfg.base||"https://generativelanguage.googleapis.com").replace(/\/+$/,"");
+      url = gb+"/v1beta/models/"+encodeURIComponent(cfg.model)+":generateContent?key="+encodeURIComponent(cfg.key);
+      headers={ "Content-Type":"application/json" };
+      body={ systemInstruction:{parts:[{text:sys}]},
+             contents:[{role:"user",parts:[{text:content}]}],
+             generationConfig:{ maxOutputTokens: noThink ? 1600 : 6000 } };
+      if (noThink) body.generationConfig.thinkingConfig = { thinkingBudget:0 };
+    }
+    applySafety(body, gem);
+    var status = 0;
+    fetch(url,{method:"POST",headers:headers,body:JSON.stringify(body)})
+      .then(function(r){ status = r.status; return r.text(); })
+      .then(function(tx){
+        var d = null; try { d = JSON.parse(tx); } catch(e){}
+        if (status && (status<200 || status>=300)){
+          var em = d && (d.error && (d.error.message || d.error) || d.message) || tx.slice(0,100);
+          return next(null, "채팅 API "+status+" · "+String(em).slice(0,120));
+        }
+        var out = "", fin = "";
+        if (!gem){
+          var ch = d && d.choices && d.choices[0];
+          out = ch ? ((ch.message && ch.message.content) || ch.text || "") : "";
+          fin = ch && ch.finish_reason || "";
+          if (d && d.error) return next(null, "채팅 API · "+String(d.error.message||d.error).slice(0,120));
+        } else {
+          if (d && d.promptFeedback && d.promptFeedback.blockReason) return next(null, "채팅 모델이 이 장면을 막았어 ("+d.promptFeedback.blockReason+")");
+          var cd = d && d.candidates && d.candidates[0];
+          out = cd ? ((cd.content && cd.content.parts)||[]).filter(function(x){ return !x.thought; }).map(function(x){ return x.text||""; }).join("") : "";
+          fin = cd && cd.finishReason || "";
+        }
+        var got = naiParse(out);
+        if (got) return next(got);
+        if (/safety|content_filter|prohibited|blocklist/i.test(fin)) return next(null, "채팅 모델이 이 장면을 막았어");
+        if (/max_tokens|length/i.test(fin)) return next(null, "태그 답이 중간에 끊겼어");
+        next(null, out ? "태그 형식이 이상하게 왔어" : "채팅 모델이 빈 답을 줬어");
+      })
+      .catch(function(){ next(null, "채팅 API에 연결하지 못했어"); });
+  };
+  once(true, function(d, why){
+    if (d) return cb(d);
+    if (/막았어/.test(why||"")) return cb(null, why);
+    once(false, function(d2, why2){ cb(d2||null, d2 ? null : (why2||why)); });
+  });
 }
 function naiJoin(){
   return Array.prototype.slice.call(arguments).map(function(x){ return String(x||"").trim().replace(/^,|,$/g,"").trim(); })
@@ -5484,8 +5546,8 @@ function naiMake(c, i){
   var set = function(text, bad){ naiJobs[key] = { text:text, bad:!!bad }; if (curId===c.id && screen==="chat") paint(); };
   var fail = function(msg){ set("실패 · "+msg+" (다시 꾹 눌러 재시도)", true); };
   set("장면 읽는 중…");
-  naiAskTags(c, lg, i, function(d, ps){
-    if (!d) return fail("장면을 태그로 바꾸지 못했어");
+  naiAskTags(c, lg, i, function(d, ps, why){
+    if (!d) return fail("장면을 태그로 바꾸지 못했어"+(why?" · "+why:""));
     set("그리는 중… 10~30초 걸려");
     var refSrc = picGet(c.id,"naiRef");
     var model0 = cfg.naiModel || NAI_MODELS[0][0];
@@ -7074,3 +7136,4 @@ function restoreHandwriting(data){
 </script>
 </body>
 </html>
+
