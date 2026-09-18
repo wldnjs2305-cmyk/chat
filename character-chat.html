@@ -2664,6 +2664,19 @@ function viewEdit(){
      + ["사진풍","그림풍"].map(function(o){ return '<option'+((c.imgStyle||"사진풍")===o?" selected":"")+'>'+o+"</option>"; }).join("")
      + '</select>';
   h += field("NAI 태그","naiTags",c.naiTags,70,"영어 태그로 외모를 고정해. 예: 1boy, silver hair, blue eyes, short hair");
+  /* v49p: 얼굴 참조 그림(캐릭터 레퍼런스) + 고정 시드 */
+  h += picBlock("NAI 얼굴 참조 그림","naiRef",picGet(c.id,"naiRef"),"넣으면 장면 그림마다 이 얼굴을 따라 그려. V4.5 모델에서만 되고, 장당 Anlas가 조금 더 들어.");
+  if (picGet(c.id,"naiRef")){
+    h += '<label>참조 방식</label><select data-k="naiRefMode">'
+       + [["character","얼굴·외모만"],["character&style","얼굴 + 그림체까지"]].map(function(o){
+           return '<option value="'+o[0]+'"'+((c.naiRefMode||"character")===o[0]?" selected":"")+'>'+o[1]+'</option>'; }).join("")
+       + '</select>';
+    h += '<label id="naiRefStrL">참조 세기 · '+naiNum(c.naiRefStr,1)+'</label><input data-k="naiRefStr" data-lb="naiRefStrL" data-lt="참조 세기" type="range" min="0" max="1" step="0.05" value="'+naiNum(c.naiRefStr,1)+'" style="padding:0">'
+       + '<div class="hint">높을수록 참조 그림을 강하게 따라가.</div>';
+    h += '<label id="naiRefFidL">닮은 정도 · '+naiNum(c.naiRefFid,1)+'</label><input data-k="naiRefFid" data-lb="naiRefFidL" data-lt="닮은 정도" type="range" min="0" max="1" step="0.05" value="'+naiNum(c.naiRefFid,1)+'" style="padding:0">'
+       + '<div class="hint">높을수록 얼굴을 그대로 옮기고, 낮추면 장면에 맞게 조금 풀어줘.</div>';
+  }
+  h += field("NAI 고정 시드","naiSeed",c.naiSeed,0,"비우면 매번 새로 뽑아. 마음에 든 그림의 시드를 넣으면 인상이 비슷하게 이어져.");
   h += '<label>배경 있을 때 대사 색</label>'
      + '<div style="display:flex;gap:8px;align-items:center">'
      + '<input id="saycol" type="color" value="'+esc(c.sayColor||"#F4F4F8")+'" style="width:56px;padding:2px;height:40px">'
@@ -2709,6 +2722,7 @@ function viewEdit(){
       }
       if(k==="currency"){c.currency=v;if(!v && curRoom(c))delete curRoom(c).currency;saveChars();return;}
       if (k==="length" || k==="lang"){ c[k]=v; saveChars(); return; }
+      if (el.getAttribute("data-lb")){ var lbe=document.getElementById(el.getAttribute("data-lb")); if (lbe) lbe.textContent=el.getAttribute("data-lt")+" · "+v; }
       if ((k==="avatar"||k==="userAvatar") && /^data:image/.test(c[k]||"") && !v) return;
       c[k]=v; saveChars();
     };
@@ -2769,7 +2783,7 @@ function viewEdit(){
           if (!ok) alert("사진을 저장하지 못했어.");
           render();
         });
-      }, kind==="bg" ? 1600 : 640);
+      }, (kind==="bg" || kind==="naiRef") ? 1600 : 640);
     };
   });
   Array.prototype.forEach.call(view.querySelectorAll("[data-picclear]"), function(el){
@@ -5228,6 +5242,25 @@ var NAI_POS = "very aesthetic, masterpiece, no text";
 var NAI_NEG = "nsfw, lowres, bad anatomy, bad hands, text, error, missing fingers, extra digits, fewer digits, cropped, worst quality, low quality, jpeg artifacts, signature, watermark, username, blurry";
 var naiJobs = {};   /* "캐릭터id:메시지번호" → "그리는 중…" 또는 오류 문장 */
 
+function naiNum(v, d){ var n = parseFloat(v); return isNaN(n) ? d : n; }
+/* v49p: 캐릭터 레퍼런스 그림은 NAI가 정한 캔버스(세로 1024x1536 · 가로 1536x1024 · 정사각 1472x1472)에
+   검은 여백으로 맞춘 PNG로 보내야 한다 */
+function naiRefPrep(src){
+  return new Promise(function(res, rej){
+    var img = new Image();
+    img.onload = function(){
+      var w=img.naturalWidth, h=img.naturalHeight, a=w/h, W, H;
+      if (a < 0.9){ W=1024; H=1536; } else if (a > 1.1){ W=1536; H=1024; } else { W=1472; H=1472; }
+      var r=Math.min(W/w, H/h), dw=Math.round(w*r), dh=Math.round(h*r);
+      var cv=document.createElement("canvas"); cv.width=W; cv.height=H;
+      var cx=cv.getContext("2d"); cx.fillStyle="#000"; cx.fillRect(0,0,W,H);
+      cx.drawImage(img, Math.round((W-dw)/2), Math.round((H-dh)/2), dw, dh);
+      res(cv.toDataURL("image/png").split(",")[1]);
+    };
+    img.onerror = function(){ rej(new Error("얼굴 참조 그림을 읽지 못했어")); };
+    img.src = src;
+  });
+}
 function naiBase(){ return String(cfg.naiBase||"https://image.novelai.net").trim().replace(/\/+$/,""); }
 function naiSettingsHTML(){
   var h = '<div class="sec">NAI 장면 그림</div>';
@@ -5248,6 +5281,10 @@ function naiSettingsHTML(){
   h += '<label>제외 태그</label><textarea id="naineg" style="min-height:70px" autocapitalize="off" spellcheck="false">'+esc(cfg.naiNeg!=null?cfg.naiNeg:NAI_NEG)+'</textarea>';
   h += '<label>단계 수 · '+(cfg.naiSteps||28)+'</label><input id="naist" type="range" min="10" max="28" step="1" value="'+(cfg.naiSteps||28)+'" style="padding:0">'
      + '<div class="hint">28 이하·기본 크기면 Opus 구독에서 Anlas가 들지 않아.</div>';
+  h += '<label>프롬프트 따르기 · '+naiNum(cfg.naiScale,5)+'</label><input id="naisc" type="range" min="1" max="10" step="0.1" value="'+naiNum(cfg.naiScale,5)+'" style="padding:0">'
+     + '<div class="hint">NovelAI의 Prompt Guidance. 보통 5~6.</div>';
+  h += '<label>색 눌러주기 · '+naiNum(cfg.naiRescale,0)+'</label><input id="nairs" type="range" min="0" max="1" step="0.02" value="'+naiNum(cfg.naiRescale,0)+'" style="padding:0">'
+     + '<div class="hint">NovelAI의 Guidance Rescale. 올리면 색이 차분해져.</div>';
   return h;
 }
 function naiSettingsBind(){
@@ -5262,6 +5299,14 @@ function naiSettingsBind(){
   on("#naisz","onchange",function(){ cfg.naiSize=this.value; saveCfg(); });
   on("#naipos","oninput",function(){ cfg.naiPos=this.value; saveCfg(); });
   on("#naineg","oninput",function(){ cfg.naiNeg=this.value; saveCfg(); });
+  on("#naisc","oninput",function(){
+    cfg.naiScale=+this.value; saveCfg();
+    var lb=this.previousElementSibling; if (lb) lb.textContent="프롬프트 따르기 · "+cfg.naiScale;
+  });
+  on("#nairs","oninput",function(){
+    cfg.naiRescale=+this.value; saveCfg();
+    var lb=this.previousElementSibling; if (lb) lb.textContent="색 눌러주기 · "+cfg.naiRescale;
+  });
   on("#naist","oninput",function(){
     cfg.naiSteps=+this.value; saveCfg();
     var lb=this.previousElementSibling; if (lb) lb.textContent="단계 수 · "+cfg.naiSteps;
@@ -5349,7 +5394,7 @@ function naiJoin(){
   return Array.prototype.slice.call(arguments).map(function(x){ return String(x||"").trim().replace(/^,|,$/g,"").trim(); })
     .filter(Boolean).join(", ");
 }
-function naiBody(d, ps, c){
+function naiBody(d, ps, c, ref){
   var sz = String(cfg.naiSize||"832x1216").split("x");
   var model = cfg.naiModel || NAI_MODELS[0][0];
   var v4 = /-4/.test(model);
@@ -5363,11 +5408,11 @@ function naiBody(d, ps, c){
   }).filter(function(x){ return x.prompt; });
   var params = {
     params_version: 3, width: +sz[0]||832, height: +sz[1]||1216,
-    scale: 5, sampler: "k_euler_ancestral", steps: Math.min(50, +cfg.naiSteps||28), n_samples: 1,
+    scale: naiNum(cfg.naiScale,5), sampler: "k_euler_ancestral", steps: Math.min(50, +cfg.naiSteps||28), n_samples: 1,
     ucPreset: 0, qualityToggle: true, sm: false, sm_dyn: false, dynamic_thresholding: false,
-    controlnet_strength: 1, legacy: false, add_original_image: true, cfg_rescale: 0,
+    controlnet_strength: 1, legacy: false, add_original_image: true, cfg_rescale: naiNum(cfg.naiRescale,0),
     noise_schedule: v4 ? "karras" : "native", legacy_v3_extend: false, skip_cfg_above_sigma: null,
-    seed: Math.floor(Math.random()*4294967295), negative_prompt: neg,
+    seed: (/^\d+$/.test(String(c && c.naiSeed || "").trim()) ? Math.min(4294967295, +String(c.naiSeed).trim()) : Math.floor(Math.random()*4294967295)), negative_prompt: neg,
     deliberate_euler_ancestral_bug: false, prefer_brownian: true
   };
   var input = base;
@@ -5379,6 +5424,14 @@ function naiBody(d, ps, c){
                          use_coords:false, use_order:true };
     params.v4_negative_prompt = { caption:{ base_caption: neg, char_captions: chars.map(function(x){ return { char_caption:"", centers:[x.center] }; }) },
                                   legacy_uc:false };
+    if (ref && /4-5/.test(model)){
+      var fid = Math.max(0, Math.min(1, naiNum(c && c.naiRefFid, 1)));
+      params.director_reference_images = [ref];
+      params.director_reference_descriptions = [{ caption:{ base_caption: (c && c.naiRefMode)||"character", char_captions:[] }, legacy_uc:false }];
+      params.director_reference_information_extracted = [1];
+      params.director_reference_strength_values = [Math.max(0, Math.min(1, naiNum(c && c.naiRefStr, 1)))];
+      params.director_reference_secondary_strength_values = [Math.round((1-fid)*100)/100];
+    }
   } else {
     input = naiJoin(base, chars.map(function(x){ return x.prompt; }).join(", "));
   }
@@ -5434,10 +5487,17 @@ function naiMake(c, i){
   naiAskTags(c, lg, i, function(d, ps){
     if (!d) return fail("장면을 태그로 바꾸지 못했어");
     set("그리는 중… 10~30초 걸려");
-    fetch(naiBase()+"/ai/generate-image", {
-      method:"POST",
-      headers:{ "Content-Type":"application/json", "Authorization":"Bearer "+cfg.naiKey },
-      body: JSON.stringify(naiBody(d, ps, c))
+    var refSrc = picGet(c.id,"naiRef");
+    var model0 = cfg.naiModel || NAI_MODELS[0][0];
+    (refSrc && /4-5/.test(model0) ? naiRefPrep(refSrc) : Promise.resolve(null))
+    .then(function(ref){
+      return fetch(naiBase()+"/ai/generate-image", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json", "Authorization":"Bearer "+cfg.naiKey },
+        body: JSON.stringify(naiBody(d, ps, c, ref))
+      }).catch(function(){
+        throw new Error("NAI에 연결하지 못했어. 브라우저에서 막혔다면 설정의 NAI 주소에 프록시를 넣어줘");
+      });
     }).then(function(r){
       if (r.ok) return r.arrayBuffer();
       return r.text().then(function(tx){
@@ -5447,8 +5507,6 @@ function naiMake(c, i){
         if (r.status===429) throw new Error("다른 그림이 아직 그려지는 중이야. 잠시 뒤에");
         throw new Error("NAI "+r.status+(em?" · "+em:""));
       });
-    }, function(){
-      throw new Error("NAI에 연결하지 못했어. 브라우저에서 막혔다면 설정의 NAI 주소에 프록시를 넣어줘");
     })
     .then(naiUnzip)
     .then(naiShrink)
