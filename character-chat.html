@@ -2911,6 +2911,10 @@ function viewCfg(){
   h += '<button class="btn" id="ping">연결 테스트</button>';
   h += '<div class="hint" id="pingout"></div>';
   h += '<div class="sec">인스타 사진</div>';
+  h += '<label>인스타 사진 만들기</label><select id="igeng">'
+     + [["server","이미지 서버"],["nai","NovelAI"]].map(function(o){
+         return '<option value="'+o[0]+'"'+((cfg.igEngine||"server")===o[0]?" selected":"")+'>'+o[1]+'</option>'; }).join("")
+     + '</select><div class="hint">NovelAI로 하면 아래 NAI 장면 그림 설정(토큰·태그·얼굴 참조)을 같이 써. 정사각형으로 그려.</div>';
   h += '<label>이미지 서버 주소</label><input id="imgsv" value="'+esc(cfg.imgServer||"")+'" autocapitalize="off" spellcheck="false" placeholder="https://...ts.net/chat2img-codex">';
   h += '<button class="btn" id="imgping">서버 확인</button>';
   h += '<div class="hint" id="imgout"></div>';
@@ -3033,6 +3037,7 @@ function viewCfg(){
   on("#t","oninput",function(){ cfg.maxTokens=parseInt(this.value,10)||2600; saveCfg(); });
   on("#imgsv","oninput",function(){ cfg.imgServer=this.value.trim().replace(/\/+$/,""); saveCfg(); });
   on("#imgsz","onchange",function(){ cfg.imgSize=+this.value; saveCfg(); });
+  on("#igeng","onchange",function(){ cfg.igEngine=this.value; saveCfg(); });
   naiSettingsBind();
   on("#imgping","onclick",function(){
     var out=$("#imgout"), btn=this, base=igServer();
@@ -5361,9 +5366,17 @@ function naiSceneText(c, lg, i){
   var clean = function(t){
     return String(t||"").replace(/\[\/?(?:지문|대사|나레)\]/g,"").replace(/\[OOC답변\][\s\S]*?\[\/OOC답변\]/g,"").trim();
   };
-  var prev = "";
-  for (var k=i-1;k>=0 && k>=i-2;k--){
-    if (lg[k] && !lg[k].ooc){ prev = clean(lg[k].t).slice(-600) + (prev?"\n"+prev:""); }
+  /* v49r: 직전 두 개만 보던 걸 최근 12개(총 5000자 안쪽)까지 넓힘 — 옷·장소·시간대를 이어 가려고 */
+  var prev = "", used = 0;
+  for (var k=i-1;k>=0 && k>=i-12;k--){
+    var m = lg[k];
+    if (!m || m.ooc) continue;
+    var t = clean(m.t);
+    if (!t) continue;
+    t = (m.r==="u" ? (c.userName||"나") : (c.name||"상대")) + ": " + (t.length>500 ? "…"+t.slice(-500) : t);
+    if (used + t.length > 5000) break;
+    used += t.length;
+    prev = t + (prev?"\n\n"+prev:"");
   }
   return { prev:prev, now:clean(lg[i].t).slice(0,2500) };
 }
@@ -5376,7 +5389,8 @@ function naiAskTags(c, lg, i, done){
     + "people에는 이번 장면 그림에 실제로 보이는 인물만 최대 3명까지 넣는다. name은 아래 인물 목록의 이름을 그대로 쓴다. 목록에 없는 단역이면 적당한 이름을 쓴다.\n"
     + "각 인물의 tags는 성별 태그(boy 또는 girl)로 시작하고, 표정, 자세, 행동, 옷차림을 쓴다. 인물끼리 주고받는 행동은 source#, target#, mutual# 접두어를 붙인다(예: source#hug, target#hug).\n"
     + "인물 목록에 '고정 태그 있음'이라고 된 인물은 머리색·눈색·머리 모양 같은 외모 태그를 쓰지 않는다. 고정 태그가 없는 인물은 외모 설명과 본문을 보고 외모 태그를 넣는다.\n"
-    + "장면의 핵심 순간 하나만 그린다. 노출이나 성적인 태그는 쓰지 않는다. 글자, 말풍선 태그는 쓰지 않는다.";
+    + "장면의 핵심 순간 하나만 그린다. 노출이나 성적인 태그는 쓰지 않는다. 글자, 말풍선 태그는 쓰지 않는다.\n"
+    + "그릴 장면에 옷차림·장소·시간대·날씨·들고 있는 물건이 안 나와 있으면 직전 흐름에서 이어지는 것을 쓴다. 그릴 장면에서 바뀌었다면 바뀐 쪽을 따른다.";
   var who = ps.map(function(p){
     return "- "+p.name+(p.user?" (유저)":"")+" : "+(p.fixed ? "고정 태그 있음" : ("고정 태그 없음"+(p.look?" / 외모: "+p.look:"")));
   }).join("\n");
@@ -5456,8 +5470,8 @@ function naiJoin(){
   return Array.prototype.slice.call(arguments).map(function(x){ return String(x||"").trim().replace(/^,|,$/g,"").trim(); })
     .filter(Boolean).join(", ");
 }
-function naiBody(d, ps, c, ref){
-  var sz = String(cfg.naiSize||"832x1216").split("x");
+function naiBody(d, ps, c, ref, size){
+  var sz = String(size||cfg.naiSize||"832x1216").split("x");
   var model = cfg.naiModel || NAI_MODELS[0][0];
   var v4 = /-4/.test(model);
   var neg = cfg.naiNeg!=null ? cfg.naiNeg : NAI_NEG;
@@ -5498,6 +5512,68 @@ function naiBody(d, ps, c, ref){
     input = naiJoin(base, chars.map(function(x){ return x.prompt; }).join(", "));
   }
   return { input: input, model: model, action: "generate", parameters: params };
+}
+/* v49s: 인스타 사진을 NovelAI로. 게시물의 사진 묘사 → 태그 → 정사각형 그림 */
+function igMakeNai(c,msgIdx,postIdx,btn){
+  if (!cfg.naiKey){ alert("설정에서 NAI 토큰부터 넣어줘."); return; }
+  if (!cfg.key){ alert("사진 묘사를 태그로 바꾸려면 채팅 API 키가 필요해."); return; }
+  var p=igPost(c,msgIdx,postIdx);
+  if(!p){ alert("이 게시물을 찾지 못했어."); return; }
+  var desc=String(p.photo||"").trim();
+  if(!desc){ alert("사진 묘사가 비어 있어."); return; }
+  var st=btn.parentNode.querySelector(".ig-st");
+  if(!st){ st=document.createElement("span"); st.className="ig-st"; btn.parentNode.appendChild(st); }
+  var fail=function(msg){ btn.disabled=false; st.textContent="실패 · "+msg; };
+  btn.disabled=true; st.textContent="사진 묘사 읽는 중…";
+  var ps = naiPeople(c);
+  var sys = "너는 인스타그램 게시물 사진 묘사를 NovelAI 이미지 태그로 바꾸는 도구다. 영어 Danbooru 태그만 쓴다.\n"
+    + "JSON 하나만 출력한다. 설명이나 코드 블록 표시는 붙이지 않는다.\n"
+    + '형식: {"scene":"태그, 태그","people":[{"name":"인물 이름","tags":"태그, 태그"}]}\n'
+    + "scene 맨 앞에는 인원수 태그(1boy, 1girl, no humans 등)를 쓰고, 찍힌 대상, 장소, 시간대, 조명, 구도를 쓴다. 셀카면 selfie, 음식·물건 사진이면 no humans와 그 대상을 쓴다.\n"
+    + "people에는 사진에 실제로 찍힌 인물만 최대 3명까지 넣는다. name은 아래 인물 목록의 이름을 그대로 쓴다.\n"
+    + "각 인물의 tags는 성별 태그(boy 또는 girl)로 시작하고, 표정, 자세, 행동, 옷차림을 쓴다.\n"
+    + "인물 목록에 '고정 태그 있음'이라고 된 인물은 머리색·눈색·머리 모양 같은 외모 태그를 쓰지 않는다.\n"
+    + "노출이나 성적인 태그는 쓰지 않는다. 글자, 로고, 말풍선, 인스타 화면 UI 태그는 쓰지 않는다.";
+  var who = ps.map(function(x){
+    return "- "+x.name+(x.user?" (유저)":"")+" : "+(x.fixed ? "고정 태그 있음" : ("고정 태그 없음"+(x.look?" / 외모: "+x.look:"")));
+  }).join("\n");
+  var content = "# 인물 목록\n"+(who||"(없음)")+"\n\n# 계정 주인\n"+(c.name||"캐릭터")
+    + "\n\n# 게시물 캡션\n"+String(p.caption||"").slice(0,400)+"\n\n# 사진 묘사\n"+desc.slice(0,1500);
+  naiLLM(sys, content, function(d, why){
+    if (!d) return fail("묘사를 태그로 바꾸지 못했어"+(why?" · "+why:""));
+    st.textContent="그리는 중… 10~30초 걸려";
+    var refSrc = picGet(c.id,"naiRef"), model0 = cfg.naiModel || NAI_MODELS[0][0];
+    var usesRef = refSrc && /4-5/.test(model0) && Array.isArray(d.people) && d.people.length;
+    (usesRef ? naiRefPrep(refSrc) : Promise.resolve(null))
+    .then(function(ref){
+      return fetch(naiBase()+"/ai/generate-image", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json", "Authorization":"Bearer "+cfg.naiKey },
+        body: JSON.stringify(naiBody(d, ps, c, ref, "1024x1024"))
+      }).catch(function(){ throw new Error("NAI에 연결하지 못했어"); });
+    }).then(function(r){
+      if (r.ok) return r.arrayBuffer();
+      return r.text().then(function(tx){
+        var em = ""; try { em = JSON.parse(tx).message || ""; } catch(e){ em = tx.slice(0,120); }
+        if (r.status===401) throw new Error("토큰이 틀렸거나 만료됐어");
+        if (r.status===402) throw new Error("구독이나 Anlas가 부족해");
+        if (r.status===429) throw new Error("다른 그림이 아직 그려지는 중이야. 잠시 뒤에");
+        throw new Error("NAI "+r.status+(em?" · "+em:""));
+      });
+    })
+    .then(naiUnzip)
+    .then(naiShrink)
+    .then(function(dataUrl){
+      st.textContent="저장하는 중…";
+      return igPut(dataUrl).then(function(ref){
+        var v = ref || dataUrl;
+        if (igEditPost(c,msgIdx,postIdx,function(pp){ igDrop(pp); pp.image=v; })){ igClose(c,msgIdx,postIdx); paint(); return; }
+        if (ref) picSet(ref.slice(4),"ig","");
+        throw new Error("게시물을 찾지 못했어");
+      });
+    })
+    .catch(function(e){ fail(e.message||"알 수 없는 오류"); });
+  });
 }
 /* NAI는 zip으로 돌려준다. 첫 파일만 꺼낸다 */
 function naiUnzip(buf){
@@ -6248,6 +6324,7 @@ function igShrink(url, done, fail){
   img.src=url;
 }
 function igMake(c,msgIdx,postIdx,btn){
+  if ((cfg.igEngine||"server")==="nai") return igMakeNai(c,msgIdx,postIdx,btn);
   var base=igServer();
   if(!base){ alert("설정에서 이미지 서버 주소부터 넣어줘."); return; }
   var p=igPost(c,msgIdx,postIdx);
@@ -7136,4 +7213,3 @@ function restoreHandwriting(data){
 </script>
 </body>
 </html>
-
