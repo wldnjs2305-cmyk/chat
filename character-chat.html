@@ -5438,8 +5438,9 @@ function naiAskTags(c, lg, i, done){
   var ps = naiPeople(c).filter(function(x){ return !x.user; }), sc = naiSceneText(c, lg, i);
   var sys = "너는 롤플레이 장면 글을 NovelAI 이미지 태그로 바꾸는 도구다. 영어 Danbooru 태그만 쓴다.\n"
     + "JSON 하나만 출력한다. 설명이나 코드 블록 표시는 붙이지 않는다.\n"
-    + '형식: {"scene":"태그, 태그","people":[{"name":"인물 이름","tags":"태그, 태그"}]}\n'
-    + "scene에는 인원수 태그(1boy, 1girl, 1boy 1girl, 2boys 등)를 맨 앞에 쓰고, 장소, 시간대, 날씨, 조명, 구도(upper body, cowboy shot, full body 등)를 쓴다.\n"
+    + '형식: {"place":"장소 태그, 태그","scene":"태그, 태그","people":[{"name":"인물 이름","tags":"태그, 태그"}]}\n'
+    + "place에는 지금 인물이 있는 장소만 쓴다. 맨 앞에 indoors 또는 outdoors를 쓰고, 장소를 구체적인 태그 2~4개로 쓴다(예: 마당 → outdoors, backyard, garden, grass / 부엌 → indoors, kitchen). 장소가 본문에 없으면 직전 흐름의 장소를 쓴다. place는 비워 두지 않는다.\n"
+    + "scene에는 인원수 태그(1boy, 1girl, 2boys 등)를 맨 앞에 쓰고, 시간대, 날씨, 조명, 구도(upper body, cowboy shot, full body 등)를 쓴다. 장소 태그는 place에만 쓴다.\n"
     + "people에는 이번 장면 그림에 실제로 보이는 인물만 최대 3명까지 넣는다. name은 아래 인물 목록의 이름을 그대로 쓴다. 목록에 없는 단역이면 적당한 이름을 쓴다.\n"
     + "각 인물의 tags는 성별 태그(boy 또는 girl)로 시작하고, 표정, 자세, 행동, 옷차림을 쓴다. 인물끼리 주고받는 행동은 source#, target#, mutual# 접두어를 붙인다(예: source#hug, target#hug).\n"
     + "인물 목록에 '고정 태그 있음'이라고 된 인물은 머리색·눈색·머리 모양 같은 외모 태그를 쓰지 않는다. 고정 태그가 없는 인물은 외모 설명과 본문을 보고 외모 태그를 넣는다.\n"
@@ -5530,7 +5531,9 @@ function naiBody(d, ps, c, ref, size){
   var model = cfg.naiModel || NAI_MODELS[0][0];
   var v4 = /-4/.test(model);
   var neg = cfg.naiNeg!=null ? cfg.naiNeg : NAI_NEG;
-  var base = naiJoin(d.scene, cfg.naiPos!=null ? cfg.naiPos : NAI_POS, c && c.naiStyle);
+  /* v49v: 장소는 따로 받아 세게 건다 — 배경이 엉뚱하게 나오는 걸 막으려고 */
+  var place = String(d.place||"").trim().replace(/^,|,$/g,"").trim();
+  var base = naiJoin(d.scene, place ? "1.5::"+place+"::" : "", cfg.naiPos!=null ? cfg.naiPos : NAI_POS, c && c.naiStyle);
   var chars = (Array.isArray(d.people) ? d.people : []).slice(0,3).map(function(p, k){
     var hit = null, nm = String(p && p.name || "").trim();
     ps.forEach(function(x){ if (!hit && (x.name===nm || x.name.split(/\s+/)[0]===nm.split(/\s+/)[0])) hit = x; });
