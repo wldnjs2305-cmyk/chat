@@ -528,7 +528,10 @@
 
   /* NAI 장면 그림 */
   .scenepic{margin:6px 0 14px;text-align:center}
-  .scenepic img{max-width:100%;max-height:70vh;border-radius:14px;display:block;margin:0 auto;border:1px solid var(--line)}
+  .scenepic img{max-width:100%;max-height:70vh;border-radius:14px;display:block;margin:0 auto;border:1px solid var(--line);-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+  .scacts{display:flex;justify-content:center;gap:8px;margin-top:8px}
+  .scacts button{background:var(--field);border:1px solid var(--line);color:var(--text);font-family:inherit;font-size:13px;padding:7px 14px;border-radius:10px;cursor:pointer}
+  .scacts button.del{color:#D06060}
   .scenepic .st{font-size:12px;color:var(--muted);padding:14px;border:1px dashed var(--line);border-radius:14px}
   .scenepic .st.bad{color:#C0405A}
   /* 응답 캡슐 */
@@ -909,7 +912,7 @@
   .ig-photo>span{font-size:32px;line-height:1}
   .ig-photo p{max-width:32em;margin:12px 0 0}
   .ig-photo.has-img{padding:0;min-height:0;display:block}
-  .ig-photo.has-img img{display:block;width:100%;height:auto}
+  .ig-photo.has-img img{display:block;width:100%;height:auto;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
   .ig-act{display:flex;gap:8px;padding:10px 16px 0;flex-wrap:wrap}
   .ig-act button{background:var(--field);border:1px solid var(--line);color:var(--text);font-family:inherit;font-size:13px;padding:7px 12px;border-radius:10px;cursor:pointer}
   .ig-act button:disabled{opacity:.5}
@@ -1840,6 +1843,22 @@ function bindHold(el, fn){
   el.addEventListener("touchmove", function(){ moved=true; clearTimeout(tm); }, {passive:true});
   el.addEventListener("touchend", function(){ clearTimeout(tm); }, {passive:true});
   el.addEventListener("contextmenu", function(e){ e.preventDefault(); fn(); });
+}
+/* v49t: 그림 저장. 아이폰은 공유 시트로 열어서 '이미지 저장'을 누르게 한다 */
+function savePic(src, name){
+  var fname = (name||"picture")+".jpg";
+  fetch(src).then(function(r){ return r.blob(); }).then(function(b){
+    var type = b.type || "image/jpeg";
+    if (/png/.test(type)) fname = fname.replace(/\.jpg$/,".png");
+    var file = null;
+    try { file = new File([b], fname, { type:type }); } catch(e){}
+    if (file && navigator.canShare && navigator.canShare({ files:[file] })){
+      return navigator.share({ files:[file] }).catch(function(){});
+    }
+    var url = URL.createObjectURL(b), a = document.createElement("a");
+    a.href = url; a.download = fname; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+  }).catch(function(){ alert("그림을 저장하지 못했어."); });
 }
 function copyText(t){
   try {
@@ -5318,12 +5337,17 @@ function naiSettingsBind(){
   });
 }
 
+var scOpen = {};   /* v49t: 꾹 누른 장면 그림 → 저장·지우기 버튼 */
 function sceneHTML(c,m,i){
   var job = naiJobs[c.id+":"+i];
   var out = "";
   if (m.pic){
     var src = m.pic.indexOf("idb:")===0 ? picGet(m.pic.slice(4),"scene") : m.pic;
-    if (src) out += '<div class="scenepic"><img src="'+esc(src)+'" alt="" data-naiview="'+i+'"></div>';
+    if (src){
+      out += '<div class="scenepic" data-scph="'+i+'"><img src="'+esc(src)+'" alt="" data-naiview="'+i+'">';
+      if (scOpen[c.id+":"+i]) out += '<div class="scacts"><button data-scsave="'+i+'">저장하기</button><button class="del" data-scdel="'+i+'">지우기</button></div>';
+      out += '</div>';
+    }
   }
   if (job) out += '<div class="scenepic"><div class="st'+(job.bad?" bad":"")+'">'+esc(job.text)+'</div></div>';
   return out;
@@ -5341,9 +5365,38 @@ function naiBindChat(c){
       delete m.pic; setLog(c.id,lg); selIdx=-1; paint();
     };
   });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-scph]"), function(el){
+    bindHold(el, function(){
+      var k = c.id+":"+el.getAttribute("data-scph");
+      el._held = Date.now();
+      if (scOpen[k]) delete scOpen[k]; else scOpen[k]=1;
+      keepScroll = view.scrollTop || 1; paint();
+    });
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-scsave]"), function(el){
+    el.onclick=function(e){
+      e.stopPropagation();
+      var i=+el.getAttribute("data-scsave"), m=getLog(c.id)[i]; if (!m || !m.pic) return;
+      var src = m.pic.indexOf("idb:")===0 ? picGet(m.pic.slice(4),"scene") : m.pic;
+      if (src) savePic(src, (c.name||"scene")+"-"+Date.now().toString(36));
+      delete scOpen[c.id+":"+i]; keepScroll = view.scrollTop || 1; paint();
+    };
+  });
+  Array.prototype.forEach.call(view.querySelectorAll("[data-scdel]"), function(el){
+    el.onclick=function(e){
+      e.stopPropagation();
+      var i=+el.getAttribute("data-scdel"), lg=getLog(c.id), m=lg[i];
+      if (!m || !m.pic) return;
+      if (!confirm("이 그림을 지울까?")) return;
+      if (m.pic.indexOf("idb:")===0) picSet(m.pic.slice(4),"scene","");
+      delete m.pic; delete scOpen[c.id+":"+i]; setLog(c.id,lg); keepScroll = view.scrollTop || 1; paint();
+    };
+  });
   Array.prototype.forEach.call(view.querySelectorAll("[data-naiview]"), function(el){
     el.onclick=function(e){
       e.stopPropagation();
+      var hp = el.closest("[data-scph]");
+      if (hp && hp._held && Date.now()-hp._held < 900) return;
       var w = window.open();
       if (w){ w.document.write('<title>장면</title><body style="margin:0;background:#000"><img src="'+el.src+'" style="width:100%"></body>'); }
     };
@@ -5381,7 +5434,8 @@ function naiSceneText(c, lg, i){
   return { prev:prev, now:clean(lg[i].t).slice(0,2500) };
 }
 function naiAskTags(c, lg, i, done){
-  var ps = naiPeople(c), sc = naiSceneText(c, lg, i);
+  /* v49u: 장면 그림에는 유저를 그리지 않는다 */
+  var ps = naiPeople(c).filter(function(x){ return !x.user; }), sc = naiSceneText(c, lg, i);
   var sys = "너는 롤플레이 장면 글을 NovelAI 이미지 태그로 바꾸는 도구다. 영어 Danbooru 태그만 쓴다.\n"
     + "JSON 하나만 출력한다. 설명이나 코드 블록 표시는 붙이지 않는다.\n"
     + '형식: {"scene":"태그, 태그","people":[{"name":"인물 이름","tags":"태그, 태그"}]}\n'
@@ -5390,6 +5444,7 @@ function naiAskTags(c, lg, i, done){
     + "각 인물의 tags는 성별 태그(boy 또는 girl)로 시작하고, 표정, 자세, 행동, 옷차림을 쓴다. 인물끼리 주고받는 행동은 source#, target#, mutual# 접두어를 붙인다(예: source#hug, target#hug).\n"
     + "인물 목록에 '고정 태그 있음'이라고 된 인물은 머리색·눈색·머리 모양 같은 외모 태그를 쓰지 않는다. 고정 태그가 없는 인물은 외모 설명과 본문을 보고 외모 태그를 넣는다.\n"
     + "장면의 핵심 순간 하나만 그린다. 노출이나 성적인 태그는 쓰지 않는다. 글자, 말풍선 태그는 쓰지 않는다.\n"
+    + "유저"+((c.userName||"").trim()?"("+c.userName.trim()+")":"")+"는 그림에 넣지 않는다. 유저와 주고받는 장면이면 유저는 화면 밖에 있는 것으로 하고 캐릭터만 그리며, 인원수 태그도 유저를 빼고 센다. 캐릭터가 유저를 바라보거나 손을 내미는 장면이면 looking at viewer, pov 같은 태그를 쓴다.\n"
     + "그릴 장면에 옷차림·장소·시간대·날씨·들고 있는 물건이 안 나와 있으면 직전 흐름에서 이어지는 것을 쓴다. 그릴 장면에서 바뀌었다면 바뀐 쪽을 따른다.";
   var who = ps.map(function(p){
     return "- "+p.name+(p.user?" (유저)":"")+" : "+(p.fixed ? "고정 태그 있음" : ("고정 태그 없음"+(p.look?" / 외모: "+p.look:"")));
@@ -5821,7 +5876,7 @@ function paint(err, thinking){
     el.addEventListener("touchstart", mark, {passive:true, capture:true});
     el.addEventListener("mousedown", mark, true);
     bindHold(el, function(){
-      if (holdSrc && holdSrc.closest && holdSrc.closest("[data-igph]")) return;
+      if (holdSrc && holdSrc.closest && (holdSrc.closest("[data-igph]") || holdSrc.closest("[data-scph]"))) return;
       keepScroll = view.scrollTop || 1; selIdx = (selIdx===i) ? -1 : i; paint();
     });
     var sx=null, sy=null;
@@ -5839,7 +5894,7 @@ function paint(err, thinking){
       m.ai=n; m.t=m.alts[n]; setLog(c.id,lg); paint();
     }, {passive:true});
   });
-  Array.prototype.forEach.call(view.querySelectorAll("[data-igmake],[data-igcopy],[data-igdrop],[data-igup]"), function(el){
+  Array.prototype.forEach.call(view.querySelectorAll("[data-igmake],[data-igcopy],[data-igdrop],[data-igup],[data-igsave]"), function(el){
     el.onclick=function(ev){
       ev.stopPropagation();
       var host=el.closest("[data-i]"); if(!host) return;
@@ -5862,6 +5917,11 @@ function paint(err, thinking){
         var cpi=+el.getAttribute("data-igcopy");
         setTimeout(function(){ igClose(c,mi,cpi); paint(); },900);
         return;
+      }
+      if (el.hasAttribute("data-igsave")){
+        var svi=+el.getAttribute("data-igsave"), sp=igPost(c,mi,svi), ssrc=sp ? igSrc(sp) : "";
+        if (ssrc) savePic(ssrc, (c.name||"insta")+"-"+Date.now().toString(36));
+        igClose(c,mi,svi); paint(); return;
       }
       if (el.hasAttribute("data-igdrop")){
         var dpi=+el.getAttribute("data-igdrop");
@@ -6218,7 +6278,8 @@ function instagramHTML(body,c){
     h+='<div class="ig-act">'
       +'<button data-igup="'+pi+'">'+(src?"사진 바꾸기":"사진 올리기")+'</button>'
       +'<button data-igcopy="'+pi+'">묘사 복사</button>'
-      +(igServer()?'<button data-igmake="'+pi+'">'+(src?"사진 다시 만들기":"사진 만들기")+'</button>':"")
+      +((igServer() || ((cfg.igEngine||"server")==="nai" && cfg.naiKey))?'<button data-igmake="'+pi+'">'+(src?"사진 다시 만들기":"사진 만들기")+'</button>':"")
+      +(src?'<button data-igsave="'+pi+'">저장하기</button>':"")
       +(src?'<button data-igdrop="'+pi+'">사진 빼기</button>':"")+'</div>';
     h+='<div class="ig-caption">'
      + (p.likes!=null?'<div class="ig-meta">좋아요 '+esc(p.likes)+'</div>':'')
